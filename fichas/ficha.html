@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Atlas de Técnicas de Artes Textiles</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <!-- PapaParse (leer CSV) -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.2/papaparse.min.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root {
+      --morado: #5b235a;
+      --durazno: #f4b29a;
+      --mostaza: #d9b36c;
+      --turquesa: #008caa;
+      --gris-mapa: #d0d0d0;
+      --fondo: #f7f7f7;
+      --texto: #333333;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background-color: var(--fondo);
+      color: var(--texto);
+    }
+
+    .app {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 16px 16px 32px;
+      display: grid;
+      grid-template-columns: 1.3fr 1.7fr;
+      gap: 16px;
+    }
+
+    header {
+      grid-column: 1 / -1;
+      margin-bottom: 8px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.6rem;
+      color: var(--morado);
+    }
+
+    .top-bar {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .select-group {
+      background: var(--morado);
+      color: #fff;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      border-radius: 4px;
+      min-width: 220px;
+    }
+
+    .select-group label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.9;
+      margin-bottom: 4px;
+    }
+
+    .select-group select,
+    .select-group input {
+      border: none;
+      padding: 6px 8px;
+      border-radius: 3px;
+      font-size: 0.9rem;
+      color: #333;
+    }
+
+    .select-group input[readonly] {
+      background: #f3dad2;
+      font-weight: 500;
+    }
+
+    /* Columna izquierda: solo un panel grande */
+    .left-column {
+      display: grid;
+      grid-template-rows: auto;
+      gap: 8px;
+    }
+
+    .panel {
+      background: var(--mostaza);
+      padding: 8px 10px 10px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+
+    .panel-title {
+      background: var(--turquesa);
+      color: #fff;
+      font-weight: 600;
+      padding: 5px 8px;
+      margin: -8px -10px 8px;
+      border-radius: 4px 4px 0 0;
+      font-size: 0.9rem;
+    }
+
+    .panel h4 {
+      margin: 6px 0 4px;
+      font-size: 0.8rem;
+    }
+
+    /* Gráficos dentro del panel de visualización */
+    #panelGraficos canvas {
+      width: 100%;
+      max-height: 180px;
+      margin-bottom: 8px;
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 4px;
+    }
+
+    .gender-legend {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      font-size: 0.8rem;
+      margin-bottom: 6px;
+    }
+
+    .gender-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 4px;
+    }
+
+    .summary-text {
+      font-size: 0.8rem;
+      margin-bottom: 6px;
+    }
+
+    /* Columna derecha: mapa + carrusel */
+    .right-column {
+      background: #fff;
+      border-radius: 4px;
+      padding: 8px;
+      display: grid;
+      /* 40px para el título, luego mapa e imágenes con el mismo alto */
+      grid-template-rows: 40px 1fr 1fr;
+      gap: 8px;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+      min-height: 220px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .map-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .map-title small {
+      font-weight: 400;
+      font-size: 0.75rem;
+      opacity: 0.7;
+    }
+
+    /* Carrusel de fotos */
+    #carruselFotos {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .carrusel-viewport {
+      flex: 1;
+      /* antes tenías max-height: 220px */
+      height: 100%;             /* que llene su mitad de la columna */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: 4px;
+      background: #f1f1f1;
+    }
+
+    .carrusel-viewport img {
+      max-width: 100%;
+      max-height: 100%;         /* ocupa toda la altura disponible */
+      display: block;
+      object-fit: contain;
+    }
+
+    .carrusel-btn {
+      border: none;
+      background: var(--morado);
+      color: #fff;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .carrusel-btn:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    /* El contenedor que envuelve carruselFotos + carruselInfo (la última fila) */
+    .right-column > div:last-child {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #carruselInfo {
+      font-size: 0.8rem;
+      text-align: center;
+      margin-top: 4px;
+      color: #555;
+    }
+
+    @media (max-width: 900px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+      .right-column {
+        min-height: 320px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Atlas de Técnicas de Artes Textiles</h1>
+      <div class="top-bar">
+        <div class="select-group">
+          <label for="tecnicaSelect">Nombre de la técnica</label>
+          <select id="tecnicaSelect">
+            <option value="">Selecciona una técnica…</option>
+          </select>
+        </div>
+
+        <div class="select-group">
+          <label for="lenguaInput">Nom. en lengua indígena</label>
+          <input
+            id="lenguaInput"
+            type="text"
+            readonly
+            placeholder="Nombre en lengua indígena (si aplica)"
+          />
+        </div>
+      </div>
+    </header>
+
+    <!-- Columna izquierda: solo visualización de la técnica -->
+    <section class="left-column">
+      <div class="panel" id="panelGraficos">
+        <div class="panel-title">Visualización de la técnica</div>
+
+        <div class="summary-text" id="resumenArtesanos">
+        Selecciona una técnica para ver cuántas personas la registraron.
+        </div>
+
+        <h4>Distribución por género</h4>
+        <div class="summary-text" id="resumenGenero">Sin registro</div>
+        <canvas id="genderChart"></canvas>
+        <div class="gender-legend">
+          <span><span class="gender-dot" id="dotMujeres"></span>Mujeres</span>
+          <span><span class="gender-dot" id="dotHombres"></span>Hombres</span>
+        </div>
+
+        <h4>¿De quién aprenden?</h4>
+        <div class="summary-text" id="resumenAprenden">Sin registro</div>
+        <canvas id="aprendenChart"></canvas>
+
+        <h4>¿A quién enseñan?</h4>
+        <div class="summary-text" id="resumenEnsenan">Sin registro</div>
+        <canvas id="ensenanChart"></canvas>
+
+        <h4>Manufactura</h4>
+        <canvas id="manufacturaChart"></canvas>
+
+        <h4>Tipo de teñido</h4>
+        <canvas id="tenidoChart"></canvas>
+      </div>
+    </section>
+
+    <!-- Columna derecha: mapa + carrusel -->
+    <section class="right-column">
+      <div class="map-title">
+        <span>Mapa de estados donde se realiza la técnica</span>
+        <small id="mapSummary">Selecciona una técnica…</small>
+      </div>
+      <div id="map"></div>
+
+      <div>
+        <div id="carruselFotos">
+          <button id="btnPrevFoto" class="carrusel-btn">&lt;</button>
+          <div class="carrusel-viewport">
+            <img id="carruselImg" src="" alt="Imagen de la técnica" />
+          </div>
+          <button id="btnNextFoto" class="carrusel-btn">&gt;</button>
+        </div>
+        <div id="carruselInfo">Selecciona una técnica para ver sus imágenes.</div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ==========================
+    // Utilidades
+    // ==========================
+    function normalize(str) {
+      if (!str) return "";
+      return str
+        .toString()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+    }
+
+    const estadoAlias = {
+      "veracruz de ignacio de la llave": "veracruz",
+      "michoacan de ocampo": "michoacan",
+      "coahuila de zaragoza": "coahuila",
+      "ciudad de mexico": "distrito federal",
+      mexico: "estado de mexico",
+    };
+
+    function mapEstadoNombre(nombre) {
+      const n = normalize(nombre);
+      if (estadoAlias[n]) return estadoAlias[n];
+      return n;
+    }
+
+    // ==========================
+    // Mapa Leaflet
+    // ==========================
+    let map,
+      mexicoLayer,
+      currentHighlightedStates = new Set();
+
+    function initMap() {
+      map = L.map("map").setView([23.5, -102], 4.5);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 7,
+        minZoom: 3,
+        attribution: "&copy; OpenStreetMap",
+      }).addTo(map);
+
+      fetch(
+        "https://raw.githubusercontent.com/angelnmara/geojson/master/mexicoHigh.json"
+      )
+        .then((resp) => resp.json())
+        .then((geojson) => {
+          mexicoLayer = L.geoJSON(geojson, {
+            style: baseStateStyle,
+            onEachFeature: (feature, layer) => {
+              const nombre =
+                feature.properties.name ||
+                feature.properties.estado ||
+                feature.properties.NOM_ENT ||
+                "";
+              layer._estadoNombreNormalizado = mapEstadoNombre(nombre);
+            },
+          }).addTo(map);
+        })
+        .catch((err) => {
+          console.error("Error cargando GeoJSON de México:", err);
+        });
+    }
+
+    function baseStateStyle(feature) {
+      const isHighlighted =
+        currentHighlightedStates.has(
+          feature.layer?._estadoNombreNormalizado ||
+            mapEstadoNombre(
+              feature.properties.name ||
+                feature.properties.estado ||
+                feature.properties.NOM_ENT
+            )
+        ) || false;
+
+      return {
+        color: isHighlighted ? "#5b235a" : "#ffffff",
+        weight: isHighlighted ? 2 : 1,
+        fillColor: isHighlighted ? "#f4b29a" : "#d0d0d0",
+        fillOpacity: isHighlighted ? 0.9 : 0.7,
+      };
+    }
+
+    function updateMapHighlight(statesSet) {
+      currentHighlightedStates = statesSet;
+
+      if (!mexicoLayer) return;
+
+      mexicoLayer.setStyle((feature) => {
+        const nombre =
+          feature.properties.name ||
+          feature.properties.estado ||
+          feature.properties.NOM_ENT ||
+          "";
+        const norm = mapEstadoNombre(nombre);
+        const isHighlighted = currentHighlightedStates.has(norm);
+
+        return {
+          color: isHighlighted ? "#5b235a" : "#ffffff",
+          weight: isHighlighted ? 2 : 1,
+          fillColor: isHighlighted ? "#f4b29a" : "#d0d0d0",
+          fillOpacity: isHighlighted ? 0.9 : 0.7,
+        };
+      });
+
+      if (statesSet.size > 0) {
+        const bounds = [];
+        mexicoLayer.eachLayer((layer) => {
+          if (statesSet.has(layer._estadoNombreNormalizado)) {
+            if (layer.getBounds) bounds.push(layer.getBounds());
+          }
+        });
+        if (bounds.length > 0) {
+          const combined = bounds[0].extend(bounds[0]);
+          bounds.forEach((b) => combined.extend(b));
+          map.fitBounds(combined.pad(0.5));
+        }
+      }
+    }
+
+    // ==========================
+    // Gráficas Chart.js
+    // ==========================
+    let genderChart;
+    let aprendenChart;
+    let ensenanChart;
+    let manufacturaChart;
+    let tenidoChart;
+
+    function initGenderChart() {
+      const ctx = document.getElementById("genderChart");
+      genderChart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: ["Mujeres", "Hombres"],
+          datasets: [
+            {
+              data: [0, 0],
+              backgroundColor: ["#5b235a", "#00a0c6"],
+            },
+          ],
+        },
+        options: {
+          cutout: "65%",
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `${ctx.label}: ${ctx.parsed}%`,
+              },
+            },
+          },
+        },
+      });
+
+      document.getElementById("dotMujeres").style.backgroundColor =
+        genderChart.data.datasets[0].backgroundColor[0];
+      document.getElementById("dotHombres").style.backgroundColor =
+        genderChart.data.datasets[0].backgroundColor[1];
+    }
+
+    function initAprendenChart() {
+      const ctx = document.getElementById("aprendenChart");
+      aprendenChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: [
+            "Madre",
+            "Abuela",
+            "Tía",
+            "Hermana",
+            "Cuñada",
+            "Instructor/a",
+            "Otra persona",
+            "Padre",
+          ],
+          datasets: [
+            {
+              data: [0, 0, 0, 0, 0, 0, 0, 0],
+              backgroundColor: "#5b235a",
+            },
+          ],
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `${ctx.raw} artesanxs`,
+              },
+            },
+          },
+          scales: {
+            x: { beginAtZero: true },
+          },
+        },
+      });
+    }
+
+    function initEnsenanChart() {
+      const ctx = document.getElementById("ensenanChart");
+      ensenanChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: [
+            "No ha enseñado",
+            "Hijas",
+            "Hijos",
+            "Nietos/as",
+            "Sobrinos/as",
+            "Pareja",
+            "Estudiantes",
+            "Otra persona",
+          ],
+          datasets: [
+            {
+              data: [0, 0, 0, 0, 0, 0, 0, 0],
+              backgroundColor: "#008caa",
+            },
+          ],
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `${ctx.raw} artesanxs`,
+              },
+            },
+          },
+          scales: {
+            x: { beginAtZero: true },
+          },
+        },
+      });
+    }
+
+    function initManufacturaChart() {
+      const ctx = document.getElementById("manufacturaChart");
+      manufacturaChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["A mano", "Pedal", "Telar", "Mixta", "Otra"],
+          datasets: [
+            {
+              data: [0, 0, 0, 0, 0],
+              backgroundColor: "#d9b36c",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `${ctx.raw} artesanxs`,
+              },
+            },
+          },
+          scales: {
+            y: { beginAtZero: true },
+          },
+        },
+      });
+    }
+
+    function initTenidoChart() {
+      const ctx = document.getElementById("tenidoChart");
+      tenidoChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["Plantas", "Minerales", "Animales", "Otro"],
+          datasets: [
+            {
+              data: [0, 0, 0, 0],
+              backgroundColor: "#5b235a",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `${ctx.raw} registro(s)`,
+              },
+            },
+          },
+          scales: {
+            y: { beginAtZero: true },
+          },
+        },
+      });
+    }
+
+    function updateGenderChart(pctMujeres, pctHombres) {
+      genderChart.data.datasets[0].data = [
+        Math.round(pctMujeres),
+        Math.round(pctHombres),
+      ];
+      genderChart.update();
+    }
+
+    // ==========================
+    // Datos CSV (solo resumen)
+    // ==========================
+    let tecnicasMap = new Map();
+    let listaTecnicas = [];
+
+    // Fotos para el carrusel
+    let fotosPorTecnica = new Map();
+    let tecnicaActualNorm = null;
+    let fotosActuales = [];
+    let indiceFotoActual = 0;
+
+    function cargarDatos() {
+      // 1) Cargar datos resumidos por técnica
+      Papa.parse("data/data_tecnicas_resumen.csv", {
+        download: true,
+        header: true,
+        dynamicTyping: true,
+        encoding: "UTF-8",
+        complete: (results) => {
+          const rows = results.data.filter(
+            (r) =>
+              r["Técnica"] ||
+              r["tecnica_norm"] ||
+              r["tecnica"] ||
+              r["Tecnica"]
+          );
+
+          if (rows.length === 0) {
+            alert(
+              "El archivo data_tecnicas_resumen.csv se leyó, pero no se encontraron valores en la columna de técnica."
+            );
+            return;
+          }
+
+          const nombresSet = new Set();
+
+          rows.forEach((row) => {
+            const nombre =
+              row["Técnica"] ||
+              row["tecnica_norm"] ||
+              row["tecnica"] ||
+              row["Tecnica"];
+            if (!nombre) return;
+            const key = normalize(nombre);
+            tecnicasMap.set(key, row);
+            nombresSet.add(nombre);
+          });
+
+          listaTecnicas = Array.from(nombresSet).sort((a, b) =>
+            a.localeCompare(b, "es")
+          );
+
+          poblarSelectTecnicas();
+
+          // 2) Cargar índice de fotos (si existe)
+          cargarFotos();
+        },
+        error: (err) => {
+          console.error(
+            "Error al leer data_tecnicas_resumen.csv:",
+            err
+          );
+          alert(
+            "Error al leer data_tecnicas_resumen.csv. Revisa la ruta y el nombre del archivo."
+          );
+        },
+      });
+    }
+
+    function poblarSelectTecnicas() {
+      const select = document.getElementById("tecnicaSelect");
+      select.innerHTML =
+        '<option value="">Selecciona una técnica…</option>';
+      listaTecnicas.forEach((tec) => {
+        const opt = document.createElement("option");
+        opt.value = tec;
+        opt.textContent = tec;
+        select.appendChild(opt);
+      });
+    }
+
+    function cargarFotos() {
+      // Archivo opcional: data/fotos_tecnicas.csv
+      // columnas: archivo, tecnica
+      Papa.parse("data/fotos_tecnicas.csv", {
+        download: true,
+        header: true,
+        dynamicTyping: false,
+        encoding: "UTF-8",
+        complete: (results) => {
+          fotosPorTecnica = new Map();
+          results.data.forEach((row) => {
+            const archivo = row["archivo"];
+            const tecnica = row["tecnica"];
+            if (!archivo || !tecnica) return;
+            const key = normalize(tecnica);
+            if (!fotosPorTecnica.has(key)) {
+              fotosPorTecnica.set(key, []);
+            }
+            fotosPorTecnica.get(key).push(archivo);
+          });
+
+          console.log(
+            "Índice de fotos cargado. Técnicas con fotos:",
+            fotosPorTecnica.size
+          );
+        },
+        error: (err) => {
+          console.warn(
+            "No se pudo leer data/fotos_tecnicas.csv. El carrusel se mostrará sin fotos específicas.",
+            err
+          );
+        },
+      });
+    }
+
+    // ==========================
+    // Carrusel de fotos
+    // ==========================
+    function actualizarCarrusel(nombreTecnica) {
+      const img = document.getElementById("carruselImg");
+      const info = document.getElementById("carruselInfo");
+      const btnPrev = document.getElementById("btnPrevFoto");
+      const btnNext = document.getElementById("btnNextFoto");
+
+      if (!fotosActuales || fotosActuales.length === 0) {
+        img.style.display = "none";
+        info.textContent =
+          "Sin imágenes registradas para esta técnica (revisa data/fotos_tecnicas.csv).";
+        btnPrev.disabled = true;
+        btnNext.disabled = true;
+        return;
+      }
+
+      if (indiceFotoActual < 0) indiceFotoActual = 0;
+      if (indiceFotoActual >= fotosActuales.length)
+        indiceFotoActual = fotosActuales.length - 1;
+
+      const archivo = fotosActuales[indiceFotoActual];
+      img.src = archivo;
+      img.alt = nombreTecnica;
+      img.style.display = "block";
+
+      info.textContent = `${nombreTecnica} — foto ${
+        indiceFotoActual + 1
+      } de ${fotosActuales.length}`;
+
+      btnPrev.disabled = fotosActuales.length <= 1;
+      btnNext.disabled = fotosActuales.length <= 1;
+    }
+
+    function mostrarFotosTecnica(tecnicaNombre) {
+      const key = normalize(tecnicaNombre);
+      tecnicaActualNorm = key;
+      fotosActuales = fotosPorTecnica.get(key) || [];
+      indiceFotoActual = 0;
+      actualizarCarrusel(tecnicaNombre);
+    }
+
+    document
+      .getElementById("btnPrevFoto")
+      .addEventListener("click", () => {
+        if (!fotosActuales || fotosActuales.length === 0) return;
+        indiceFotoActual =
+          (indiceFotoActual - 1 + fotosActuales.length) %
+          fotosActuales.length;
+        const tecSelect = document.getElementById("tecnicaSelect");
+        const nombre = tecSelect.value || "Técnica";
+        actualizarCarrusel(nombre);
+      });
+
+    document
+      .getElementById("btnNextFoto")
+      .addEventListener("click", () => {
+        if (!fotosActuales || fotosActuales.length === 0) return;
+        indiceFotoActual =
+          (indiceFotoActual + 1) % fotosActuales.length;
+        const tecSelect = document.getElementById("tecnicaSelect");
+        const nombre = tecSelect.value || "Técnica";
+        actualizarCarrusel(nombre);
+      });
+
+    // ==========================
+    // Actualización por técnica
+    // ==========================
+    function onTecnicaChange() {
+  const tecnica = document.getElementById("tecnicaSelect").value;
+  if (!tecnica) return;
+
+  const key = normalize(tecnica);
+  const row = tecnicasMap.get(key);
+  if (!row) {
+    console.warn("No encontré datos resumidos para la técnica:", tecnica);
+    return;
+  }
+
+  // ---------- Número de artesanas/os que registran esta técnica ----------
+  const nFichas = Number(row["n_fichas"] || 0);
+  const resumenArtesanos = document.getElementById("resumenArtesanos");
+  if (nFichas > 0) {
+    resumenArtesanos.textContent =
+      nFichas === 1
+        ? "1 persona registró esta técnica en el Atlas."
+        : `${nFichas} personas registraron esta técnica en el Atlas.`;
+  } else {
+    resumenArtesanos.textContent =
+      "Sin registros de artesanas/os para esta técnica.";
+  }
+
+  // Lengua / nombre en lengua indígena
+  const lenguaInput = document.getElementById("lenguaInput");
+  lenguaInput.value =
+    row["tecnica_lengua"] ||
+    row["Técnica (lengua indígena)"] ||
+    "Sin registro";
+
+      // ---------- Género ----------
+      const nMujeres = Number(row["n_mujeres"] || 0);
+      const nHombres = Number(row["n_hombres"] || 0);
+      const totalGen = nMujeres + nHombres;
+
+      const pctMujeres = totalGen > 0 ? (nMujeres / totalGen) * 100 : 0;
+      const pctHombres = totalGen > 0 ? (nHombres / totalGen) * 100 : 0;
+
+      document.getElementById("resumenGenero").textContent =
+        totalGen > 0
+          ? `Mujeres: ${nMujeres} (${Math.round(
+              pctMujeres
+            )}%), Hombres: ${nHombres} (${Math.round(
+              pctHombres
+            )}%)`
+          : "Sin registro";
+
+      updateGenderChart(pctMujeres, pctHombres);
+
+      // ---------- Estados ----------
+      const estadosStr = row["estados"] || row["Estados"] || "";
+      let estados = [];
+      if (estadosStr) {
+        estados = estadosStr
+          .split(",")
+          .map((e) => e.trim())
+          .filter((e) => e.length > 0);
+      }
+
+      const estadosNorm = new Set(estados.map((e) => mapEstadoNombre(e)));
+      updateMapHighlight(estadosNorm);
+      document.getElementById("mapSummary").textContent =
+        estados.length > 0
+          ? `${estados.length} estado(s) con registros para esta técnica`
+          : "Sin registros de estado";
+
+      // ---------- Aprendizaje (resumen + gráfico) ----------
+      const aprCounts = [
+        { label: "Madre", val: Number(row["n_aprendio_madre"] || 0) },
+        { label: "Abuela", val: Number(row["n_aprendio_abuela"] || 0) },
+        { label: "Tía", val: Number(row["n_aprendio_tia"] || 0) },
+        {
+          label: "Hermana",
+          val: Number(row["n_aprendio_hermana"] || 0),
+        },
+        {
+          label: "Cuñada",
+          val: Number(row["n_aprendio_cunada"] || 0),
+        },
+        {
+          label: "Instructor/a",
+          val: Number(row["n_aprendio_instructor"] || 0),
+        },
+        {
+          label: "Otra persona",
+          val: Number(row["n_aprendio_otro"] || 0),
+        },
+        { label: "Padre", val: Number(row["n_aprendio_padre"] || 0) },
+      ];
+      const aprNoCero = aprCounts.filter((d) => d.val > 0);
+      aprNoCero.sort((a, b) => b.val - a.val);
+
+      document.getElementById("resumenAprenden").textContent =
+        aprNoCero.length > 0
+          ? `Principalmente de: ${aprNoCero[0].label} (${aprNoCero[0].val} artesanxs)`
+          : "Sin registro";
+
+      aprendenChart.data.datasets[0].data = aprCounts.map(
+        (d) => d.val
+      );
+      aprendenChart.update();
+
+      // ---------- Enseñanza (resumen + gráfico) ----------
+      const ensCounts = [
+        {
+          label: "No ha enseñado",
+          val: Number(row["n_no_ha_ensenado"] || 0),
+        },
+        { label: "Hijas", val: Number(row["n_ens_hijas"] || 0) },
+        { label: "Hijos", val: Number(row["n_ens_hijos"] || 0) },
+        { label: "Nietos/as", val: Number(row["n_ens_nietos"] || 0) },
+        {
+          label: "Sobrinos/as",
+          val: Number(row["n_ens_sobrinos"] || 0),
+        },
+        { label: "Pareja", val: Number(row["n_ens_pareja"] || 0) },
+        {
+          label: "Estudiantes",
+          val: Number(row["n_ens_estudiantes"] || 0),
+        },
+        {
+          label: "Otra persona",
+          val: Number(row["n_ens_otra"] || 0),
+        },
+      ];
+      const ensNoCero = ensCounts.filter((d) => d.val > 0);
+      ensNoCero.sort((a, b) => b.val - a.val);
+
+      document.getElementById("resumenEnsenan").textContent =
+        ensNoCero.length > 0
+          ? `Enseñan principalmente a: ${ensNoCero[0].label} (${ensNoCero[0].val} artesanxs)`
+          : "Sin registro";
+
+      ensenanChart.data.datasets[0].data = ensCounts.map(
+        (d) => d.val
+      );
+      ensenanChart.update();
+
+      // ---------- Manufactura ----------
+      const n_man_mano = Number(row["n_man_mano"] || 0);
+      const n_man_pedal = Number(row["n_man_pedal"] || 0);
+      const n_man_telar = Number(row["n_man_telar"] || 0);
+      const n_man_mixta = Number(row["n_man_mixta"] || 0);
+      const n_man_otra = Number(row["n_man_otra"] || 0);
+
+      manufacturaChart.data.datasets[0].data = [
+        n_man_mano,
+        n_man_pedal,
+        n_man_telar,
+        n_man_mixta,
+        n_man_otra,
+      ];
+      manufacturaChart.update();
+
+      // ---------- Tipo de teñido ----------
+      const n_tenido_plantas = Number(row["n_tenido_plantas"] || 0);
+      const n_tenido_minerales = Number(
+        row["n_tenido_minerales"] || 0
+      );
+      const n_tenido_animales = Number(
+        row["n_tenido_animales"] || 0
+      );
+      const n_tenido_otro = Number(row["n_tenido_otro"] || 0);
+
+      tenidoChart.data.datasets[0].data = [
+        n_tenido_plantas,
+        n_tenido_minerales,
+        n_tenido_animales,
+        n_tenido_otro,
+      ];
+      tenidoChart.update();
+
+      // ---------- Carrusel de fotos ----------
+      mostrarFotosTecnica(tecnica);
+    }
+
+    // ==========================
+    // Inicio
+    // ==========================
+    window.addEventListener("DOMContentLoaded", () => {
+      initMap();
+      initGenderChart();
+      initAprendenChart();
+      initEnsenanChart();
+      initManufacturaChart();
+      initTenidoChart();
+      cargarDatos();
+      document
+        .getElementById("tecnicaSelect")
+        .addEventListener("change", onTecnicaChange);
+    });
+  </script>
+</body>
+</html>
