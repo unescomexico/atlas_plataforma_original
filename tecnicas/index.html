@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Índice de técnicas</title>
+  <style>
+    :root{ --bg:#0b0d10; --card:#12161b; --text:#e9eef5; --muted:#a9b4c2; --line:#24303b; --accent:#7aa2ff; }
+    body{ margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Arial; background:var(--bg); color:var(--text); }
+    .wrap{ max-width:1100px; margin:0 auto; padding:24px; }
+    h1{ font-size:22px; margin:0 0 12px; }
+    .toolbar{ display:grid; grid-template-columns: 1fr 240px 240px; gap:10px; margin:12px 0 18px; }
+    input, select{
+      width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line);
+      background:#0f1317; color:var(--text); outline:none;
+    }
+    .count{ color:var(--muted); font-size:13px; margin:6px 0 16px; }
+    .grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:12px; }
+    .card{
+      background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px;
+      box-shadow:0 8px 20px rgba(0,0,0,.25);
+    }
+    .title{ font-weight:650; font-size:15px; margin:0 0 8px; line-height:1.25; }
+    .meta{ font-size:12px; color:var(--muted); line-height:1.35; }
+    .meta b{ color:#cfe0ff; font-weight:600; }
+    a.btn{
+      display:inline-block; margin-top:10px; padding:8px 10px; border-radius:10px;
+      border:1px solid var(--line); color:var(--text); text-decoration:none;
+      background:#0f1317;
+    }
+    a.btn:hover{ border-color:var(--accent); }
+    .badge-miss{
+      display:inline-block; margin-left:8px; font-size:11px; color:#ffd1d1;
+      border:1px solid rgba(255,120,120,.35); padding:2px 6px; border-radius:999px;
+      background: rgba(255,120,120,.08);
+    }
+    .empty{ color:var(--muted); padding:18px; border:1px dashed var(--line); border-radius:14px; }
+    @media (max-width:860px){ .toolbar{ grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Índice de fichas por técnica</h1>
+
+    <div style="margin:8px 0 0;">
+      <a class="btn" href="./galeria/index.html">Abrir galería de imágenes</a>
+    </div>
+
+    <div class="toolbar">
+      <input id="q" type="search" placeholder="Buscar técnica…">
+      <select id="fEstado"><option value="">Estado (todos)</option></select>
+      <select id="fGrupo"><option value="">Grupo (todos)</option></select>
+    </div>
+
+    <div class="count" id="count"></div>
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="empty" style="display:none;">No hay resultados con esos filtros.</div>
+  </div>
+
+  <script>
+    const ITEMS = [{"tecnica_norm":"Afelpado","file":"afelpado.html","tecnica_grup":"Telar de cintura","estados":"Oaxaca","exists":true},{"tecnica_norm":"Animalitos de lana","file":"animalitos_de_lana.html","tecnica_grup":"Bordado a mano","estados":"Chiapas","exists":true},{"tecnica_norm":"Anudado","file":"anudado.html","tecnica_grup":"Otra","estados":"México","exists":true},{"tecnica_norm":"Anudado o empuntado","file":"anudado_o_empuntado.html","tecnica_grup":"Bordado a mano","estados":"Chiapas","exists":true},{"tecnica_norm":"Apliqué","file":"aplique.html","tecnica_grup":"Bordado a mano","estados":"Chihuahua","exists":true},{"tecnica_norm":"Baimkal","file":"baimkal.html","tecnica_grup":"Telar de cintura","estados":"Durango","exists":true},{"tecnica_norm":"Batzikop tzotsil","file":"batzikop_tzotsil.html","tecnica_grup":"Telar de cintura","estados":"Chiapas","exists":true},{"tecnica_norm":"Bordado a mano con aguja chica","file":"bordado_a_mano_con_aguja_chica.html","tecnica_grup":"Bordado a mano","estados":"","exists":true},{"tecnica_norm":"Bordado a mano con puntada lineal continua","file":"bordado_a_mano_con_puntada_lineal_continua.html","tecnica_grup":"Bordado a mano","estados":"Oaxaca","exists":true},{"tecnica_norm":"Bordado camisas de lavor","file":"bordado_camisas_de_lavor.html","tecnica_grup":"Bordado a mano","estados":"Puebla","exists":true},{"tecnica_norm":"Bordado ch'ol tzeltal","file":"bordado_ch_ol_tzeltal.html","tecnica_grup":"Bordado a mano","estados":"Chiapas","exists":true},{"tecnica_norm":"Bordado con dos agujas","file":"bordado_con_dos_agujas.html","tecnica_grup":"Bordado a mano","estados":"México","exists":true},{"tecnica_norm":"Bordado de chaquira","file":"bordado_de_chaquira.html","tecnica_grup":"Bordado a mano","estados":"Guerrero","exists":true},{"tecnica_norm":"Bordado de dos agujas","file":"bordado_de_dos_agujas.html","tecnica_grup":"Bordado a mano","estados":"México","exists":true},{"tecnica_norm":"Bordado de dos hilos y una aguja","file":"bordado_de_dos_hilos_y_una_aguja.html","tecnica_grup":"Bordado a mano","estados":"México","exists":true},{"tecnica_norm":"Bordado de manta","file":"bordado_de_manta.html","tecnica_grup":"Bordado a mano","estados":"Chiapas","exists":true},{"tecnica_norm":"Bordado de puntada continua","file":"bordado_de_puntada_continua.html","tecnica_grup":"Bordado a mano","estados":"","exists":true},{"tecnica_norm":"Bordado de san antonio","file":"bordado_de_san_antonio.html","tecnica_grup":"Bordado a mano","estados":"Oaxaca","exists":true},{"tecnica_norm":"Bordado de xochicuahuitl","file":"bordado_de_xochicuahuitl.html","tecnica_grup":"Bordado a mano","estados":"Puebla","exists":true},{"tecnica_norm":"Bordado elevado de contado","file":"bordado_elevado_de_contado.html","tecnica_grup":"Bordado a mano","estados":"Chiapas","exists":true},{"tecnica_norm":"Bordado libre en maquina de pedal","file":"bordado_libre_en_maquina_de_pedal.html","tecnica_grup":"Bordado a máquina","estados":"Oaxaca, Yucatán","exists":true},{"tecnica_norm":"Bordado mazahua","file":"bordado_mazahua.html","tecnica_grup":"Bordado a mano","estados":"México","exists":true},{"tecnica_norm":"Bordado nahua","file":"bordado_nahua.html","tecnica_grup":"Bordado a máquina","estados":"Tlaxcala","exists":true},{"tecnica_norm":"Bordado primavera","file":"bordado_primavera.html","tecnica_grup":"Bordado a mano","estados":"Oaxaca","exists":true},{"tecnica_norm":"Bordado raramuri","file":"bordado_raramuri.html","tecnica_grup":"Bordado a mano","estados":"Chihuahua","exists":true},{"tecnica_norm":"Bordado sobre tela y cesteria","file":"bordado_sobre_tela_y_cesteria.html","tecnica_grup":"Bordado a mano","estados":"Sonora","exists":true},{"tecnica_norm":"Bordado tenango","file":"bordado_tenango.html","tecnica_grup":"Bordado a mano","estados":"Hidalgo","exists":true},{"tecnica_norm":"Bordado tradicional","file":"bordado_tradicional.html","tecnica_grup":"Bordado a mano","estados":"Coahuila De Zaragoza, Michoacán De Ocampo, Oaxaca, Puebla, Veracruz De Ignacio De La Llave","exists":true},{"tecnica_norm":"Bordados de chamula y larrainzar","file":"bordados_de_chamula_y_larrainzar.html","tecnica_grup":"Telar de cintura","estados":"Chiapas","exists":true},{"tecnica_norm":"Bordados en chaquira","file":"bordados_en_chaquira.html","tecnica_grup":"Bordado a mano","estados":"Guerrero, Puebla","exists":true},{"tecnica_norm":"Bot/vi chuy","file":"bot_vi_chuy.html","tecnica_grup":"Bordado a máquina","estados":"Yucatán","exists":true},{"tecnica_norm":"Brocado","file":"brocado.html","tecnica_grup":"Bordado a mano","estados":"Chiapas, Guerrero, Michoacán De Ocampo, Oaxaca, Veracruz De Ignacio De La Llave","exists":true},{"tecnica_norm":"Cadeneta o cadenilla","file":"cadeneta_o_cadenilla.html","tecnica_grup":"Bordado a mano","estados":"Chiapas, Oaxaca, Sonora, Tabasco, Yucatán","exists":true},{"tecnica_norm":"Calado","file":"calado.html","tecnica_grup":"Bordado a máquina","estados":"Yucatán","exists":true},{"tecnica_norm":"Canahuate","file":"canahuate.html","tecnica_grup":"Bordado a mano","estados":"Oaxaca","exists":true},{"tecnica_norm":"Cocoleado","file":"cocoleado.html","tecnica_grup":"Bordado a mano","estados":"Puebla","exists":true},{"tecnica_norm":"Cola de ratón","file":"cola_de_raton.html","tecnica_grup":"Bordado a mano","estados":"Hidalgo","exists":true},{"tecnica_norm":"Confección de traje tradicional de la sierra tarahumara chihuahua","file":"confeccion_de_traje_tradicional_de_la_sierra_tarahumara_chihuahua.html","tecnica_grup":"Otra","estados":"Chihuahua","exists":true},{"tecnica_norm":"Contabilidad y vuelta por hilo","file":"contabilidad_y_vuelta_por_hilo.html","tecnica_grup":"Bordado a mano","estados":"Guanajuato, México, Oaxaca, Puebla","exists":true},{"tecnica_norm":"Contado","file":"contado.html","tecnica_grup":"Telar de cintura","estados":"Veracruz De Ignacio De La Llave","exists":true},{"tecnica_norm":"Coralillo","file":"coralillo.html","tecnica_grup":"Bordado a máquina","estados":"Oaxaca","exists":true},{"tecnica_norm":"Costilla de ratón","file":"costilla_de_raton.html","tecnica_grup":"Bordado a mano","estados":"Hidalgo, Sonora","exists":true},{"tecnica_norm":"Costura","file":"costura.html","tecnica_grup":"Telar de cintura","estados":"Chihuahua","exists":true},{"tecnica_norm":"Croché","file":"croche.html","tecnica_grup":"Tejido a mano","estados":"Oaxaca, Puebla","exists":true},{"tecnica_norm":"Cuera tamaulipeca y talabarteria","file":"cuera_tamaulipeca_y_talabarteria.html","tecnica_grup":"Telar de pedal","estados":"Tamaulipas","exists":true},{"tecnica_norm":"Culebrilla","file":"culebrilla.html","tecnica_grup":"Bordado a mano","estados":"Chiapas","exists":true},{"tecnica_norm":"Deshilado","file":"deshilado.html","tecnica_grup":"Bordado a mano","estados":"Aguascalientes, Chiapas, Michoacán De Ocampo, Oaxaca, Puebla, Querétaro","exists":true},{"tecnica_norm":"Deslizado","file":"deslizado.html","tecnica_grup":"Bordado a máquina","estados":"Yucatán","exists":true},{"tecnica_norm":"Dibujo de ika","file":"dibujo_de_ika.html","tecnica_grup":"Telar de cintura","estados":"México","exists":true},{"tecnica_norm":"Discontinuo","file":"discontinuo.html","tecnica_grup":"Telar de cintura","estados":"Oaxaca","exists":true},{"tecnica_norm":"Empuntado","file":"empuntado.html","tecnica_grup":"Bordado a mano","estados":"México","exists":true},{"tecnica_norm":"Enrollado","file":"enrollado.html","tecnica_grup":"Bordado a mano","estados":"Chiapas, Quintana Roo","exists":true},{"tecnica_norm":"Filigrana","file":"filigrana.html","tecnica_grup":"Bordado a mano","estados":"Aguascalientes","exists":true},{"tecnica_norm":"Flor de margarita","file":"flor_de_margarita.html","tecnica_grup":"Bordado a mano","estados":"Oaxaca","exists":true},{"tecnica_norm":"Flor de palma","file":"flor_de_palma.html","tecnica_grup":"Bordado a mano","estados":"Chiapas","exists":true},{"tecnica_norm":"Gasa fina y técnica de gasa","file":"gasa_fina_y_tecnica_de_gasa.html","tecnica_grup":"Bordado a mano","estados":"Guerrero, Jalisco, Michoacán De Ocampo, Puebla","exists":true},{"tecnica_norm":"Hazme si puedes","file":"hazme_si_puedes.html","tecnica_grup":"Bordado a mano","estados":"Oaxaca","exists":true},{"tecnica_norm":"Hilado con malacate","file":"hilado_con_malacate.html","tecnica_grup":"Bordado a mano","estados":"Puebla","exists":true},{"tecnica_norm":"Hilo contado","file":"hilo_contado.html","tecnica_grup":"Bordado a mano","estados":"Yucatán","exists":true},{"tecnica_norm":"Hilván","file":"hilvan.html","tecnica_grup":"Bordado a mano","estados":"Campeche, Chiapas, Chihuahua, Hidalgo, México, Oaxaca, Puebla, Querétaro, Tlaxcala, Veracruz De Ignacio De La Llave","exists":true},{"tecnica_norm":"Hoja de pino","file":"hoja_de_pino.html","tecnica_grup":"Bordado a mano","estados":"Chihuahua","exists":true},{"tecnica_norm":"Horquilla","file":"horquilla.html","tecnica_grup":"Tejido a mano","estados":"Oaxaca","exists":true},{"tecnica_norm":"Huipil seremonial","file":"huipil_seremonial.html","tecnica_grup":"Telar de cintura","estados":"Chiapas","exists":true},{"tecnica_norm":"Ita'a kaxií","file":"ita_a_kaxii.html","tecnica_grup":"Telar de pedal","estados":"Guerrero","exists":true},{"tecnica_norm":"Ivan bordado","file":"ivan_bordado.html","tecnica_grup":"Telar de cintura","estados":"Chihuahua","exists":true},{"tecnica_norm":"Jaspeado","file":"jaspeado.html","tecnica_grup":"Bordado a máquina","estados":"México, Yucatán","exists":true},{"tecnica_norm":"Jolobil","file":"jolobil.html","tecnica_grup":"Bordado a mano","estados":"Chiapas","exists":true},{"tecnica_norm":"Ju ech'el o tamulamb'il","file":"ju_ech_el_o_tamulamb_il.html","tecnica_grup":"Bordado a mano","estados":"Chiapas","exists":true},{"tecnica_norm":"Jun","file":"jun.html","tecnica_grup":"Bordado a mano","estados":"Veracruz De Ignacio De La Llave","exists":true},{"tecnica_norm":"Kuil","file":"kuil.html","tecnica_grup":"Telar de cintura","estados":"Chiapas","exists":true},{"tecnica_norm":"Labrado","file":"labrado.html","tecnica_grup":"Telar de cintura","estados":"Jalisco, Oaxaca, Tlaxcala","exists":true},{"tecnica_norm":"Lomillo","file":"lomillo.html","tecnica_grup":"Bordado a mano","estados":"Chiapas, Hidalgo, México, Oaxaca, Puebla, Tabasco","exists":true},{"tecnica_norm":"Luchbilltaaval","file":"luchbilltaaval.html","tecnica_grup":"Bordado a mano","estados":"Chiapas","exists":true},{"tecnica_norm":"Macizo","file":"macizo.html","tecnica_grup":"Bordado a máquina","estados":"Oaxaca, Puebla, Tlaxcala, Yucatán","exists":true},{"tecnica_norm":"Macrame","file":"macrame.html","tecnica_grup":"Bordado a mano","estados":"Puebla","exists":true},{"tecnica_norm":"Malla o red","file":"malla_o_red.html","tecnica_grup":"Bordado a mano","estados":"Chiapas, Oaxaca","exists":true},{"tecnica_norm":"Mañanita","file":"mananita.html","tecnica_grup":"Bordado a mano","estados":"Chiapas","exists":true},{"tecnica_norm":"Media puntada","file":"media_puntada.html","tecnica_grup":"Bordado a mano","estados":"Puebla","exists":true},{"tecnica_norm":"Mol miss","file":"mol_miss.html","tecnica_grup":"Bordado a mano","estados":"Campeche","exists":true},{"tecnica_norm":"Nëxuy","file":"nexuy.html","tecnica_grup":"Bordado a máquina","estados":"Oaxaca","exists":true},{"tecnica_norm":"Nii rididiva lunaá","file":"nii_rididiva_lunaa.html","tecnica_grup":"Bordado a mano","estados":"Oaxaca","exists":true},{"tecnica_norm":"Ojitos","file":"ojitos.html","tecnica_grup":"Telar de cintura","estados":"Veracruz De Ignacio De La Llave","exists":true},{"tecnica_norm":"Otomí","file":"otomi.html","tecnica_grup":"Bordado a mano","estados":"Hidalgo","exists":true},{"tecnica_norm":"Otras","file":"otras.html","tecnica_grup":"Telar de cintura","estados":"Oaxaca","exists":true},{"tecnica_norm":"Pata de gallo","file":"pata_de_gallo.html","tecnica_grup":"Bordado a mano","estados":"Guerrero, Hidalgo, Oaxaca","exists":true},{"tecnica_norm":"Pepenado","file":"pepenado.html","tecnica_grup":"Bordado a mano","estados":"Hidalgo, México, Oaxaca, Puebla, Tlaxcala","exists":true},{"tecnica_norm":"Pepenado en pliegue","file":"pepenado_en_pliegue.html","tecnica_grup":"Bordado a mano","estados":"Tlaxcala","exists":true},{"tecnica_norm":"Petatillo","file":"petatillo.html","tecnica_grup":"Telar de cintura","estados":"Chiapas, Morelos","exists":true},{"tecnica_norm":"Pete","file":"pete.html","tecnica_grup":"Telar de cintura","estados":"Chiapas","exists":true},{"tecnica_norm":"Pima (nevome)","file":"pima_nevome.html","tecnica_grup":"Bordado a mano","estados":"Chihuahua","exists":true},{"tecnica_norm":"Pinitos","file":"pinitos.html","tecnica_grup":"Bordado a mano","estados":"Oaxaca","exists":true},{"tecnica_norm":"Piquitos","file":"piquitos.html","tecnica_grup":"Bordado a mano","estados":"Chiapas","exists":true},{"tecnica_norm":"Piteado","file":"piteado.html","tecnica_grup":"Bordado a mano","estados":"Aguascalientes","exists":true},{"tecnica_norm":"Plisada","file":"plisada.html","tecnica_grup":"Mixta","estados":"Guerrero","exists":true},{"tecnica_norm":"Polkan, baak kaan, puuch kaan","file":"polkan_baak_kaan_puuch_kaan.html","tecnica_grup":"Bordado a mano","estados":"Quintana Roo","exists":true},{"tecnica_norm":"Prendas tradicional","file":"prendas_tradicional.html","tecnica_grup":"Otra","estados":"Chihuahua","exists":true},{"tecnica_norm":"Puntada antigua","file":"puntada_antigua.html","tecnica_grup":"Bordado a mano","estados":"Puebla","exists":true},{"tecnica_norm":"Puntada corrida","file":"puntada_corrida.html","tecnica_grup":"Bordado a mano","estados":"Tlaxcala","exists":true},{"tecnica_norm":"Puntada de red","file":"puntada_de_red.html","tecnica_grup":"Bordado a máquina","estados":"Yucatán","exists":true},{"tecnica_norm":"Puntada de rescate u hoja de platano","file":"puntada_de_rescate_u_hoja_de_platano.html","tecnica_grup":"Bordado a mano","estados":"Campeche","exists":true},{"tecnica_norm":"Puntada de satín","file":"puntada_de_satin.html","tecnica_grup":"Bordado a mano","estados":"Oaxaca","exists":true},{"tecnica_norm":"Puntada frontal","file":"puntada_frontal.html","tecnica_grup":"Bordado a mano","estados":"Puebla","exists":true},{"tecnica_norm":"Puntada lineal continua","file":"puntada_lineal_continua.html","tecnica_grup":"Bordado a mano","estados":"Oaxaca","exists":true},{"tecnica_norm":"Punto atrás","file":"punto_atras.html","tecnica_grup":"Bordado a mano","estados":"Oaxaca","exists":true},{"tecnica_norm":"Punto confite","file":"punto_confite.html","tecnica_grup":"Bordado a mano","estados":"Puebla","exists":true},{"tecnica_norm":"Punto de cruz","file":"punto_de_cruz.html","tecnica_grup":"Bordado a mano","estados":"Campeche, Chiapas, Chihuahua, Colima, Durango, Guerrero, Jalisco, México, Michoacán De Ocampo, Morelos, Oaxaca, Puebla, Querétaro, Quintana Roo, Tamaulipas, Veracruz De Ignacio De La Llave, Yucatán","exists":true},{"tecnica_norm":"Purépecha","file":"purepecha.html","tecnica_grup":"Bordado a mano","estados":"Michoacán De Ocampo","exists":true},{"tecnica_norm":"Randa de aguja","file":"randa_de_aguja.html","tecnica_grup":"Tejido a mano","estados":"Oaxaca","exists":true},{"tecnica_norm":"Rayado","file":"rayado.html","tecnica_grup":"Bordado a máquina","estados":"Yucatán","exists":true},{"tecnica_norm":"Recorte de cuadros","file":"recorte_de_cuadros.html","tecnica_grup":"Tejido a mano","estados":"Tlaxcala","exists":true},{"tecnica_norm":"Rectas","file":"rectas.html","tecnica_grup":"Bordado a mano","estados":"Chiapas","exists":true},{"tecnica_norm":"Rejilla","file":"rejilla.html","tecnica_grup":"Bordado a máquina","estados":"Oaxaca, Yucatán","exists":true},{"tecnica_norm":"Relleno","file":"relleno.html","tecnica_grup":"Bordado a mano","estados":"Chiapas, Oaxaca, Puebla, Tabasco, Yucatán","exists":true},{"tecnica_norm":"Renacimiento","file":"renacimiento.html","tecnica_grup":"Bordado a máquina","estados":"Campeche, Yucatán","exists":true},{"tecnica_norm":"Rococó","file":"rococo.html","tecnica_grup":"Bordado a mano","estados":"Chiapas, Puebla","exists":true},{"tecnica_norm":"Saltillo","file":"saltillo.html","tecnica_grup":"Telar de pedal","estados":"Tlaxcala","exists":true},{"tecnica_norm":"Sapo","file":"sapo.html","tecnica_grup":"Telar de cintura","estados":"Chiapas","exists":true},{"tecnica_norm":"Sarape fino de saltillo","file":"sarape_fino_de_saltillo.html","tecnica_grup":"Telar de cintura","estados":"Coahuila De Zaragoza","exists":true},{"tecnica_norm":"Semilla","file":"semilla.html","tecnica_grup":"Otra","estados":"Oaxaca","exists":true},{"tecnica_norm":"Seri","file":"seri.html","tecnica_grup":"Bordado a mano","estados":"Sonora","exists":true},{"tecnica_norm":"Sombreado","file":"sombreado.html","tecnica_grup":"Bordado a máquina","estados":"Yucatán","exists":true},{"tecnica_norm":"Suéter de lana","file":"sueter_de_lana.html","tecnica_grup":"Bordado a mano","estados":"Chiapas","exists":true},{"tecnica_norm":"Swikili","file":"swikili.html","tecnica_grup":"Bordado a mano","estados":"Puebla","exists":true},{"tecnica_norm":"Tääsuun ekëëp","file":"taasuun_ekeep.html","tecnica_grup":"Bordado a máquina","estados":"Oaxaca","exists":true},{"tecnica_norm":"Tafetán","file":"tafetan.html","tecnica_grup":"Telar de cintura","estados":"Guanajuato, Morelos, Veracruz De Ignacio De La Llave","exists":true},{"tecnica_norm":"Talakaxtokgo da makan","file":"talakaxtokgo_da_makan.html","tecnica_grup":"Bordado a mano","estados":"Veracruz De Ignacio De La Llave","exists":true},{"tecnica_norm":"Técnica macizo","file":"tecnica_macizo.html","tecnica_grup":"Bordado a mano","estados":"Yucatán","exists":true},{"tecnica_norm":"Tejido cerrado","file":"tejido_cerrado.html","tecnica_grup":"Telar de cintura","estados":"Puebla","exists":true},{"tecnica_norm":"Tejido con hoja de pino","file":"tejido_con_hoja_de_pino.html","tecnica_grup":"Tejido a mano","estados":"Chihuahua","exists":true},{"tecnica_norm":"Tejido de fibra natural","file":"tejido_de_fibra_natural.html","tecnica_grup":"Bordado a máquina","estados":"Hidalgo, Michoacán De Ocampo, Veracruz De Ignacio De La Llave","exists":true},{"tecnica_norm":"Tejido de gancho","file":"tejido_de_gancho.html","tecnica_grup":"Tejido a mano","estados":"Oaxaca","exists":true},{"tecnica_norm":"Tejido de horquilla","file":"tejido_de_horquilla.html","tecnica_grup":"Tejido a mano","estados":"Veracruz De Ignacio De La Llave","exists":true},{"tecnica_norm":"Tejido de lana","file":"tejido_de_lana.html","tecnica_grup":"Tejido a mano","estados":"Puebla","exists":true},{"tecnica_norm":"Tejido de ojitos","file":"tejido_de_ojitos.html","tecnica_grup":"Tejido a mano","estados":"Veracruz De Ignacio De La Llave","exists":true},{"tecnica_norm":"Tejido de patakua","file":"tejido_de_patakua.html","tecnica_grup":"Tejido a mano","estados":"Michoacán De Ocampo","exists":true},{"tecnica_norm":"Tejido de semilla","file":"tejido_de_semilla.html","tecnica_grup":"Bordado a mano","estados":"Oaxaca","exists":true},{"tecnica_norm":"Tejido en bajo lizo o trapiel","file":"tejido_en_bajo_lizo_o_trapiel.html","tecnica_grup":"Telar de cintura","estados":"Tlaxcala","exists":true},{"tecnica_norm":"Tejido en bastidor de madera","file":"tejido_en_bastidor_de_madera.html","tecnica_grup":"Tejido a mano","estados":"Sinaloa","exists":true},{"tecnica_norm":"Tejido en curva y brocado","file":"tejido_en_curva_y_brocado.html","tecnica_grup":"Telar de cintura","estados":"Puebla","exists":true},{"tecnica_norm":"Tejido tradicional","file":"tejido_tradicional.html","tecnica_grup":"Tejido a mano","estados":"Chiapas, Chihuahua, Guerrero, Oaxaca","exists":true},{"tecnica_norm":"Telar colonial","file":"telar_colonial.html","tecnica_grup":"Tejido a mano","estados":"Tlaxcala","exists":true},{"tecnica_norm":"Telar de cajón","file":"telar_de_cajon.html","tecnica_grup":"Telar de cajón","estados":"México","exists":true},{"tecnica_norm":"Telar de cintura","file":"telar_de_cintura.html","tecnica_grup":"Telar de cintura","estados":"Chiapas, Ciudad De México, Guerrero, Hidalgo, México, Michoacán De Ocampo, Morelos, Nayarit, Oaxaca, Puebla, Querétaro, Sinaloa, Veracruz De Ignacio De La Llave","exists":true},{"tecnica_norm":"Telar de pedal","file":"telar_de_pedal.html","tecnica_grup":"Telar de pedal","estados":"Chiapas, Coahuila De Zaragoza, Jalisco, México, Michoacán De Ocampo, Oaxaca, Querétaro, Tlaxcala, Zacatecas","exists":true},{"tecnica_norm":"Tenerife","file":"tenerife.html","tecnica_grup":"Bordado a mano","estados":"Campeche","exists":true},{"tecnica_norm":"Tinte natural y tejido","file":"tinte_natural_y_tejido.html","tecnica_grup":"Tejido a mano","estados":"Veracruz De Ignacio De La Llave","exists":true},{"tecnica_norm":"Tintes naturales","file":"tintes_naturales.html","tecnica_grup":"Otra","estados":"Tlaxcala","exists":true},{"tecnica_norm":"Tlajkitilistli","file":"tlajkitilistli.html","tecnica_grup":"Telar de cintura","estados":"Veracruz De Ignacio De La Llave","exists":true},{"tecnica_norm":"Tlapial","file":"tlapial.html","tecnica_grup":"Bordado a mano","estados":"Veracruz De Ignacio De La Llave","exists":true},{"tecnica_norm":"Trama suplementaria","file":"trama_suplementaria.html","tecnica_grup":"Bordado a mano","estados":"Chiapas","exists":true},{"tecnica_norm":"Trencilla","file":"trencilla.html","tecnica_grup":"Tejido a mano","estados":"Baja California, México","exists":true},{"tecnica_norm":"Trencilla mazahua","file":"trencilla_mazahua.html","tecnica_grup":"Bordado a mano","estados":"México","exists":true},{"tecnica_norm":"Trenza alzadas","file":"trenza_alzadas.html","tecnica_grup":"Bordado a mano","estados":"Veracruz De Ignacio De La Llave","exists":true},{"tecnica_norm":"Trenzado","file":"trenzado.html","tecnica_grup":"Tejido a mano","estados":"Chiapas, Michoacán De Ocampo, Puebla","exists":true},{"tecnica_norm":"Urdido","file":"urdido.html","tecnica_grup":"Tejido a mano","estados":"Yucatán","exists":true},{"tecnica_norm":"Xaam nïxuy","file":"xaam_nixuy.html","tecnica_grup":"Bordado a máquina","estados":"Oaxaca","exists":true},{"tecnica_norm":"Xmanikté","file":"xmanikte.html","tecnica_grup":"Bordado a mano","estados":"Yucatán","exists":true},{"tecnica_norm":"Zarga","file":"zarga.html","tecnica_grup":"Telar de cintura","estados":"Puebla","exists":true},{"tecnica_norm":"Zigzag","file":"zigzag.html","tecnica_grup":"Bordado a mano","estados":"Chiapas","exists":true}];
+
+    function splitTokens(fieldKey, value){
+      if (!value) return [];
+      const sep = (fieldKey === "estados") ? "," : "|";
+      return String(value).split(sep).map(x => x.trim()).filter(Boolean);
+    }
+
+    function tokenSet(fieldKey){
+      const s = new Set();
+      ITEMS.forEach(it => splitTokens(fieldKey, it[fieldKey]).forEach(x => s.add(x)));
+      return Array.from(s).sort((a,b)=>a.localeCompare(b,"es"));
+    }
+
+    function matchesTokenField(fieldKey, fieldValue, selected){
+      if (!selected) return true;
+      return splitTokens(fieldKey, fieldValue).includes(selected);
+    }
+
+    const $q = document.getElementById("q");
+    const $fE = document.getElementById("fEstado");
+    const $fG = document.getElementById("fGrupo");
+    const $grid = document.getElementById("grid");
+    const $count = document.getElementById("count");
+    const $empty = document.getElementById("empty");
+
+    tokenSet("estados").forEach(v=>{
+      const o=document.createElement("option"); o.value=v; o.textContent=v; $fE.appendChild(o);
+    });
+    tokenSet("tecnica_grup").forEach(v=>{
+      const o=document.createElement("option"); o.value=v; o.textContent=v; $fG.appendChild(o);
+    });
+
+    function render(){
+      const q = ($q.value || "").trim().toLowerCase();
+      const selE = $fE.value;
+      const selG = $fG.value;
+
+      const out = ITEMS.filter(it=>{
+        const name = (it.tecnica_norm || "").toLowerCase();
+        if (q && !name.includes(q)) return false;
+
+        const est = it["estados"] || "";
+        const grp = it["tecnica_grup"] || "";
+
+        if (!matchesTokenField("estados", est, selE)) return false;
+        if (!matchesTokenField("tecnica_grup", grp, selG)) return false;
+
+        return true;
+      });
+
+      $grid.innerHTML = "";
+      $empty.style.display = out.length ? "none" : "block";
+      $count.textContent = `${out.length} de ${ITEMS.length} técnicas`;
+
+      out.forEach(it=>{
+        const est = it["estados"] || "";
+        const grp = it["tecnica_grup"] || "";
+        const missing = (it.exists === false);
+
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <div class="title">
+            ${it.tecnica_norm}
+            ${missing ? `<span class="badge-miss">no existe html</span>` : ``}
+          </div>
+          <div class="meta">
+            ${grp ? `<div><b>Grupo:</b> ${grp}</div>` : ``}
+            ${est ? `<div><b>Estados:</b> ${est}</div>` : ``}
+          </div>
+          ${missing ? `` : `<a class="btn" href="./${it.file}">Abrir ficha</a>`}
+        `;
+        $grid.appendChild(card);
+      });
+    }
+
+    $q.addEventListener("input", render);
+    $fE.addEventListener("change", render);
+    $fG.addEventListener("change", render);
+
+    render();
+  </script>
+</body>
+</html>

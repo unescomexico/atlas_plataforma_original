@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Dashboard | Atlas de Técnicas Textiles</title>
+  <link rel="stylesheet" href="./styles.css"/>
+  <!-- CSV parser -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <!-- Charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Treemap plugin for Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-treemap@3.1.0/dist/chartjs-chart-treemap.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar__inner">
+      <div class="brand">
+        <h1>Dashboard</h1>
+      </div>
+
+      <div class="actions">
+        <label class="field">
+          <span>Estado</span>
+          <select id="fEstado">
+            <option value="">Todos</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Lengua</span>
+          <select id="fLengua">
+            <option value="">Todas</option>
+          </select>
+        </label>
+
+        <button id="reloadBtn" class="btn" type="button">Recargar datos</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="kpis" aria-label="Tarjetas resumen">
+      <article class="kpi">
+        <div class="kpi__label">Técnicas distintas</div>
+        <div class="kpi__value" id="kpiTecnicas">—</div>
+      </article>
+      <article class="kpi">
+        <div class="kpi__label">Estados</div>
+        <div class="kpi__value" id="kpiEstados">—</div>
+      </article>
+      <article class="kpi">
+        <div class="kpi__label">Municipios</div>
+        <div class="kpi__value" id="kpiMunicipios">—</div>
+      </article>
+      <article class="kpi">
+        <div class="kpi__label">Lenguas</div>
+        <div class="kpi__value" id="kpiLenguas">—</div>
+      </article>
+    </section>
+
+    <section class="grid">
+      <article class="card" data-chart="chGenero">
+        <div class="card__head">
+          <div>
+            <h2>Participantes por género</h2>
+            <p class="muted">Distribución de registros según el género reportado.</p>
+          </div>
+          <button class="iconbtn expandBtn" type="button" title="Ampliar" aria-label="Ampliar" data-target="chGenero">⤢</button>
+        </div>
+        <div class="card__body chartBox">
+          <canvas id="chGenero"></canvas>
+        </div>
+      </article>
+
+      <article class="card" data-chart="chManufactura">
+        <div class="card__head">
+          <div>
+            <h2>Manufactura</h2>
+            <p class="muted">Frecuencia de modalidades de manufactura reportadas en los registros.</p>
+          </div>
+          <button class="iconbtn expandBtn" type="button" title="Ampliar" aria-label="Ampliar" data-target="chManufactura">⤢</button>
+        </div>
+        <div class="card__body chartBox">
+          <canvas id="chManufactura"></canvas>
+        </div>
+      </article>
+
+      <article class="card" data-chart="chTenidoTec">
+        <div class="card__head">
+          <div>
+            <h2>Teñido (técnicas)</h2>
+            <p class="muted">Proporción de técnicas que reportan teñido en al menos un registro.</p>
+          </div>
+          <button class="iconbtn expandBtn" type="button" title="Ampliar" aria-label="Ampliar" data-target="chTenidoTec">⤢</button>
+        </div>
+        <div class="card__body chartBox">
+          <canvas id="chTenidoTec"></canvas>
+        </div>
+        <div class="card__foot muted" id="tenidoNota"></div>
+      </article>
+
+      <article class="card" data-chart="chTipoTenido">
+        <div class="card__head">
+          <div>
+            <h2>Tipo de teñido</h2>
+            <p class="muted">Materiales/insumos de teñido mencionados en los registros.</p>
+          </div>
+          <button class="iconbtn expandBtn" type="button" title="Ampliar" aria-label="Ampliar" data-target="chTipoTenido">⤢</button>
+        </div>
+        <div class="card__body chartBox">
+          <canvas id="chTipoTenido"></canvas>
+        </div>
+      </article>
+
+      <article class="card" data-chart="chAprendizaje">
+        <div class="card__head">
+          <div>
+            <h2>Aprendizaje más frecuente</h2>
+            <p class="muted">Principales vías de aprendizaje reportadas (familia, instructora u otras).</p>
+          </div>
+          <button class="iconbtn expandBtn" type="button" title="Ampliar" aria-label="Ampliar" data-target="chAprendizaje">⤢</button>
+        </div>
+        <div class="card__body chartBox">
+          <canvas id="chAprendizaje"></canvas>
+        </div>
+      </article>
+
+      <article class="card" data-chart="chTransmision">
+        <div class="card__head">
+          <div>
+            <h2>Transmisión</h2>
+            <p class="muted">A quién se transmite la técnica según los registros.</p>
+          </div>
+          <button class="iconbtn expandBtn" type="button" title="Ampliar" aria-label="Ampliar" data-target="chTransmision">⤢</button>
+        </div>
+        <div class="card__body chartBox">
+          <canvas id="chTransmision"></canvas>
+        </div>
+      </article>
+
+      <article class="card" data-chart="chTransmiten">
+        <div class="card__head">
+          <div>
+            <h2>Personas que transmiten la técnica</h2>
+            <p class="muted">Registros con evidencia de transmisión (al menos un “Sí”) vs. sin evidencia.</p>
+          </div>
+          <button class="iconbtn expandBtn" type="button" title="Ampliar" aria-label="Ampliar" data-target="chTransmiten">⤢</button>
+        </div>
+        <div class="card__body chartBox">
+          <canvas id="chTransmiten"></canvas>
+        </div>
+      </article>
+
+      <article class="card" data-chart="tmMateriales">
+        <div class="card__head">
+          <div>
+            <h2>Materiales más utilizados</h2>
+            <p class="muted">Términos más mencionados en “Materiales” (normalizados para agrupar singular/plural).</p>
+          </div>
+          <button class="iconbtn expandBtn" type="button" title="Ampliar" aria-label="Ampliar" data-target="tmMateriales">⤢</button>
+        </div>
+        <div class="card__body chartBox">
+          <canvas id="tmMateriales"></canvas>
+        </div>
+      </article>
+
+      <article class="card" data-chart="tmPracticas">
+        <div class="card__head">
+          <div>
+            <h2>Prácticas más mencionadas</h2>
+            <p class="muted">Términos más frecuentes en pr1…pr6 (normalizados para agrupar variantes).</p>
+          </div>
+          <button class="iconbtn expandBtn" type="button" title="Ampliar" aria-label="Ampliar" data-target="tmPracticas">⤢</button>
+        </div>
+        <div class="card__body chartBox">
+          <canvas id="tmPracticas"></canvas>
+        </div>
+      </article>
+
+      <article class="card" data-chart="tmCeremonias">
+        <div class="card__head">
+          <div>
+            <h2>Ceremonias más mencionadas</h2>
+            <p class="muted">Términos más frecuentes en c1…c8 (normalizados para agrupar variantes).</p>
+          </div>
+          <button class="iconbtn expandBtn" type="button" title="Ampliar" aria-label="Ampliar" data-target="tmCeremonias">⤢</button>
+        </div>
+        <div class="card__body chartBox">
+          <canvas id="tmCeremonias"></canvas>
+        </div>
+      </article>
+    </section>
+
+    <section class="empty hidden" id="errBox">
+      <h2>Error al cargar datos</h2>
+      <p class="muted" id="errMsg"></p>
+      <p class="muted">Tip: en GitHub Pages, asegúrate de que el CSV esté publicado y que la ruta en <code>app.js</code> sea correcta.</p>
+    </section>
+  </main>
+
+  <!-- Modal de ampliación -->
+  <div id="modal" class="modal hidden" aria-hidden="true">
+    <div id="modalBg" class="modal__bg"></div>
+    <div class="modal__panel" role="dialog" aria-modal="true" aria-label="Gráfica ampliada">
+      <div class="modal__head">
+        <div>
+          <div id="modalTitle" class="modal__title">—</div>
+          <div id="modalDesc" class="modal__desc muted"></div>
+        </div>
+        <button id="modalClose" class="iconbtn" type="button" aria-label="Cerrar" title="Cerrar">✕</button>
+      </div>
+      <div class="modal__body">
+        <canvas id="modalCanvas"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>

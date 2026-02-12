@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atlas Nacional de Técnicas Textiles</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Pleca superior -->
+  <header class="top-bar">
+    <h1>Atlas Nacional de Técnicas Textiles</h1>
+    
+  </header>
+
+  <!-- Contenedor principal -->
+  <div class="main-container">
+    <!-- Barra lateral -->
+    <nav class="sidebar">
+      <button class="nav-btn active" id="btn-fichas" title="Fichas">
+        <img src="iconos/fichas.png" alt="Fichas">
+      </button>
+
+      <button class="nav-btn" id="btn-galeria" title="Galería">
+        <img src="iconos/statistics.png" alt="Galería">
+      </button>
+
+      <button class="nav-btn" id="btn-info" title="Información">
+        <img src="iconos/info.svg" alt="Información">
+      </button>
+
+      <button class="nav-btn" id="btn-diagram" title="Información">
+        <img src="iconos/red.png" alt="Información">
+      </button>
+
+      <button class="nav-btn" id="btn-send" title="Enviar aportación">
+        <img src="iconos/send.svg" alt="Enviar aportación">
+      </button>
+    </nav>
+
+    <!-- Contenido principal -->
+    <main id="content">
+      <!-- Sección 1: Fichas -->
+      <section id="fichas-section" class="section active">
+        <iframe
+          src="tecnicas/index.html"
+          width="100%"
+          height="800"
+          style="border:none;"
+        ></iframe>
+      </section>
+
+    <!-- Sección 2: Dashboard -->
+      <section id="galeria-section" class="section">
+        <iframe
+          src="dashboard/index.html"
+          width="100%"
+          height="800"
+          style="border:none;"
+        ></iframe>
+      </section>
+
+    <!-- Sección 3: Información -->
+      <section id="info-section" class="section">
+        <iframe
+          src="blog/index.html"
+          width="100%"
+          height="800"
+          style="border:none;"
+        ></iframe>
+      </section>
+
+      <!-- Sección 4: Diagrama -->
+      <section id="diagram-section" class="section">
+        <iframe
+          src="red_neuronal/index.html"
+          width="100%"
+          height="800"
+          style="border:none;"
+        ></iframe>
+      </section>
+
+      <!-- Sección 5: Enviar aportación -->
+      <section id="send-section" class="section">
+        <iframe
+          src="form_aportaciones/index.html"
+          width="100%"
+          height="800"
+          style="border:none;"
+        ></iframe>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+

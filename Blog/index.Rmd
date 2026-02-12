@@ -1,0 +1,2741 @@
+---
+title: "Reporte de registros"
+author: "Registros proporcionados por artesanas y artesanos participantes en el Encuentro de Arte Textil Mexicano ORIGINAL"
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: true
+    number_sections: false
+    self_contained: true
+    
+    includes:
+      in_header: "plantillas/rmd_head.html"
+      before_body: "plantillas/rmd_before_body.html"
+      after_body: "plantillas/rmd_after_body.html"
+
+  pdf_document:
+    toc: true
+    toc_depth: 4
+  word_document:
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.align = "center",
+  fig.bg = "#0b0d10",
+  dev.args = list(bg = "#0b0d10"),
+  dpi = 150
+)
+
+# Estilo global para gráficas (fondo transparente + texto blanco)
+# - ggplot2: tema oscuro consistente
+# - base R: colores blancos
+# - plotly/htmlwidgets: fuente blanca y fondo transparente (cuando aplique)
+options(
+  htmltools.dir.version = FALSE,
+  plotly.layout = list(
+    paper_bgcolor = "rgba(0,0,0,0)",
+    plot_bgcolor  = "rgba(0,0,0,0)",
+    font = list(color = "white")
+  )
+)
+
+apply_dark_plot_style <- function(){
+  # ggplot2
+  if (requireNamespace("ggplot2", quietly = TRUE)) {
+    ggplot2::theme_set(
+      ggplot2::theme_minimal(base_size = 12) +
+        ggplot2::theme(
+          text = ggplot2::element_text(color = "white"),
+          plot.background  = ggplot2::element_rect(fill = "transparent", color = NA),
+          panel.background = ggplot2::element_rect(fill = "transparent", color = NA),
+          legend.background = ggplot2::element_rect(fill = "transparent", color = NA),
+          legend.key = ggplot2::element_rect(fill = "transparent", color = NA),
+          panel.grid.major = ggplot2::element_line(color = "rgba(255,255,255,0.10)"),
+          panel.grid.minor = ggplot2::element_line(color = "rgba(255,255,255,0.06)"),
+          axis.text  = ggplot2::element_text(color = "white"),
+          axis.title = ggplot2::element_text(color = "white"),
+          plot.title = ggplot2::element_text(color = "white", face = "bold")
+        )
+    )
+  }
+
+  # base graphics defaults
+  par(
+    bg = NA,
+    col = "white",
+    col.axis = "white",
+    col.lab = "white",
+    col.main = "white",
+    col.sub = "white",
+    fg = "white"
+  )
+}
+
+# Llama una vez (y también si algún chunk reinicia device)
+apply_dark_plot_style()
+```
+
+```{r librerias, include=FALSE}
+
+if(!require(glue)) install.packages("glue")
+if(!require(collapsibleTree)) install.packages("collapsibleTree")
+if(!require(cowplot)) install.packages("cowplot")
+if(!require(tidyverse)) install.packages("tidyverse")
+if(!require(readxl)) install.packages("readxl")
+if(!require(ggplot2)) install.packages("ggplot2")
+if(!require(patchwork)) install.packages("patchwork")
+if(!require(treemapify)) install.packages("treemapify")
+if(!require(tidytext)) install.packages("tidytext")
+if(!require(ggtext)) install.packages("ggtext")
+if(!require(ggalluvial)) install.packages("ggalluvial")
+if(!require(circlize)) install.packages("circlize")
+if(!require(stopwords)) install.packages("stopwords")
+if(!require(reactable)) install.packages("reactable")   # para HTML
+if(!require(flextable)) install.packages("flextable")   # para Word
+if(!require(leaflet)) install.packages("leaflet")
+if(!require(sf)) install.packages("sf")
+if(!require(rnaturalearth)) install.packages("rnaturalearth")
+if(!require(rnaturalearthdata)) install.packages("rnaturalearthdata")
+if(!require(stringi)) install.packages("stringi")
+if(!require(forcats)) install.packages("forcats")
+if(!require(stringr)) install.packages("stringr")
+if(!require(tidyr)) install.packages("tidyr")
+if(!require(scales)) install.packages("scales")
+if(!require(ggpattern)) install.packages("ggpattern")
+if(!require(readr)) install.packages("readr")
+if(!require(dplyr)) install.packages("dplyr")
+if(!require(SnowballC)) install.packages("SnowballC")
+if(!require(tibble)) install.packages("tibble")
+if(!require(htmltools))     install.packages("htmltools")
+
+library(cowplot)
+library(collapsibleTree)
+library(glue)
+library(tidyverse)
+library(readxl)
+library(ggplot2)
+library(patchwork)
+library(treemapify)
+library(tidytext)
+library(ggtext)
+library(ggalluvial)
+library(circlize)
+library(stopwords)
+library(leaflet); library(sf)
+library(rnaturalearth); library(rnaturalearthdata)
+library(stringi)
+library(dplyr)
+library(forcats)
+library(stringr)
+library(tidyr)
+library(scales)
+library(ggpattern)
+library(readr)
+library(dplyr)
+library(SnowballC)
+library(tibble)
+library(htmltools)
+
+```
+
+```{r datos, include=FALSE}
+data_path <- "data/data_completed.xlsx"
+datos <- read_excel(data_path)
+
+# --- Paleta de colores extendida y coherente (25 tonos armónicos) ---
+colores_expandida <- c(
+  "#9B59B6", "#3498DB", "#27AE60", "#F1C40F", "#E74C3C",
+  "#8E44AD", "#2980B9", "#2ECC71", "#F39C12", "#C0392B",
+  "#D2B4DE", "#85C1E9", "#52BE80", "#F5B041", "#EC7063",
+  "#AF7AC5", "#5DADE2", "#58D68D", "#E67E22", "#922B21",
+  "#16A085", "#76D7C4", "#48C9B0", "#7F8C8D"
+)
+
+
+# Crear matriz de coocurrencias de estados según técnicas compartidas
+tec_estado <- datos %>%
+  select(Estado, Nombre_de_la_t_cnica_en_espa_ol) %>%
+  distinct()
+
+# --- Tema global coherente ---
+theme_global <- theme_minimal(base_size = 12, base_family = "Sitka Text") +
+  theme(
+    panel.background = element_rect(fill = "#FAFAFA", color = NA),
+    plot.background = element_rect(fill = "#FAFAFA", color = NA),
+    axis.text = element_text(color = "#333333"),
+    plot.title = element_text(face = "bold", size = 16, hjust = 0)
+  )
+opciones_filtro <- datos |>
+    dplyr::distinct(`Nombre_de_la_t_cnica_en_espa_ol`) |>
+    dplyr::arrange(`Nombre_de_la_t_cnica_en_espa_ol`) |>
+    dplyr::pull(`Nombre_de_la_t_cnica_en_espa_ol`)
+
+```
+
+```{r preparar_mapa, include=FALSE}
+
+# --- Cargar polígonos de estados de México desde el .rds ---
+
+mexico <- readRDS("data/mexico_sf.rds")
+
+# --- Función para normalizar texto (acentos, mayúsculas) ---
+
+norm <- function(x) {
+  x %>%
+    stringi::stri_trans_general("Latin-ASCII") %>%  # quita acentos
+    toupper() %>%
+    trimws()
+}
+
+# Normalizar nombres en ambas fuentes
+
+mexico <- mexico %>% dplyr::mutate(NOMGEO_NORM = norm(NOMGEO))
+datos  <- datos  %>% dplyr::mutate(Estado_NORM = norm(Estado))
+
+# Ajustes de equivalencias comunes
+
+recode_tab <- c(
+  "CDMX"             = "CIUDAD DE MEXICO",
+  "DISTRITO FEDERAL" = "CIUDAD DE MEXICO",
+  "MEXICO"           = "ESTADO DE MEXICO"
+)
+
+datos$Estado_NORM <- dplyr::recode(
+  datos$Estado_NORM, !!!recode_tab,
+  .default = datos$Estado_NORM
+)
+
+# --- Conteo de técnicas por estado ---
+
+df_estado <- datos %>%
+  dplyr::filter(!is.na(Estado_NORM)) %>%
+  dplyr::count(Estado_NORM, name = "Tecnicas")
+
+# --- Unir al mapa ---
+
+mexico_join <- mexico %>%
+  dplyr::left_join(df_estado, by = c("NOMGEO_NORM" = "Estado_NORM"))
+
+# --- Cálculo de indicadores generales ---
+
+n_registros <- nrow(datos)
+
+n_participantes <- datos %>%
+  dplyr::filter(!is.na(Nombre_de_la_persona_entrevistada)) %>%
+  dplyr::distinct(Nombre_de_la_persona_entrevistada) %>%
+  nrow()
+
+n_estados <- datos %>%
+  dplyr::filter(!is.na(Estado)) %>%
+  dplyr::distinct(Estado) %>%
+  nrow()
+
+n_municipios <- datos %>%
+  dplyr::filter(!is.na(Municipio)) %>%
+  dplyr::distinct(Municipio) %>%
+  nrow()
+
+n_tecnicas <- datos %>%
+  dplyr::filter(!is.na(Nombre_de_la_t_cnica_en_espa_ol)) %>%
+  dplyr::distinct(Nombre_de_la_t_cnica_en_espa_ol) %>%
+  nrow()
+
+n_lenguas <- datos %>%
+  dplyr::filter(!is.na(Lengua_ind_gena), Lengua_ind_gena != "") %>%
+  dplyr::distinct(Lengua_ind_gena) %>%
+  nrow()
+
+```
+
+## Aplicación y metodología
+
+### Planteamiento
+
+La propuesta de elaboración del **Atlas De Técnicas De Artes Textiles En Original** surgió ante la necesidad de reconocer, documentar y fortalecer la diversidad de técnicas textiles que existen en México, muchas de las cuales están en riesgo por la falta de registro, la desvalorización cultural y el debilitamiento de los procesos de transmisión intergeneracional.
+
+Impulsada en el marco del Encuentro Nacional de Artes Textiles Original, esta iniciativa representa una oportunidad para promover formas participativas de consulta y registro que contribuyan a la salvaguardia de técnicas artesanales en todo el país, aprovechando la amplia convocatoria del evento.
+
+Un atlas, construido de forma **participativa con artesanas y artesanos** de distintas regiones, podría convertirse en una herramienta clave para:
+
+- Visibilizar saberes locales y formas de vida vinculadas al textil.
+- Fortalecer redes comunitarias y procesos de salvaguardia.
+- Orientar políticas públicas culturales desde las voces de quienes practican estas técnicas.
+
+**Es importante destacar que este atlas no pretende ser exhaustivo, sino representar una muestra de la diversidad técnica del arte textil en México. Su estructura y contenido permanece abierto, por lo que podrá enriquecerse con futuras experiencias, registros y actividades.**
+
+### Técnicas del arte textil
+
+Son los diversos métodos usados en la elaboración y manipulación de telas y tejidos y que son esenciales para producir prendas de vestir, decoración de interiores y otros productos textiles. Se pueden consideran tres categorías principales:
+
+- El bordado
+- El tejido
+- El teñido
+
+#### El bordado
+
+El bordado artesanal es una actividad artística y cultural, que se realiza sobre telas tejidas o de otros soportes flexibles (cuero, plástico) usando agujas e hilos, que, mediante puntadas sobre la tela o puntadas tejidas, forman motivos y diseños artísticos o decorativos. Pueden incorporarse perlas, abalorios o lentejuelas.
+
+**¿Cuántas técnicas encontramos en el bordado y que se define como técnica?**
+
+- De acuerdo a la forma cómo se realiza existen 2 técnicas: bordado de mano y bordado de máquina en donde tenemos las máquinas de pedal y las máquinas de motor. Ambas son artesanales porque dependen para realizarse de las bordadoras implicando una coordinación de los movimientos de las manos, del pie y evidentemente de la vista y del cerebro.
+- En cuanto a puntadas, existen, acorde a registros que se han realizado, más de 300 puntadas en el mundo, considerando las 2 técnicas: mano y máquina.
+- Sin embargo, hay quienes consideran que cada puntada es una técnica y se habla de más de 300 técnicas en el mundo.
+
+En el ejercicio, las puntadas las consideramos como técnicas del bordado y en ese sentido cada puntada será considerada como una técnica.
+
+#### El tejido
+
+El tejido artesanal es una actividad artística cuyas técnicas implican el inter lazado de hilos para crear prendas o telas. Pueden realizarse a mano o con telares de cintura o mecánicos o de pedal.
+
+**¿Cuántas técnicas encontramos en el tejido y que se define como técnica?** 
+
+- De acuerdo a la forma como se realiza existen:  
+ - El tejido a mano que puede ser con de punto (con dos agujas y estambre o hilo) y de crochet (con ganchillo y estambre o hilo)
+
+ - El tejido en telar puede ser:
+  - Con telar de cintura usando hilos de algodón o de lana naturales o con hilos sintéticos
+  - Con telar de pedal o mecánico usando algodón o lana naturales o sintéticos.
+
+#### El teñido
+
+El Teñido artesanal es una actividad artística artesanal que consiste en añadir color a los tejidos para cambiar su apariencia. Hay dos técnicas a considerar:
+
+- Teñido con tintes naturales
+- Teñido con tintes sintéticos
+
+#### Diagrama
+
+El siguiente diagrama presenta una estructura jerárquica de las principales técnicas artesanales empleadas en el arte textil en México, organizada en tres grandes categorías: bordado, tejido y teñido. Cada una de estas categorías se desglosa en subprocesos y variantes que reflejan la diversidad de métodos, herramientas y conocimientos tradicionales utilizados por las y los artesanos.
+
+```{r arbol_tecnicas, echo=FALSE, fig.width=14, fig.height=4}
+
+library(collapsibleTree)
+library(htmltools)
+
+tecnicas_tree <- data.frame(
+  Nivel1 = c(
+    rep("Bordado", 3),
+    rep("Tejido", 4),
+    rep("Teñido", 4)
+  ),
+  Nivel2 = c(
+    "Bordado a mano",
+    "Bordado a máquina",
+    "Bordado a máquina",
+    "Mano",
+    "Telar",
+    "Telar",
+    "Telar",
+    "Tintes naturales",
+    "Tintes naturales",
+    "Tintes naturales",
+    "Tintes sintéticos"
+  ),
+  Nivel3 = c(
+    NA,
+    "Pedal",
+    "Motor",
+    NA,
+    "Telar de cintura",
+    "Telar de pedal",
+    "Telar de cajón",
+    "Plantas",
+    "Productos animales",
+    "Sales y minerales",
+    NA
+  ),
+  stringsAsFactors = FALSE
+)
+
+w <- collapsibleTree(
+  tecnicas_tree,
+  hierarchy = c("Nivel1", "Nivel2", "Nivel3"),
+  root = "Técnicas artesanales de arte textil",
+  width = 800,
+  height = 600
+)
+
+tagList(
+  tags$style(HTML("
+    /* Fuerza textos del árbol en blanco y negritas */
+    .collapsibleTree svg text{
+      fill: #ffffff !important;
+      font-weight: 700 !important;
+    }
+
+    /* Opcional: líneas y nodos un poco más visibles en fondo oscuro */
+    .collapsibleTree svg path.link{
+      stroke: rgba(255,255,255,0.35) !important;
+    }
+    .collapsibleTree svg circle{
+      stroke: rgba(255,255,255,0.65) !important;
+      fill: rgba(255,255,255,0.12) !important;
+    }
+  ")),
+  w
+)
+
+```
+
+> **En este Atlas, los registros de técnicas proporcionados por las artesanas y los artesanos de Original reflejan la variedad existente dentro de las dos categorías generales: bordado y tejido. Cada una de ellas se organiza a su vez en subgrupos —bordado a mano y bordado a máquina; tejido a mano y tejido en telar— para facilitar su análisis. Por su parte, el teñido se considera una técnica de aplicación transversal, es decir, puede incorporarse a cualquiera de los grupos anteriores. A lo largo de este instrumento se presenta la información derivada del registro de técnicas dentro de estas categorías y subcategorías.**
+
+## Recolección de datos
+
+Para la recolección de datos se diseñó una Ficha de Registro de Técnicas Textiles como herramienta para documentar, preservar y visibilizar los saberes textiles tradicionales. Esta ficha fue desarrollada en una plataforma digital para la recolección de datos, lo que permitió estructurar un formato flexible, accesible y eficiente para su aplicación en campo a través de dispositivos móviles.
+
+La decisión de diseñar esta ficha respondió a la necesidad de contar con un instrumento que facilitara la sistematización de información directamente desde las voces de las personas artesanas, mediante entrevistas que recogen datos sobre procesos, significados, materiales y contextos sociales vinculados a cada técnica.
+
+El contenido de la Ficha de Registro de Técnicas Textiles incluyó:
+
+- Datos generales de la persona entrevistada (edad, género, ubicación, contacto).
+- Identificación de la técnica, tanto en español como en lengua indígena.
+- Ubicación geográfica de la práctica (estado, municipio, localidad).
+- Características técnicas, como tipo de manufactura, uso de teñido y materiales empleados.
+- Contexto cultural, incluyendo historia, creencias, significados, ceremonias.
+- Prendas y eventos comunitarios donde se utiliza la técnica.
+- Transmisión del conocimiento, con información sobre quién enseñó la técnica y transmisión.
+- Material multimedia, como fotografías y videos que complementan el registro.
+
+El ejercicio de levantamiento de fichas fue acompañado por una actividad de cartografía participativa, en la que las y los asistentes colocaban en un mapa expuesto en la sala las técnicas textiles que iban registrando.
+
+Esta dinámica permitió visualizar la diversidad geográfica de los saberes compartidos, fomentar el intercambio entre regiones y fortalecer el sentido colectivo del patrimonio textil.
+
+### Procesamiento
+
+Como parte del procesamiento de la información recabada mediante las fichas de registro, se realizó una limpieza y estandarización de los datos, especialmente en los nombres de las técnicas textiles, utilizando criterios de coincidencia fonética y similitud técnica para facilitar su agrupación y análisis.
+
+Posteriormente, se aplicaron herramientas de análisis basadas en lenguaje de código y sistemas de visualización geoespacial, lo que permitió explorar los datos, identificar patrones regionales y generar una serie de fichas analíticas por técnica, con hallazgos relevantes sobre su distribución, características, significados y formas de transmisión.
+
+### Resumen de datos
+
+Se recibieron un total de **`r n_registros` aportaciones**, correspondientes a **`r n_participantes` participantes** en el ejercicio.
+
+Las personas participantes provienen de **`r n_estados` estados** y **`r n_municipios` municipios** del país.  
+
+En conjunto, se identificaron **`r n_tecnicas` técnicas**, las cuales se vinculan con **`r n_lenguas` lenguas** registradas en los testimonios recopilados.
+
+## Participación
+
+### Participantes por sede
+
+La siguiente gráfica presenta el número total de participantes registrados en cada una de las sedes de Original. Para cada sede se contabilizaron únicamente personas únicas, evitando duplicidades en caso de múltiples registros asociados al mismo participante.
+
+```{r participantesxsede, echo=FALSE, fig.width=14, fig.height=4}
+
+participantes_sede <- datos %>%
+  filter(!is.na(Sede), !is.na(Nombre_de_la_persona_entrevistada)) %>%
+  distinct(Sede, Nombre_de_la_persona_entrevistada) %>%
+  count(Sede, name = "Num_Participantes") %>%
+  arrange(desc(Num_Participantes))
+
+color_base <- "#883AA1"
+bg_dark <- "#0b0d10"
+
+ggplot(participantes_sede,
+       aes(x = reorder(Sede, -Num_Participantes), y = Num_Participantes)) +
+  geom_col(fill = color_base, width = 0.6) +
+  geom_text(
+    aes(label = Num_Participantes),
+    vjust = -0.4,
+    color = "white",
+    size = 4.5,
+    family = "Sitka Text"
+  ) +
+  theme_minimal(base_size = 14, base_family = "Sitka Text") +
+  theme(
+    # ✅ fondo oscuro (NO transparente)
+    plot.background  = element_rect(fill = bg_dark, color = NA),
+    panel.background = element_rect(fill = bg_dark, color = NA),
+
+    # si hay paneles facet o bandas
+    strip.background = element_rect(fill = bg_dark, color = NA),
+    strip.text       = element_text(color = "white", face = "bold"),
+
+    # texto blanco
+    axis.title       = element_text(color = "white"),
+    axis.text        = element_text(color = "white", angle = 0, vjust = 0.5, hjust = 1),
+    plot.title       = element_text(face = "bold", size = 16, hjust = 0, color = "white"),
+    plot.subtitle    = element_text(size = 12, hjust = 0, color = "white"),
+
+    # leyenda
+    legend.title     = element_text(color = "white"),
+    legend.text      = element_text(color = "white"),
+    legend.background = element_rect(fill = bg_dark, color = NA),
+    legend.key       = element_rect(fill = bg_dark, color = NA),
+
+    # grilla sutil (hex con alfa)
+    panel.grid.major = element_line(color = "#FFFFFF1F"),
+    panel.grid.minor = element_line(color = "#FFFFFF0F"),
+
+    panel.border     = element_blank()
+  ) +
+  labs(
+    title = "Número de participantes por sede",
+    subtitle = "Personas únicas registradas en el Atlas",
+    x = "Sede",
+    y = "Número de participantes"
+  ) +
+  expand_limits(y = max(participantes_sede$Num_Participantes, na.rm = TRUE) * 1.1)
+
+```
+
+### Participantes por estado
+
+El siguiente gráfico muestra la distribución de las personas participantes según su estado de procedencia. Se contabilizan participantes únicos, lo que permite visualizar en qué entidades federativas se concentró la mayor participación en el ejercicio
+
+```{r participantesxestado, echo=FALSE, fig.width=14, fig.height=8}
+
+# --- Calcular número de participantes únicos por Estado ---
+participantes_estado <- datos %>%
+  filter(!is.na(Estado), !is.na(Nombre_de_la_persona_entrevistada)) %>%
+  distinct(Estado, Nombre_de_la_persona_entrevistada) %>%
+  count(Estado, name = "Num_Participantes") %>%
+  arrange(desc(Num_Participantes))
+
+color_base <- "#883AA1"
+bg_dark <- "#0b0d10"
+
+ggplot(participantes_estado,
+       aes(x = reorder(Estado, -Num_Participantes), y = Num_Participantes)) +
+  geom_col(fill = color_base, width = 0.6) +
+  geom_text(
+    aes(label = Num_Participantes),
+    vjust = -0.4,
+    color = "white",
+    size = 4.5,
+    family = "Sitka Text"
+  ) +
+  theme_minimal(base_size = 14, base_family = "Sitka Text") +
+  theme(
+    # ✅ Fondo oscuro
+    plot.background  = element_rect(fill = bg_dark, color = NA),
+    panel.background = element_rect(fill = bg_dark, color = NA),
+
+    # ✅ Texto blanco
+    axis.title       = element_text(color = "white"),
+    axis.text        = element_text(color = "white", angle = 90, vjust = 0.5, hjust = 1),
+    plot.title       = element_text(face = "bold", size = 16, hjust = 0, color = "white"),
+    plot.subtitle    = element_text(size = 12, hjust = 0, color = "white"),
+
+    # ✅ Leyenda (si aplica)
+    legend.title     = element_text(color = "white"),
+    legend.text      = element_text(color = "white"),
+    legend.background = element_rect(fill = bg_dark, color = NA),
+    legend.key       = element_rect(fill = bg_dark, color = NA),
+
+    # ✅ Grilla sutil
+    panel.grid.major = element_line(color = "#FFFFFF1F"),
+    panel.grid.minor = element_line(color = "#FFFFFF0F"),
+
+    panel.border     = element_blank()
+  ) +
+  labs(
+    title = "Número de participantes por estado",
+    subtitle = "Personas únicas registradas en el Atlas",
+    x = "Estado",
+    y = "Número de participantes"
+  ) +
+  expand_limits(y = max(participantes_estado$Num_Participantes, na.rm = TRUE) * 1.1)
+```
+
+### Participantes por lengua indígena
+
+Este gráfico presenta el número de participantes que se identifican con cada lengua indígena registrada en el ejercicio.
+
+```{r participantesxlengua, echo=FALSE, fig.width=14, fig.height=8}
+# --- Calcular número de participantes únicos por lengua indígena ---
+participantes_lengua <- datos %>%
+  filter(!is.na(Lengua_ind_gena), !is.na(Nombre_de_la_persona_entrevistada)) %>%
+  distinct(Lengua_ind_gena, Nombre_de_la_persona_entrevistada) %>%
+  count(Lengua_ind_gena, name = "Num_Participantes") %>%
+  arrange(desc(Num_Participantes))
+
+color_base <- "#883AA1"
+bg_dark <- "#0b0d10"
+
+ggplot(participantes_lengua,
+       aes(x = reorder(Lengua_ind_gena, -Num_Participantes),
+           y = Num_Participantes)) +
+  geom_col(fill = color_base, width = 0.6) +
+  geom_text(
+    aes(label = Num_Participantes),
+    vjust = -0.4,
+    color = "white",
+    size = 4.5,
+    family = "Sitka Text"
+  ) +
+  theme_minimal(base_size = 14, base_family = "Sitka Text") +
+  theme(
+    # ✅ Fondo oscuro
+    plot.background  = element_rect(fill = bg_dark, color = NA),
+    panel.background = element_rect(fill = bg_dark, color = NA),
+
+    # ✅ Texto blanco
+    axis.title       = element_text(color = "white"),
+    axis.text        = element_text(color = "white"),
+    axis.text.x      = element_text(angle = 90, vjust = 0.5, hjust = 1, color = "white"),
+    plot.title       = element_text(face = "bold", size = 16, hjust = 0, color = "white"),
+    plot.subtitle    = element_text(size = 12, hjust = 0, color = "white"),
+
+    # ✅ Leyenda (por si aplica)
+    legend.title     = element_text(color = "white"),
+    legend.text      = element_text(color = "white"),
+    legend.background = element_rect(fill = bg_dark, color = NA),
+    legend.key       = element_rect(fill = bg_dark, color = NA),
+
+    # ✅ Grilla sutil
+    panel.grid.major = element_line(color = "#FFFFFF1F"),
+    panel.grid.minor = element_line(color = "#FFFFFF0F"),
+
+    panel.border     = element_blank()
+  ) +
+  labs(
+    title = "Número de participantes por lengua indígena",
+    subtitle = "Personas únicas registradas en el Atlas",
+    x = "Lengua indígena",
+    y = "Número de participantes"
+  ) +
+  expand_limits(y = max(participantes_lengua$Num_Participantes, na.rm = TRUE) * 1.1)
+```
+
+### Participantes por género
+
+Se muestra la distribución porcentual de participantes según género.
+
+```{r participantesxgenero, echo=FALSE, fig.width=10, fig.height=6, fig.bg="#0b0d10"}
+library(dplyr)
+library(ggplot2)
+
+# --- Preparar datos ---
+genero_df <- datos %>%
+  filter(!is.na(G_nero_de_la_persona_entrevistada)) %>%
+  count(G_nero_de_la_persona_entrevistada, name = "n") %>%
+  mutate(
+    Porcentaje = 100 * n / sum(n),
+    etiqueta = paste0(round(Porcentaje, 1), "%"),
+    Genero = G_nero_de_la_persona_entrevistada
+  )
+
+# --- Paleta coherente (morado) ---
+colores_genero <- c("#A46BBF", "#E0C6ED", "gray")
+bg_dark <- "#0b0d10"
+
+ggplot(genero_df, aes(x = 2, y = Porcentaje, fill = Genero)) +
+  geom_col(width = 1, color = scales::alpha("white", 0.18)) +
+  coord_polar(theta = "y") +
+  geom_text(
+    aes(label = etiqueta),
+    position = position_stack(vjust = 0.5),
+    size = 5,
+    family = "Sitka Text",
+    fontface = "bold",
+    color = "white"
+  ) +
+  scale_fill_manual(values = colores_genero) +
+  xlim(0.5, 2.5) +
+  theme_void(base_family = "Sitka Text") +
+  theme(
+    # Fondo oscuro en TODO
+    plot.background  = element_rect(fill = bg_dark, color = NA),
+    panel.background = element_rect(fill = bg_dark, color = NA),
+
+    # Quitar márgenes internos
+    plot.margin = margin(0, 0, 0, 0),
+
+    # Leyenda en blanco + sin “cajitas” claras
+    legend.position   = "right",
+    legend.title      = element_text(face = "bold", size = 12, color = "white"),
+    legend.text       = element_text(size = 11, color = "white"),
+    legend.background = element_rect(fill = bg_dark, color = NA),
+    legend.key        = element_rect(fill = bg_dark, color = NA),
+    legend.box.background = element_rect(fill = bg_dark, color = NA)
+  ) +
+  labs(fill = "Género")
+
+```
+
+## Distribución geográfica
+
+### Cantidad de técnicas registradas por demarcaciones
+
+Ranking de estados con más técnicas distintas reportadas. Las etiquetas indican el total de técnicas por estado.
+
+```{r tecnicasxestado, echo=FALSE, fig.width=12, fig.height=7}
+
+# --- Calcular número de técnicas distintas por Estado ---
+tecnicas_estado <- datos %>%
+  filter(!is.na(Estado), !is.na(Nombre_de_la_t_cnica_en_espa_ol)) %>%
+  distinct(Estado, Nombre_de_la_t_cnica_en_espa_ol) %>%
+  count(Estado, name = "Num_Tecnicas") %>%
+  arrange(desc(Num_Tecnicas))
+
+color_base <- "#883AA1"
+bg_dark <- "#0b0d10"
+
+ggplot(tecnicas_estado, aes(x = reorder(Estado, Num_Tecnicas), y = Num_Tecnicas)) +
+  geom_col(fill = color_base, width = 0.6) +
+  geom_text(
+    aes(label = Num_Tecnicas),
+    hjust = -0.2,
+    color = "white",
+    size = 4.5,
+    family = "Sitka Text"
+  ) +
+  coord_flip() +
+  theme_minimal(base_size = 14, base_family = "Sitka Text") +
+  theme(
+    # ✅ Fondo oscuro
+    plot.background  = element_rect(fill = bg_dark, color = NA),
+    panel.background = element_rect(fill = bg_dark, color = NA),
+
+    # ✅ Texto blanco
+    axis.title       = element_text(color = "white"),
+    axis.text        = element_text(color = "white"),
+    plot.title       = element_text(face = "bold", size = 16, hjust = 0, color = "white"),
+    plot.subtitle    = element_text(size = 12, hjust = 0, color = "white"),
+
+    # ✅ Leyenda (por si aplica)
+    legend.title     = element_text(color = "white"),
+    legend.text      = element_text(color = "white"),
+    legend.background = element_rect(fill = bg_dark, color = NA),
+    legend.key       = element_rect(fill = bg_dark, color = NA),
+
+    # ✅ Grilla sutil
+    panel.grid.major = element_line(color = "#FFFFFF1F"),
+    panel.grid.minor = element_line(color = "#FFFFFF0F"),
+
+    panel.border     = element_blank()
+  ) +
+  labs(
+    title = "Cantidad de técnicas por estado",
+    subtitle = "Conteo de técnicas distintas reportadas en el Atlas",
+    x = "Estado",
+    y = "Número de técnicas"
+  ) +
+  expand_limits(y = max(tecnicas_estado$Num_Tecnicas, na.rm = TRUE) * 1.1)
+```
+
+Este gráfico presenta los 20 municipios con el mayor número de técnicas distintas registradas dentro del Atlas.Cada barra representa la cantidad de técnicas identificadas en un municipio específico.
+
+```{r tecnicasxmunicipio, echo=FALSE, fig.width=12, fig.height=7}
+# --- Calcular número de técnicas distintas por Municipio ---
+tecnicas_municipio <- datos %>%
+  filter(!is.na(Municipio), !is.na(Nombre_de_la_t_cnica_en_espa_ol)) %>%
+  distinct(Municipio, Nombre_de_la_t_cnica_en_espa_ol) %>%
+  count(Municipio, name = "Num_Tecnicas") %>%
+  arrange(desc(Num_Tecnicas)) %>%
+  slice_head(n = 20)
+
+color_base <- "#883AA1"
+bg_dark <- "#0b0d10"
+
+ggplot(tecnicas_municipio,
+       aes(x = reorder(Municipio, -Num_Tecnicas), y = Num_Tecnicas)) +
+  geom_col(fill = color_base, width = 0.7) +
+  geom_text(
+    aes(label = Num_Tecnicas),
+    vjust = -0.4,
+    color = "white",
+    size = 4.5,
+    family = "Sitka Text"
+  ) +
+  theme_minimal(base_size = 14, base_family = "Sitka Text") +
+  theme(
+    # ✅ Fondo oscuro
+    plot.background  = element_rect(fill = bg_dark, color = NA),
+    panel.background = element_rect(fill = bg_dark, color = NA),
+
+    # ✅ Texto blanco
+    axis.title       = element_text(color = "white"),
+    axis.text.x      = element_text(color = "white", angle = 90, vjust = 0.5, hjust = 1),
+    axis.text.y      = element_text(color = "white"),
+    plot.title       = element_text(face = "bold", size = 16, color = "white"),
+    plot.subtitle    = element_text(size = 12, color = "white"),
+
+    # ✅ Leyenda (por si aplica)
+    legend.title     = element_text(color = "white"),
+    legend.text      = element_text(color = "white"),
+    legend.background = element_rect(fill = bg_dark, color = NA),
+    legend.key       = element_rect(fill = bg_dark, color = NA),
+
+    # ✅ Grilla sutil
+    panel.grid.major = element_line(color = "#FFFFFF1F"),
+    panel.grid.minor = element_line(color = "#FFFFFF0F"),
+
+    panel.border     = element_blank()
+  ) +
+  labs(
+    title = "Municipios con mayor número de técnicas",
+    subtitle = "Técnicas distintas registradas en cada municipio",
+    x = "Municipio",
+    y = "Número de técnicas"
+  ) +
+  expand_limits(y = max(tecnicas_municipio$Num_Tecnicas, na.rm = TRUE) * 1.15)
+
+```
+
+### Relación entre estados y técnicas
+
+Flujos entre los 5 estados con más técnicas y las 10 técnicas más frecuentes. El ancho de cada flujo corresponde al número de registros compartidos.
+
+```{r aluvial, echo=FALSE, fig.width=12, fig.height=8}
+library(dplyr)
+library(ggplot2)
+library(ggalluvial)
+library(forcats)
+library(stringr)
+
+# --- Validaciones ---
+if (!"Estado" %in% names(datos)) stop("No existe la columna 'Estado' en los datos.")
+if (!"Nombre_de_la_t_cnica_en_espa_ol" %in% names(datos)) stop("No existe la columna de técnica.")
+
+# --- Top técnicas ---
+top_tecnicas <- datos %>%
+  filter(!is.na(Nombre_de_la_t_cnica_en_espa_ol)) %>%
+  count(Nombre_de_la_t_cnica_en_espa_ol, sort = TRUE) %>%
+  slice_head(n = 10) %>%
+  pull(Nombre_de_la_t_cnica_en_espa_ol)
+
+# --- Top estados por número de técnicas distintas ---
+top_estados <- datos %>%
+  filter(!is.na(Estado), !is.na(Nombre_de_la_t_cnica_en_espa_ol)) %>%
+  distinct(Estado, Nombre_de_la_t_cnica_en_espa_ol) %>%
+  count(Estado, name = "num_tecnicas") %>%
+  arrange(desc(num_tecnicas)) %>%
+  slice_head(n = 5) %>%
+  pull(Estado)
+
+# --- Datos para el diagrama aluvial ---
+df_alluvial <- datos %>%
+  select(Estado, Nombre_de_la_t_cnica_en_espa_ol) %>%
+  filter(
+    Estado %in% top_estados,
+    Nombre_de_la_t_cnica_en_espa_ol %in% top_tecnicas
+  ) %>%
+  count(Estado, Nombre_de_la_t_cnica_en_espa_ol, name = "n")
+
+# Ordenar factores por tamaño
+orden_estados <- df_alluvial %>%
+  group_by(Estado) %>% summarise(total = sum(n), .groups = "drop") %>%
+  arrange(desc(total)) %>% pull(Estado)
+
+orden_tecnicas <- df_alluvial %>%
+  group_by(Nombre_de_la_t_cnica_en_espa_ol) %>% summarise(total = sum(n), .groups = "drop") %>%
+  arrange(desc(total)) %>% pull(Nombre_de_la_t_cnica_en_espa_ol)
+
+df_alluvial <- df_alluvial %>%
+  mutate(
+    Estado = factor(Estado, levels = orden_estados),
+    Nombre_de_la_t_cnica_en_espa_ol = factor(Nombre_de_la_t_cnica_en_espa_ol, levels = orden_tecnicas)
+  )
+
+# --- Paleta morada coherente (claro -> oscuro) por popularidad ---
+tec_totales <- df_alluvial %>%
+  group_by(Nombre_de_la_t_cnica_en_espa_ol) %>%
+  summarise(total = sum(n), .groups = "drop") %>%
+  arrange(desc(total)) %>%
+  mutate(rank = row_number())
+
+n_tec <- nrow(tec_totales)
+pal_morado <- colorRampPalette(c("#EBD9F4", "#883AA1"))(max(n_tec, 2))
+mapa_colores <- setNames(pal_morado[tec_totales$rank], tec_totales$Nombre_de_la_t_cnica_en_espa_ol)
+
+# --- Estilo plataforma (oscuro) ---
+bg_dark <- "#0b0d10"
+
+ggplot(df_alluvial, aes(axis1 = Estado, axis2 = Nombre_de_la_t_cnica_en_espa_ol, y = n)) +
+  geom_alluvium(aes(fill = Nombre_de_la_t_cnica_en_espa_ol),
+                width = 0.28, alpha = 0.90, color = NA) +
+  # ✅ Strata visibles en oscuro
+  geom_stratum(width = 0.28, fill = "#12161b", color = "#FFFFFF33") +
+  # ✅ Texto blanco
+  geom_text(
+    stat = "stratum",
+    aes(label = stringr::str_wrap(after_stat(stratum), 20)),
+    family = "Sitka Text", size = 5.2, color = "white"
+  ) +
+  scale_fill_manual(values = mapa_colores) +
+  scale_x_discrete(labels = c("Estado", "Técnica")) +
+  theme_minimal(base_size = 16, base_family = "Sitka Text") +
+  theme(
+    plot.background  = element_rect(fill = bg_dark, color = NA),
+    panel.background = element_rect(fill = bg_dark, color = NA),
+
+    panel.grid       = element_blank(),
+    axis.title       = element_blank(),
+    axis.text.y      = element_blank(),
+    axis.ticks       = element_blank(),
+
+    axis.text.x      = element_text(face = "bold", color = "white"),
+    legend.position  = "none",
+
+    plot.title       = element_text(face = "bold", size = 18, color = "white"),
+    plot.subtitle    = element_text(size = 13, color = "white")
+  ) +
+  labs(
+    title = "Relación entre estados y técnicas más frecuentes",
+    subtitle = "Top 5 estados (por diversidad) y top 10 técnicas (por registros)"
+  )
+```
+
+### Técnicas más comúnes
+
+Para cada estado se presenta la técnica con mayor número de personas únicas que la reportan, ordenada por relevancia
+
+```{r tecnicas, echo=FALSE, fig.width=12, fig.height=5}
+
+library(dplyr)
+# --- Verificar columnas clave ---
+if (!"Estado" %in% names(datos)) stop("No existe la columna 'Estado' en los datos.")
+if (!"Nombre_de_la_t_cnica_en_espa_ol" %in% names(datos)) stop("No existe la columna 'Nombre_de_la_t_cnica_en_espa_ol' en los datos.")
+if (!"Nombre_de_la_persona_entrevistada" %in% names(datos)) stop("No existe la columna 'Nombre_de_la_persona_entrevistada' en los datos.")
+
+# --- Calcular técnica más común por Estado ---
+tabla_tecnicas_estado <- datos %>%
+  filter(
+    !is.na(Estado),
+    !is.na(Nombre_de_la_t_cnica_en_espa_ol),
+    !is.na(Nombre_de_la_persona_entrevistada)
+  ) %>%
+  group_by(Estado, Nombre_de_la_t_cnica_en_espa_ol) %>%
+  summarise(Personas_unicas = n_distinct(Nombre_de_la_persona_entrevistada), .groups = "drop") %>%
+  group_by(Estado) %>%
+  slice_max(Personas_unicas, n = 1, with_ties = FALSE) %>%
+  arrange(desc(Personas_unicas))
+
+# --- Mostrar tabla ---
+
+tabla <- tabla_tecnicas_estado %>%
+  rename(
+    Estado = Estado,
+    `Técnica más común` = Nombre_de_la_t_cnica_en_espa_ol,
+    `Personas únicas` = Personas_unicas
+  )
+
+bg_dark   <- "#0b0d10"
+panel     <- "#12161b"
+panel2    <- "#0f1317"
+line_col  <- "#FFFFFF1F"  # blanco con alfa (~12%)
+text_col  <- "#FFFFFF"
+muted_col <- "#FFFFFFB3"  # blanco ~70%
+
+if (knitr::is_html_output()) {
+  library(reactable)
+
+  reactable(
+    tabla,
+    columns = list(
+      Estado = colDef(minWidth = 180),
+      `Técnica más común` = colDef(minWidth = 260),
+      `Personas únicas` = colDef(
+        align = "center",
+        format = colFormat(separators = TRUE)
+      )
+    ),
+    defaultSorted = "Personas únicas",
+    defaultSortOrder = "desc",
+    striped = TRUE,
+    highlight = TRUE,
+    bordered = TRUE,
+    wrap = FALSE,
+    compact = TRUE,
+    searchable = TRUE,
+    pagination = TRUE,
+    defaultPageSize = 15,
+    theme = reactableTheme(
+      color = text_col,
+      backgroundColor = bg_dark,
+      borderColor = line_col,
+      stripedColor = panel2,
+      highlightColor = "#7aa2ff26",   # acento suave
+      cellPadding = "8px 12px",
+      headerStyle = list(
+        background = panel,
+        color = text_col,
+        fontWeight = 800,
+        borderBottom = paste("1px solid", line_col)
+      ),
+      tableStyle = list(
+        background = bg_dark
+      ),
+      searchInputStyle = list(
+        background = panel,
+        color = text_col,
+        border = paste("1px solid", line_col),
+        borderRadius = "10px"
+      ),
+      paginationStyle = list(
+        background = bg_dark,
+        color = muted_col
+      )
+    )
+  )
+
+} else {
+  library(flextable)
+
+  ft <- flextable(tabla)
+  ft <- theme_booktabs(ft)
+
+  # Fondo oscuro general + texto blanco
+  ft <- bg(ft, bg = bg_dark, part = "all")
+  ft <- color(ft, color = text_col, part = "all")
+
+  # Header: un poquito más claro + negritas
+  ft <- bg(ft, part = "header", bg = panel)
+  ft <- color(ft, part = "header", color = text_col)
+  ft <- bold(ft, part = "header", bold = TRUE)
+
+  # Alinear columna numérica
+  ft <- align(ft, j = "Personas únicas", align = "center", part = "all")
+
+  # Bordes sutiles (ojo: flextable usa colores hex, no rgba)
+  ft <- border_remove(ft)
+  ft <- hline(ft, border = fp_border(color = "#FFFFFF33", width = 1), part = "body")
+  ft <- hline(ft, border = fp_border(color = "#FFFFFF33", width = 1), part = "header")
+
+  ft <- autofit(ft)
+  ft <- set_caption(ft, caption = "Técnica más común por estado (conteo de personas únicas).")
+  ft
+}
+
+```
+
+## Características de la técnica
+
+### Distribución por técnica general
+Participación porcentual de las técnicas generales. Las etiquetas muestran el porcentaje sobre el total.
+
+```{r manufactura_general, echo=FALSE, fig.width=12, fig.height=5}
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+
+# --- Resumen y orden ---
+manufactura_df <- datos %>%
+  summarise(
+    `A mano`            = sum(`Manufactura_de_la_t_cnica/se_realiza_a_mano`, na.rm = TRUE),
+    `Máquina`           = sum(`Manufactura_de_la_t_cnica/se_realiza_a_m_quina_de_pedal`, na.rm = TRUE),
+    `Tejido a mano`     = sum(`Manufactura_de_la_t_cnica/se_realiza_con_tejido_a_mano`, na.rm = TRUE),
+    `Telar de cintura`  = sum(`Manufactura_de_la_t_cnica/otra`, na.rm = TRUE),
+    `Telar de pedal`    = sum(`Manufactura_de_la_t_cnica/se_realiza_con_telar_de_pedal`, na.rm = TRUE),
+    `Mixta`             = sum(`Manufactura_de_la_t_cnica/es_una_t_cnica_mixta`, na.rm = TRUE),
+    `Otra`              = sum(`Manufactura_de_la_t_cnica/otra_1`, na.rm = TRUE)
+  ) %>%
+  pivot_longer(everything(), names_to = "Tipo", values_to = "Valor") %>%
+  mutate(
+    Porcentaje = Valor / sum(Valor) * 100
+  ) %>%
+  arrange(desc(Porcentaje)) %>%
+  mutate(Tipo = factor(Tipo, levels = Tipo))
+
+color_base <- "#883AA1"
+bg_dark <- "#0b0d10"
+
+ggplot(manufactura_df, aes(x = Tipo, y = Porcentaje)) +
+  geom_col(fill = color_base, width = 0.6) +
+  geom_text(
+    aes(label = paste0(round(Porcentaje, 1), "%")),
+    vjust = -0.4,
+    size = 4.5,
+    family = "Sitka Text",
+    color = "white"
+  ) +
+  scale_y_continuous(
+    labels = scales::label_percent(scale = 1),
+    expand = expansion(mult = c(0, 0.15))
+  ) +
+  theme_minimal(base_size = 14, base_family = "Sitka Text") +
+  theme(
+    # ✅ Fondo oscuro
+    plot.background  = element_rect(fill = bg_dark, color = NA),
+    panel.background = element_rect(fill = bg_dark, color = NA),
+
+    # ✅ Grilla sutil
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_line(color = "#FFFFFF1F"),
+    panel.grid.major.y = element_line(color = "#FFFFFF0F"),
+
+    # ✅ Texto blanco
+    axis.title = element_blank(),
+    axis.text  = element_text(color = "white"),
+    plot.title = element_text(face = "bold", size = 16, hjust = 0, color = "white"),
+    plot.subtitle = element_text(size = 12, hjust = 0, color = "white"),
+
+    legend.position = "none"
+  ) +
+  labs(
+    title = "Distribución general de manufactura",
+    subtitle = "Ordenada de mayor a menor participación porcentual"
+  )
+
+```
+
+### Tipos de técnicas generales por estado
+
+Composición relativa de las técnicas generales en cada estado. Permite comparar proporciones internas más que volúmenes absolutos.
+
+```{r man_estado, echo=FALSE, fig.width=14, fig.height=12}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+
+# --- Datos base ---
+df <- datos %>%
+  select(
+    Estado,
+    a_mano        = `Manufactura_de_la_t_cnica/se_realiza_a_mano`,
+    maquina       = `Manufactura_de_la_t_cnica/se_realiza_a_m_quina_de_pedal`,
+    tejido_mano   = `Manufactura_de_la_t_cnica/se_realiza_con_tejido_a_mano`,
+    telar_cintura = `Manufactura_de_la_t_cnica/otra`,
+    telar_pedal   = `Manufactura_de_la_t_cnica/se_realiza_con_telar_de_pedal`,
+    mixta         = `Manufactura_de_la_t_cnica/es_una_t_cnica_mixta`,
+    otra          = `Manufactura_de_la_t_cnica/otra_1`
+  ) %>%
+  pivot_longer(
+    cols = c(a_mano, maquina, tejido_mano, telar_cintura, telar_pedal, mixta, otra),
+    names_to = "Tipo",
+    values_to = "Valor"
+  ) %>%
+  group_by(Estado, Tipo) %>%
+  summarise(Total = sum(Valor, na.rm = TRUE), .groups = "drop") %>%
+  group_by(Estado) %>%
+  mutate(
+    Total_estado = sum(Total, na.rm = TRUE),
+    Porcentaje   = ifelse(Total_estado > 0, 100 * Total / Total_estado, 0)
+  ) %>%
+  ungroup()
+
+# Etiquetas legibles
+df$Tipo <- recode(
+  df$Tipo,
+  "a_mano"        = "A mano",
+  "maquina"       = "Máquina",
+  "tejido_mano"   = "Tejido a mano",
+  "telar_cintura" = "Telar de cintura",
+  "telar_pedal"   = "Telar de pedal",
+  "mixta"         = "Mixta",
+  "otra"          = "Otra"
+)
+
+# --- Ordenar estados de mayor a menor total ---
+orden_estados <- df %>%
+  distinct(Estado, Total_estado) %>%
+  arrange(desc(Total_estado)) %>%
+  pull(Estado)
+
+df <- df %>% mutate(Estado = factor(Estado, levels = orden_estados))
+
+# --- Paleta coherente ---
+colores_manufactura <- c(
+  "A mano"           = "#883AA1",
+  "Máquina"          = "#A46BBF",
+  "Tejido a mano"    = "#C49FD9",
+  "Telar de cintura" = "#E0C6ED",
+  "Telar de pedal"   = "#F1E6F8",
+  "Mixta"            = "#F5D6F8",
+  "Otra"             = "#FBEFFC"
+)
+
+bg_dark <- "#0b0d10"
+
+ggplot(df, aes(x = Estado, y = Porcentaje, fill = Tipo)) +
+  geom_col(position = "fill", color = "#FFFFFF33", width = 0.7) +
+  scale_fill_manual(values = colores_manufactura) +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+  coord_flip() +
+  labs(
+    title = "Distribución de tipos de manufactura por estado",
+    subtitle = "Barras apiladas proporcionales (ordenadas de mayor a menor)",
+    x = "Estado",
+    y = "Porcentaje",
+    fill = "Tipo de manufactura"
+  ) +
+  theme_minimal(base_size = 14, base_family = "Sitka Text") +
+  theme(
+    # ✅ Fondo oscuro
+    plot.background  = element_rect(fill = bg_dark, color = NA),
+    panel.background = element_rect(fill = bg_dark, color = NA),
+
+    # ✅ Grilla sutil
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(color = "#FFFFFF14"),
+
+    # ✅ Texto blanco
+    axis.text.x  = element_text(color = "white"),
+    axis.text.y  = element_text(color = "white"),
+    axis.title.x = element_text(color = "white"),
+    axis.title.y = element_text(color = "white"),
+
+    plot.title    = element_text(face = "bold", size = 16, color = "white"),
+    plot.subtitle = element_text(size = 12, color = "white"),
+
+    # ✅ Leyenda en blanco, fondo oscuro
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold", color = "white"),
+    legend.text  = element_text(color = "white"),
+    legend.background = element_rect(fill = bg_dark, color = NA),
+    legend.key = element_rect(fill = bg_dark, color = NA)
+  )
+
+```
+
+### Materiales
+
+Los rectángulos representan los materiales más mencionados; su tamaño es proporcional a la frecuencia y la etiqueta incluye el porcentaje.
+
+```{r materiales_tecnica, echo=FALSE, fig.width=20, fig.height=12}
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(tidytext)
+library(ggplot2)
+library(treemapify)
+
+# --- Procesar materiales ---
+stop_extra <- c("telar", "telares", "cintura", "cinturas")
+
+materiales_df <- datos %>%
+  select(`_Qu_materiales_util_ci_n_de_esta_t_cnica`) %>%
+  filter(!is.na(`_Qu_materiales_util_ci_n_de_esta_t_cnica`)) %>%
+  rename(material_text = `_Qu_materiales_util_ci_n_de_esta_t_cnica`) %>%
+  unnest_tokens(material, material_text, token = "words") %>%
+  mutate(
+    material = str_to_lower(material),
+    material = str_replace_all(material, "s$", "")
+  ) %>%
+  filter(!material %in% c(stopwords::stopwords("es"), stop_extra))
+
+# --- Frecuencia ---
+frecuencia_material <- materiales_df %>%
+  count(material, name = "cantidad") %>%
+  mutate(porcentaje = 100 * cantidad / sum(cantidad)) %>%
+  arrange(desc(cantidad)) %>%
+  slice_head(n = 20)
+
+# --- Paleta morada (claro -> oscuro) ---
+color_base  <- "#883AA1"
+color_claro <- "#F1E6F8"
+n_cat <- nrow(frecuencia_material)
+pal <- colorRampPalette(c(color_claro, color_base))(max(n_cat, 2))
+
+frecuencia_material <- frecuencia_material %>%
+  mutate(fill_color = pal[rank(-cantidad, ties.method = "first")])
+
+# Contraste de texto (blanco en celdas oscuras, blanco también en claras si quieres 100% blanco)
+hex_to_rgb <- function(h) {
+  h <- gsub("#", "", h)
+  r <- as.numeric(strtoi(substr(h, 1, 2), 16L))
+  g <- as.numeric(strtoi(substr(h, 3, 4), 16L))
+  b <- as.numeric(strtoi(substr(h, 5, 6), 16L))
+  c(r, g, b)
+}
+luminancia <- function(h) {
+  rgb <- hex_to_rgb(h) / 255
+  adj <- ifelse(rgb <= 0.03928, rgb/12.92, ((rgb + 0.055)/1.055)^2.4)
+  0.2126*adj[1] + 0.7152*adj[2] + 0.0722*adj[3]
+}
+
+frecuencia_material <- frecuencia_material %>%
+  rowwise() %>%
+  mutate(
+    # ✅ mantenemos buen contraste pero en modo oscuro
+    text_color = ifelse(luminancia(fill_color) < 0.55, "#FFFFFF", "#FFFFFF")
+  ) %>%
+  ungroup() %>%
+  mutate(
+    # ✅ etiqueta: término + porcentaje (término es lo importante)
+    etiqueta = paste0(material, "\n", round(porcentaje, 1), "%")
+  )
+
+bg_dark <- "#0b0d10"
+
+# --- Treemap consistente, fondo oscuro, texto blanco ---
+ggplot(
+  frecuencia_material,
+  aes(area = cantidad, fill = fill_color, label = etiqueta)
+) +
+  geom_treemap(color = "#FFFFFF2B", lwd = 1) +
+  geom_treemap_text(
+    aes(colour = text_color),
+    place = "centre",
+    grow = TRUE,
+    reflow = TRUE,
+    fontface = "bold",
+    size = 12,
+    family = "Sitka Text"
+  ) +
+  scale_fill_identity() +
+  scale_colour_identity() +
+  theme_void(base_size = 14) +
+  theme(
+    plot.background  = element_rect(fill = bg_dark, color = NA),
+    panel.background = element_rect(fill = bg_dark, color = NA),
+    legend.position  = "none",
+    plot.title       = element_text(face = "bold", size = 25, color = "white", family = "Sitka Text"),
+    plot.subtitle    = element_text(size = 18, color = "white", family = "Sitka Text")
+  ) +
+  labs(
+    title = "Materiales más utilizados",
+    subtitle = "Frecuencia de términos (top 20)"
+  )
+```
+
+### Diversidad de técnicas por lengua indígena
+
+La siguiente gráfica muestra la distribución relativa de las diez técnicas más frecuentemente registradas entre las distintas lenguas indígenas representadas en el Atlas.
+
+```{r diversidad_lengua, echo=FALSE, fig.width=12, fig.height=8}
+# --- Top 10 técnicas más frecuentes en todo el Atlas ---
+
+top_tecnicas <- datos %>%
+  filter(!is.na(Nombre_de_la_t_cnica_en_espa_ol)) %>%
+  count(Nombre_de_la_t_cnica_en_espa_ol, sort = TRUE) %>%
+  slice_head(n = 10) %>%
+  pull(Nombre_de_la_t_cnica_en_espa_ol)
+
+# --- Datos para barras apiladas al 100% por lengua indígena ---
+
+df_tec_lengua <- datos %>%
+  filter(
+    !is.na(Lengua_ind_gena),
+    !is.na(Nombre_de_la_t_cnica_en_espa_ol),
+    Nombre_de_la_t_cnica_en_espa_ol %in% top_tecnicas
+  ) %>%
+  mutate(
+    Tecnica = Nombre_de_la_t_cnica_en_espa_ol,
+    Lengua  = Lengua_ind_gena
+  ) %>%
+  count(Lengua, Tecnica, name = "n") %>%
+  group_by(Lengua) %>%
+  mutate(
+    total_lengua = sum(n),
+    Porcentaje   = ifelse(total_lengua > 0, 100 * n / total_lengua, 0)
+  ) %>%
+  ungroup()
+
+# Ordenar lenguas por número total de registros
+orden_lenguas <- df_tec_lengua %>%
+  group_by(Lengua) %>%
+  summarise(total = sum(n), .groups = "drop") %>%
+  arrange(desc(total)) %>%
+  pull(Lengua)
+
+df_tec_lengua <- df_tec_lengua %>%
+  mutate(
+    Lengua  = factor(Lengua, levels = orden_lenguas),
+    Tecnica = factor(Tecnica)
+  )
+
+# --- Paleta de 10 colores (igual que la tuya) ---
+pal_tecnicas <- c(
+  "#9B59B6",
+  "#3498DB",
+  "#27AE60",
+  "#F1C40F",
+  "#E67E22",
+  "#E74C3C",
+  "#16A085",
+  "#7F8C8D",
+  "#AF7AC5",
+  "#5DADE2"
+)
+
+# --- Estilo oscuro (coherente con plataforma) ---
+bg_dark   <- "#0b0d10"   # gris muy oscuro
+panel_dark<- "#0b0d10"
+grid_col  <- "#FFFFFF1A" # blanco con alpha en HEX (no rgba)
+axis_col  <- "white"
+muted_col <- "#A9B4C2"
+
+# --- Gráfica ---
+
+ggplot(df_tec_lengua, aes(x = Lengua, y = n, fill = Tecnica)) +
+  geom_col(position = "fill", color = "#FFFFFF2A", width = 0.7) +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+  scale_fill_manual(values = pal_tecnicas) +
+  theme_minimal(base_size = 14, base_family = "Sitka Text") +
+  theme(
+    plot.background  = element_rect(fill = bg_dark, color = NA),
+    panel.background = element_rect(fill = panel_dark, color = NA),
+
+    # rejilla sutil
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.major.y = element_line(color = grid_col, linewidth = 0.35),
+
+    # ejes
+    axis.text.y      = element_text(color = axis_col),
+    axis.text.x      = element_text(color = axis_col, angle = 90, vjust = 0.5, hjust = 1),
+    axis.title.x     = element_text(color = axis_col),
+    axis.title.y     = element_text(color = axis_col),
+
+    # títulos
+    plot.title       = element_text(face = "bold", size = 16, hjust = 0, color = axis_col),
+    plot.subtitle    = element_text(size = 12, hjust = 0, color = muted_col),
+
+    # leyenda
+    legend.position  = "right",
+    legend.background = element_rect(fill = bg_dark, color = NA),
+    legend.key        = element_rect(fill = bg_dark, color = NA),
+    legend.title     = element_text(face = "bold", color = axis_col),
+    legend.text      = element_text(color = axis_col)
+  ) +
+  labs(
+    title = "Distribución de las técnicas por lengua indígena",
+    subtitle = "Técnicas más frecuentes por lengua indígena",
+    x = "Lengua indígena",
+    y = "Porcentaje",
+    fill = "Técnica"
+  )
+
+```
+
+## Teñido
+
+### Distribución general por tipo teñido
+
+Este gráfico muestra la participación porcentual de los distintos tipos de teñido registrados en el Atlas. La visualización permite identificar claramente cuáles son las prácticas de teñido predominantes entre las personas portadoras de técnicas textiles.
+
+```{r tenido, echo=FALSE, fig.width=12, fig.height=5}
+# --- Distribución de tipos de teñido ---
+
+tenido_df <- data.frame(
+  Tipo = c("Con plantas", "Con sales y minerales", "Con insectos y animales", "Con otro"),
+  Valor = c(
+    sum(datos$`_Que_tipo_de_te_ido_se_utiliza/te_ido_con_plantas__ejem__muicle__peric_`, na.rm = TRUE),
+    sum(datos$`_Que_tipo_de_te_ido_se_utiliza/te_ido_con_sales_y_minerales__ejem__alum`, na.rm = TRUE),
+    sum(datos$`_Que_tipo_de_te_ido_se_utiliza/te_ido_con_con_insectos_y_animales__ejem`, na.rm = TRUE),
+    sum(datos$`_Que_tipo_de_te_ido_se_utiliza/otro`, na.rm = TRUE)
+  )
+) %>%
+  mutate(Porcentaje = 100 * Valor / sum(Valor)) %>%
+  arrange(desc(Porcentaje)) %>%
+  mutate(Tipo = factor(Tipo, levels = Tipo))  # conserva el orden descendente
+
+# --- Estilo coherente (oscuro) ---
+
+color_base <- "#883AA1"
+
+bg_dark   <- "#0b0d10"
+panel_dark<- "#0b0d10"
+grid_col  <- "#FFFFFF1A"  # blanco con alpha (hex)
+axis_col  <- "white"
+muted_col <- "#A9B4C2"
+
+ggplot(tenido_df, aes(x = Tipo, y = Porcentaje)) +
+  geom_col(fill = color_base, width = 0.6) +
+  geom_text(
+    aes(label = paste0(round(Porcentaje, 1), "%")),
+    vjust = -0.4, size = 5, family = "Sitka Text",
+    color = "white", fontface = "bold"
+  ) +
+  scale_y_continuous(
+    labels = scales::label_percent(scale = 1),
+    expand = expansion(mult = c(0, 0.15))
+  ) +
+  theme_minimal(base_size = 14, base_family = "Sitka Text") +
+  theme(
+    plot.background  = element_rect(fill = bg_dark, color = NA),
+    panel.background = element_rect(fill = panel_dark, color = NA),
+
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.major.y = element_line(color = grid_col, linewidth = 0.35),
+
+    axis.title = element_blank(),
+    axis.text  = element_text(color = axis_col),
+
+    plot.title    = element_text(face = "bold", size = 16, hjust = 0, color = axis_col),
+    plot.subtitle = element_text(size = 12, hjust = 0, color = muted_col),
+
+    legend.position = "none"
+  ) +
+  labs(
+    title = "Distribución general de tipos de teñido",
+    subtitle = "Ordenada de mayor a menor participación porcentual"
+  )
+
+```
+
+### Tipos de teñido por manufactura
+
+En este gráfico se examina cómo se combinan los procesos de teñidp con las formas de manufactura (a mano, a máquina de pedal, a máquina eléctrica, técnica mixta u otra).
+
+La visualización, construida con barras horizontales apiladas al 100%, permite observar la proporcionalidad interna en cada tipo de manufactura, revelando patrones como:
+
+- Qué procesos de teñido se asocian más frecuentemente con prácticas tradicionales.
+
+- Qué técnicas de manufactura tienden a incorporar ciertos materiales para teñido.
+
+- La diversidad de combinaciones entre métodos de producción y prácticas de teñido.
+
+```{r tenido_manufactura, echo=FALSE, fig.width=12, fig.height=5}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+library(stringr)
+
+# ====== Colores estilo plataforma (define ANTES de la gráfica) ======
+bg_plot  <- "#0b0d10"   # fondo general (gris muy oscuro)
+bg_panel <- "#0f1317"   # fondo del panel (ligeramente distinto)
+grid_col <- scales::alpha("white", 0.12)
+
+# --- Preparar datos de manufactura + teñido ---
+df_tenido_manuf <- datos %>%
+  select(
+    man_mano          = `Manufactura_de_la_t_cnica/se_realiza_a_mano`,
+    man_maquina       = `Manufactura_de_la_t_cnica/se_realiza_a_m_quina_de_pedal`,
+    man_tejido_mano   = `Manufactura_de_la_t_cnica/se_realiza_con_tejido_a_mano`,
+    man_telar_cintura = `Manufactura_de_la_t_cnica/otra`,
+    man_telar_pedal   = `Manufactura_de_la_t_cnica/se_realiza_con_telar_de_pedal`,
+    man_mixta         = `Manufactura_de_la_t_cnica/es_una_t_cnica_mixta`,
+    man_otra          = `Manufactura_de_la_t_cnica/otra_1`,
+    plantas  = `_Que_tipo_de_te_ido_se_utiliza/te_ido_con_plantas__ejem__muicle__peric_`,
+    sales    = `_Que_tipo_de_te_ido_se_utiliza/te_ido_con_sales_y_minerales__ejem__alum`,
+    insectos = `_Que_tipo_de_te_ido_se_utiliza/te_ido_con_con_insectos_y_animales__ejem`,
+    otro     = `_Que_tipo_de_te_ido_se_utiliza/otro`
+  ) %>%
+  pivot_longer(
+    cols = c(man_mano, man_maquina, man_tejido_mano, man_telar_cintura, man_telar_pedal, man_mixta, man_otra),
+    names_to = "Manufactura_raw",
+    values_to = "Man_val"
+  ) %>%
+  mutate(Man_val = as.numeric(Man_val)) %>%
+  filter(!is.na(Man_val), Man_val > 0) %>%
+  pivot_longer(
+    cols = c(plantas, sales, insectos, otro),
+    names_to = "Tipo",
+    values_to = "Valor"
+  ) %>%
+  mutate(Valor = as.numeric(Valor)) %>%
+  group_by(Manufactura_raw, Tipo) %>%
+  summarise(n = sum(Valor, na.rm = TRUE), .groups = "drop") %>%
+  group_by(Manufactura_raw) %>%
+  mutate(
+    total_manuf = sum(n),
+    Porcentaje  = ifelse(total_manuf > 0, 100 * n / total_manuf, 0)
+  ) %>%
+  ungroup() %>%
+  filter(total_manuf > 0) %>%
+  mutate(
+    Manufactura = recode(
+      Manufactura_raw,
+      "man_mano"          = "A mano",
+      "man_maquina"       = "Máquina",
+      "man_tejido_mano"   = "Tejido a mano",
+      "man_telar_cintura" = "Telar de cintura",
+      "man_telar_pedal"   = "Telar de pedal",
+      "man_mixta"         = "Mixta",
+      "man_otra"          = "Otra"
+    ),
+    Tipo = recode(
+      Tipo,
+      "plantas"  = "Con plantas",
+      "sales"    = "Con sales y minerales",
+      "insectos" = "Con insectos y animales",
+      "otro"     = "Con otro"
+    ),
+    Tipo = factor(Tipo, levels = c("Con plantas","Con sales y minerales","Con insectos y animales","Con otro"))
+  )
+
+# Ordenar manufacturas por volumen total
+orden_manuf <- df_tenido_manuf %>%
+  group_by(Manufactura) %>%
+  summarise(total = sum(n), .groups = "drop") %>%
+  arrange(desc(total)) %>%
+  pull(Manufactura)
+
+df_tenido_manuf <- df_tenido_manuf %>%
+  mutate(Manufactura = factor(Manufactura, levels = orden_manuf))
+
+# Paleta
+colores_tenido <- c(
+  "Con plantas"             = "#27AE60",
+  "Con sales y minerales"   = "#F1C40F",
+  "Con insectos y animales" = "#E67E22",
+  "Con otro"                = "#7F8C8D"
+)
+
+# --- Gráfica final (estilo oscuro + texto blanco) ---
+p <- ggplot(df_tenido_manuf, aes(y = Manufactura, x = n, fill = Tipo)) +
+  geom_col(
+    position = "fill",
+    width = 0.7,
+    color = scales::alpha("white", 0.18)
+  ) +
+  scale_x_continuous(
+    labels = scales::percent_format(scale = 1),
+    expand = expansion(mult = c(0, 0.02))
+  ) +
+  scale_fill_manual(values = colores_tenido) +
+  labs(
+    title = "Tipo de teñido por tipo de manufactura",
+    subtitle = "Distribución porcentual de las técnicas según la combinación de manufactura y teñido",
+    x = "Porcentaje",
+    y = "Tipo de manufactura",
+    fill = "Tipo de teñido"
+  ) +
+  theme_minimal(base_size = 14, base_family = "Sitka Text") +
+  theme(
+    plot.background  = element_rect(fill = bg_plot,  color = NA),
+    panel.background = element_rect(fill = bg_panel, color = NA),
+
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_line(color = grid_col, linewidth = 0.35),
+    panel.grid.major.y = element_blank(),
+
+    axis.title.x  = element_text(color = scales::alpha("white", 0.90)),
+    axis.title.y  = element_text(color = scales::alpha("white", 0.90)),
+    axis.text.x   = element_text(color = scales::alpha("white", 0.85)),
+    axis.text.y   = element_text(color = scales::alpha("white", 0.85)),
+
+    plot.title    = element_text(face = "bold", size = 16, hjust = 0, color = "white"),
+    plot.subtitle = element_text(size = 12, hjust = 0, color = scales::alpha("white", 0.78)),
+
+    legend.position = "right",
+    legend.background = element_rect(fill = NA, color = NA),
+    legend.key = element_rect(fill = NA, color = NA),
+    legend.title = element_text(face = "bold", color = "white"),
+    legend.text  = element_text(color = scales::alpha("white", 0.85))
+  )
+
+p
+
+```
+
+### Tipos de teñido por técnica
+
+Este gráfico profundiza mostrando la composición porcentual del teñido en las 20 técnicas textiles más frecuentes del Atlas.
+
+Cada barra horizontal normalizada al 100% permite comparar, entre técnicas, la importancia relativa de:
+
+- teñido con plantas,
+
+- teñido con sales y minerales,
+
+- teñido con insectos y animales,
+
+- otros métodos registrales.
+
+```{r tenido_tecnica, echo=FALSE, fig.width=12, fig.height=5}
+```{r tenido_por_tecnica_top, echo=FALSE, message=FALSE, warning=FALSE, fig.width=14, fig.height=9}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+library(stringr)
+
+# =========================
+# Estilo plataforma (oscuro)
+# =========================
+bg_plot  <- "#0b0d10"   # fondo muy oscuro
+bg_panel <- "#0f1317"   # panel oscuro
+grid_col <- "#242b33"   # grid sutil
+
+# --- Top técnicas más frecuentes (para el eje vertical) ---
+top_tecnicas_tenido <- datos %>%
+  filter(!is.na(Nombre_de_la_t_cnica_en_espa_ol)) %>%
+  count(Nombre_de_la_t_cnica_en_espa_ol, sort = TRUE) %>%
+  slice_head(n = 20) %>%
+  pull(Nombre_de_la_t_cnica_en_espa_ol)
+
+# --- Preparar datos de teñido por técnica (top 20) ---
+df_tenido <- datos %>%
+  filter(
+    !is.na(Nombre_de_la_t_cnica_en_espa_ol),
+    Nombre_de_la_t_cnica_en_espa_ol %in% top_tecnicas_tenido
+  ) %>%
+  select(
+    Tecnica = Nombre_de_la_t_cnica_en_espa_ol,
+    plantas  = `_Que_tipo_de_te_ido_se_utiliza/te_ido_con_plantas__ejem__muicle__peric_`,
+    sales    = `_Que_tipo_de_te_ido_se_utiliza/te_ido_con_sales_y_minerales__ejem__alum`,
+    insectos = `_Que_tipo_de_te_ido_se_utiliza/te_ido_con_con_insectos_y_animales__ejem`,
+    otro     = `_Que_tipo_de_te_ido_se_utiliza/otro`
+  ) %>%
+  pivot_longer(
+    cols = c(plantas, sales, insectos, otro),
+    names_to = "Tipo",
+    values_to = "Valor"
+  ) %>%
+  mutate(Valor = as.numeric(Valor)) %>%
+  group_by(Tecnica, Tipo) %>%
+  summarise(n = sum(Valor, na.rm = TRUE), .groups = "drop") %>%
+  group_by(Tecnica) %>%
+  mutate(
+    total_tec   = sum(n),
+    Porcentaje  = ifelse(total_tec > 0, 100 * n / total_tec, 0)
+  ) %>%
+  ungroup() %>%
+  filter(total_tec > 0)
+
+# --- Ordenar técnicas (más frecuentes arriba) ---
+orden_tec <- df_tenido %>%
+  group_by(Tecnica) %>%
+  summarise(total_tec = sum(n), .groups = "drop") %>%
+  arrange(desc(total_tec)) %>%
+  pull(Tecnica)
+
+# --- Etiquetas legibles y orden de leyenda ---
+df_tenido <- df_tenido %>%
+  mutate(
+    Tipo = recode(
+      Tipo,
+      "plantas"  = "Con plantas",
+      "sales"    = "Con sales y minerales",
+      "insectos" = "Con insectos y animales",
+      "otro"     = "Con otro"
+    ),
+    Tipo = factor(
+      Tipo,
+      levels = c(
+        "Con plantas",
+        "Con sales y minerales",
+        "Con insectos y animales",
+        "Con otro"
+      )
+    ),
+    Tecnica = factor(Tecnica, levels = orden_tec)
+  )
+
+# --- Paleta armónica (mantengo tu paleta) ---
+colores_tenido <- c(
+  "Con plantas"             = "#27AE60",
+  "Con sales y minerales"   = "#F1C40F",
+  "Con insectos y animales" = "#E67E22",
+  "Con otro"                = "#7F8C8D"
+)
+
+# --- Gráfica: barras horizontales apiladas al 100% ---
+p <- ggplot(df_tenido, aes(y = Tecnica, x = n, fill = Tipo)) +
+  geom_col(
+    position = "fill",
+    width = 0.72,
+    color = scales::alpha("white", 0.18),
+    linewidth = 0.3
+  ) +
+  scale_x_continuous(
+    labels = percent_format(scale = 1),
+    expand = expansion(mult = c(0, 0.02))
+  ) +
+  scale_fill_manual(values = colores_tenido) +
+  labs(
+    title = "Tipo de teñido por técnica",
+    subtitle = "Distribución porcentual (técnicas más frecuentes)",
+    x = "Porcentaje",
+    y = "Técnica",
+    fill = "Tipo de teñido"
+  ) +
+  theme_minimal(base_size = 14, base_family = "Sitka Text") +
+  theme(
+    # fondos
+    plot.background  = element_rect(fill = bg_plot,  color = NA),
+    panel.background = element_rect(fill = bg_panel, color = NA),
+
+    # grids (suaves)
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_line(color = grid_col, linewidth = 0.35),
+    panel.grid.major.y = element_blank(),
+
+    # textos (blanco)
+    plot.title    = element_text(face = "bold", size = 16, hjust = 0, color = "white"),
+    plot.subtitle = element_text(size = 12, hjust = 0, color = scales::alpha("white", 0.78)),
+    axis.title.x  = element_text(color = scales::alpha("white", 0.90)),
+    axis.title.y  = element_text(color = scales::alpha("white", 0.90)),
+    axis.text.x   = element_text(color = scales::alpha("white", 0.85)),
+    axis.text.y   = element_text(color = scales::alpha("white", 0.85)),
+
+    # leyenda (blanca, sin fondo)
+    legend.position   = "right",
+    legend.background = element_rect(fill = NA, color = NA),
+    legend.key        = element_rect(fill = NA, color = NA),
+    legend.title      = element_text(face = "bold", color = "white"),
+    legend.text       = element_text(color = scales::alpha("white", 0.85))
+  )
+
+p
+
+```
+
+## Transmisión
+
+### Aprendizaje
+Distribución de las fuentes de aprendizaje reportadas. Los porcentajes se calculan sobre el total de respuestas.
+
+```{r aprendizaje, echo=FALSE, fig.width=12, fig.height=5}
+library(dplyr)
+library(ggplot2)
+library(scales)
+
+# ===== Estilo oscuro (igual que plataforma) =====
+bg_plot  <- "#0b0d10"   # gris muy oscuro
+bg_panel <- "#0b0d10"
+grid_col <- scales::alpha("white", 0.10)
+txt_main <- "white"
+txt_muted <- scales::alpha("white", 0.80)
+
+# --- Datos y porcentajes ---
+aprendizaje_df <- data.frame(
+  Tipo = c("Madre o padre", "Abuelos", "Tíos", "Hermanos", "Cuñada", "Instructor", "Otra persona"),
+  Valor = c(
+    sum(datos$`_De_qui_n_aprendi_esta_t_cnica/madre`, na.rm = TRUE),
+    sum(datos$`_De_qui_n_aprendi_esta_t_cnica/abuela`, na.rm = TRUE),
+    sum(datos$`_De_qui_n_aprendi_esta_t_cnica/t_a`, na.rm = TRUE),
+    sum(datos$`_De_qui_n_aprendi_esta_t_cnica/hermana`, na.rm = TRUE),
+    sum(datos$`_De_qui_n_aprendi_esta_t_cnica/cu_ada`, na.rm = TRUE),
+    sum(datos$`_De_qui_n_aprendi_esta_t_cnica/de_una_maestra_o_instructora`, na.rm = TRUE),
+    sum(datos$`_De_qui_n_aprendi_esta_t_cnica/otra`, na.rm = TRUE)
+  )
+) %>%
+  mutate(Porcentaje = 100 * Valor / sum(Valor)) %>%
+  arrange(desc(Porcentaje)) %>%
+  mutate(Tipo = factor(Tipo, levels = rev(Tipo)))  # mayor arriba
+
+# --- Estilo coherente ---
+color_base <- "#883AA1"
+
+ggplot(aprendizaje_df, aes(x = Porcentaje, y = Tipo)) +
+  geom_col(fill = color_base, width = 0.62) +
+  geom_text(
+    aes(label = paste0(round(Porcentaje, 1), "%")),
+    hjust = -0.12,
+    size = 5,
+    family = "Sitka Text",
+    fontface = "bold",
+    color = txt_main
+  ) +
+  scale_x_continuous(
+    labels = label_percent(scale = 1),
+    expand  = expansion(mult = c(0, 0.18))
+  ) +
+  coord_cartesian(clip = "off") +
+  theme_minimal(base_size = 14, base_family = "Sitka Text") +
+  theme(
+    plot.background  = element_rect(fill = bg_plot,  color = NA),
+    panel.background = element_rect(fill = bg_panel, color = NA),
+
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(color = grid_col, linewidth = 0.35),
+
+    axis.title = element_blank(),
+    axis.text  = element_text(color = txt_muted),
+    axis.text.y = element_text(color = txt_muted),
+
+    plot.title    = element_text(face = "bold", size = 16, hjust = 0, color = txt_main),
+    plot.subtitle = element_text(size = 12, hjust = 0, color = scales::alpha("white", 0.78)),
+
+    legend.position = "none",
+    plot.margin = margin(10, 24, 10, 10)
+  ) +
+  labs(
+    title = "¿De quién aprendieron las técnicas?",
+    subtitle = "Ordenada de mayor a menor participación porcentual"
+  )
+
+```
+
+### Enseñanza
+
+Destinatarios a quienes se transmite la técnica. Los porcentajes se calculan sobre el total de respuestas.
+
+```{r ensenanza, echo=FALSE, fig.width=12, fig.height=5}
+# --- Datos y porcentajes ---
+
+ensenanza_df <- data.frame(
+  Tipo = c(
+    "No ha enseñado", "A hijas e hijos", "A nietas o nietos", "A sobrinos",
+    "A una pareja", "A estudiantes", "A otras personas"
+  ),
+  Valor = c(
+    sum(datos$`_A_quien_ha_ense_ado_este_t_cnica/no_la_he_ense_ado`, na.rm = TRUE),
+    sum(datos$`_A_quien_ha_ense_ado_este_t_cnica/s__a_mis_hijas_o_hijos`, na.rm = TRUE),
+    sum(datos$`_A_quien_ha_ense_ado_este_t_cnica/s__a_mis_nietas_o_nietos`, na.rm = TRUE),
+    sum(datos$`_A_quien_ha_ense_ado_este_t_cnica/s__a_mis_sobrinas_o_sobrinos`, na.rm = TRUE),
+    sum(datos$`_A_quien_ha_ense_ado_este_t_cnica/s__a_una_pareja`, na.rm = TRUE),
+    sum(datos$`_A_quien_ha_ense_ado_este_t_cnica/s__a_estudiantes`, na.rm = TRUE),
+    sum(datos$`_A_quien_ha_ense_ado_este_t_cnica/si__a_otra_persona`, na.rm = TRUE)
+  )
+) %>%
+  dplyr::mutate(Porcentaje = 100 * Valor / sum(Valor)) %>%
+  dplyr::arrange(dplyr::desc(Porcentaje)) %>%
+  dplyr::mutate(Tipo = factor(Tipo, levels = rev(Tipo)))  # arriba la mayor
+
+# --- Estilo "plataforma" (oscuro) ---
+color_base <- "#883AA1"
+bg_plot    <- "#0b0d10"                              # fondo general
+bg_panel   <- "#0b0d10"                              # panel (gris muy oscuro)
+grid_col   <- scales::alpha("white", 0.10)           # grid suave
+
+ggplot(ensenanza_df, aes(x = Porcentaje, y = Tipo)) +
+  geom_col(fill = color_base, width = 0.6) +
+  geom_text(
+    aes(label = paste0(round(Porcentaje, 1), "%")),
+    hjust = -0.15,
+    size = 5,
+    family = "Sitka Text",
+    fontface = "bold",
+    color = "white"
+  ) +
+  scale_x_continuous(
+    labels = scales::label_percent(scale = 1),
+    expand = ggplot2::expansion(mult = c(0, 0.18))
+  ) +
+  theme_minimal(base_size = 14, base_family = "Sitka Text") +
+  theme(
+    # fondos
+    plot.background  = element_rect(fill = bg_plot,  color = NA),
+    panel.background = element_rect(fill = bg_panel, color = NA),
+
+    # grid (muy discreto)
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(color = grid_col, linewidth = 0.35),
+
+    # ejes y textos (todo blanco)
+    axis.title = element_blank(),
+    axis.text  = element_text(color = scales::alpha("white", 0.88)),
+    axis.ticks = element_line(color = scales::alpha("white", 0.25)),
+
+    # títulos
+    plot.title    = element_text(face = "bold", size = 16, hjust = 0, color = "white"),
+    plot.subtitle = element_text(size = 12, hjust = 0, color = scales::alpha("white", 0.78)),
+
+    # sin leyenda
+    legend.position = "none"
+  ) +
+  labs(
+    title = "¿A quién han enseñado la técnica?",
+    subtitle = "Barras horizontales, ordenadas de mayor a menor participación porcentual"
+  )
+
+
+```
+
+### Cadena de transmisión de saberes
+
+Flujos entre fuente de aprendizaje → género → a quién se enseña. El ancho de cada flujo representa el número de personas únicas (se muestran los 10 géneros más frecuentes).
+
+```{r transmision, echo=FALSE, fig.width=20, fig.height=12}
+library(dplyr)
+library(ggplot2)
+library(ggalluvial)
+library(stringr)
+library(scales)
+
+# ====== Estilo plataforma (oscuro) ======
+bg_plot  <- "#0b0d10"                 # fondo muy oscuro
+bg_panel <- "#0b0d10"
+grid_col <- scales::alpha("white", 0.08)
+txt_main <- "white"
+txt_muted <- scales::alpha("white", 0.78)
+
+# --- Alias para ejes ---
+alias_aprendizaje <- c(
+  "de_una_maestra_o_instructura" = "Instructor",
+  "hermana" = "Hermana",
+  "madre"   = "Madre",
+  "t_a"     = "Tía",
+  "abuela"  = "Abuela"
+)
+alias_ensenanza <- c(
+  "no_la_he_ense_ado"               = "No he enseñado",
+  "s__a_estudiantes"                = "Estudiantes",
+  "s__a_mis_hijas_o_hijos"          = "Hijas o hijos",
+  "s__a_mis_sobrinas_o_sobrinos"    = "Sobrinas o sobrinos",
+  "s__a_otra_persona"               = "Otro"
+)
+
+# --- Ejes (palabras clave de extracción) ---
+aprendizaje_words <- names(alias_aprendizaje)
+ensenanza_words   <- names(alias_ensenanza)
+
+# --- Elegir hasta 10 categorías de género más frecuentes ---
+genero_top <- datos %>%
+  filter(!is.na(G_nero_de_la_persona_entrevistada)) %>%
+  count(G_nero_de_la_persona_entrevistada, sort = TRUE) %>%
+  slice_head(n = 10) %>%
+  pull(G_nero_de_la_persona_entrevistada)
+
+# --- Dataset para el aluvial (conteo por persona única) ---
+df_aluvial <- datos %>%
+  mutate(
+    Aprendizaje = str_extract(
+      tolower(`_De_qui_n_aprendi_esta_t_cnica`),
+      paste(aprendizaje_words, collapse = "|")
+    ),
+    Aprendizaje = recode(Aprendizaje, !!!alias_aprendizaje),
+
+    Persona = G_nero_de_la_persona_entrevistada,
+    Nombre  = Nombre_de_la_persona_entrevistada,
+
+    Ensenanza = str_extract(
+      tolower(`_A_quien_ha_ense_ado_este_t_cnica`),
+      paste(ensenanza_words, collapse = "|")
+    ),
+    Ensenanza = recode(Ensenanza, !!!alias_ensenanza)
+  ) %>%
+  filter(!is.na(Aprendizaje), !is.na(Ensenanza), Persona %in% genero_top) %>%
+  group_by(Aprendizaje, Persona, Ensenanza) %>%
+  summarise(valor = n_distinct(Nombre), .groups = "drop")
+
+# --- Ordenar factores por tamaño ---
+ord_apr <- df_aluvial %>% count(Aprendizaje, wt = valor, sort = TRUE) %>% pull(Aprendizaje)
+ord_gen <- df_aluvial %>% count(Persona,     wt = valor, sort = TRUE) %>% pull(Persona)
+ord_ens <- df_aluvial %>% count(Ensenanza,   wt = valor, sort = TRUE) %>% pull(Ensenanza)
+
+df_aluvial <- df_aluvial %>%
+  mutate(
+    Aprendizaje = factor(Aprendizaje, levels = ord_apr),
+    Persona     = factor(Persona,     levels = ord_gen),
+    Ensenanza   = factor(Ensenanza,   levels = ord_ens)
+  )
+
+# --- Paleta morada coherente (mapea a niveles) ---
+n_apr <- nlevels(df_aluvial$Aprendizaje)
+pal_morado <- colorRampPalette(c("#EBD9F4", "#883AA1"))(max(n_apr, 2))
+pal_morado <- setNames(pal_morado, levels(df_aluvial$Aprendizaje))
+
+# --- Gráfico (estilo oscuro) ---
+ggplot(df_aluvial,
+       aes(axis1 = Aprendizaje, axis2 = Persona, axis3 = Ensenanza, y = valor)) +
+  geom_alluvium(
+    aes(fill = Aprendizaje),
+    width = 0.25,
+    alpha = 0.85,
+    color = NA
+  ) +
+  geom_stratum(
+    width = 0.25,
+    fill  = scales::alpha("#12161b", 0.08),
+    color = scales::alpha("white", 0.18)
+  ) +
+  geom_text(
+    stat  = "stratum",
+    aes(label = stringr::str_wrap(after_stat(stratum), 18)),
+    family = "Sitka Text",
+    size = 6,
+    fontface = "bold",
+    color = txt_main
+  ) +
+  scale_fill_manual(values = pal_morado) +
+  scale_x_discrete(labels = c("Aprendizaje", "Género", "Enseñanza")) +
+  theme_minimal(base_size = 16, base_family = "Sitka Text") +
+  theme(
+    plot.background  = element_rect(fill = bg_plot,  color = NA),
+    panel.background = element_rect(fill = bg_panel, color = NA),
+    panel.grid       = element_blank(),
+
+    axis.title       = element_blank(),
+    axis.text.y      = element_blank(),
+    axis.ticks       = element_blank(),
+    axis.text.x      = element_text(face = "bold", color = txt_main, size = 14),
+
+    legend.position  = "none",
+
+    plot.title       = element_text(face = "bold", size = 20, color = txt_main),
+    plot.subtitle    = element_text(size = 14, color = txt_muted),
+
+    plot.margin      = margin(10, 10, 10, 10)
+  ) +
+  labs(
+    title = "Relación entre aprendizaje, género y enseñanza",
+    subtitle = "Diagrama aluvial (personas únicas), mostrando los flujos más frecuentes"
+  )
+```
+
+### Transmisión de saberes por género
+
+La siguiente visualización muestra cómo las personas participantes transmiten sus saberes según su género. Las barras horizontales representan el 100% de las respuestas dentro de cada categoría de género, y los colores indican los distintos grupos a quienes han enseñado la técnica: hijas, hijos, nietos, estudiantes, pareja, entre otros.
+
+```{r transmisionxgenero, echo=FALSE, fig.width=12, fig.height=5}
+# --- Preparar datos con nombres legibles ---
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+
+# Colores base del estilo (ajusta si ya los tienes globales en tu Rmd)
+bg_plot  <- "#0b0d10"                 # gris muy oscuro
+bg_panel <- "#0b0d10"                 # panel ligeramente distinto
+grid_col <- scales::alpha("white", 0.10)
+
+ensenanza_genero <- datos %>%
+  filter(!is.na(G_nero_de_la_persona_entrevistada)) %>%
+  select(
+    Genero = G_nero_de_la_persona_entrevistada,
+    no_enseñado     = `_A_quien_ha_ense_ado_este_t_cnica/no_la_he_ense_ado`,
+    hijas           = `_A_quien_ha_ense_ado_este_t_cnica/s__a_mis_hijas_o_hijos`,
+    hijos           = `_A_quien_ha_ense_ado_este_t_cnica/a_hijos`,
+    nietos          = `_A_quien_ha_ense_ado_este_t_cnica/s__a_mis_nietas_o_nietos`,
+    sobrinos        = `_A_quien_ha_ense_ado_este_t_cnica/s__a_mis_sobrinas_o_sobrinos`,
+    pareja          = `_A_quien_ha_ense_ado_este_t_cnica/s__a_una_pareja`,
+    estudiantes     = `_A_quien_ha_ense_ado_este_t_cnica/s__a_estudiantes`,
+    otra_persona    = `_A_quien_ha_ense_ado_este_t_cnica/si__a_otra_persona`
+  ) %>%
+  pivot_longer(
+    cols = -Genero,
+    names_to = "Tipo",
+    values_to = "Valor"
+  ) %>%
+  mutate(
+    Valor = as.numeric(Valor),
+    Tipo = recode(
+      Tipo,
+      "no_enseñado"  = "No ha enseñado",
+      "hijas"        = "He enseñado a mis hijas",
+      "hijos"        = "He enseñado a mis hijos",
+      "nietos"       = "He enseñado a mis nietos",
+      "sobrinos"     = "He enseñado a mis sobrinos",
+      "pareja"       = "He enseñado a mi pareja",
+      "estudiantes"  = "He enseñado a estudiantes",
+      "otra_persona" = "He enseñado a otra persona"
+    )
+  ) %>%
+  group_by(Genero, Tipo) %>%
+  summarise(n = sum(Valor, na.rm = TRUE), .groups = "drop") %>%
+  group_by(Genero) %>%
+  mutate(
+    total_genero = sum(n),
+    Porcentaje = ifelse(total_genero > 0, 100 * n / total_genero, 0)
+  ) %>%
+  ungroup()
+
+# --- Mantener el orden de leyenda solicitado ---
+
+orden_ensenanza <- c(
+  "No ha enseñado",
+  "He enseñado a mis hijas",
+  "He enseñado a mis hijos",
+  "He enseñado a mis nietos",
+  "He enseñado a mis sobrinos",
+  "He enseñado a mi pareja",
+  "He enseñado a estudiantes",
+  "He enseñado a otra persona"
+)
+
+ensenanza_genero <- ensenanza_genero %>%
+  mutate(Tipo = factor(Tipo, levels = orden_ensenanza))
+
+# --- Paleta de colores armonizada (8 tonos) ---
+
+colores_ensenanza <- c(
+  "No ha enseñado"             = "#7F8C8D",
+  "He enseñado a mis hijas"    = "#9B59B6",
+  "He enseñado a mis hijos"    = "#2980B9",
+  "He enseñado a mis nietos"   = "#27AE60",
+  "He enseñado a mis sobrinos" = "#F1C40F",
+  "He enseñado a mi pareja"    = "#E67E22",
+  "He enseñado a estudiantes"  = "#E74C3C",
+  "He enseñado a otra persona" = "#16A085"
+)
+
+# --- Gráfica final (estilo oscuro plataforma) ---
+
+ggplot(ensenanza_genero, aes(y = Genero, x = n, fill = Tipo)) +
+  geom_col(
+    position = "fill",
+    width = 0.7,
+    color = scales::alpha("white", 0.18)
+  ) +
+  scale_x_continuous(
+    labels = scales::percent_format(scale = 1),
+    expand = expansion(mult = c(0, 0.02))
+  ) +
+  scale_fill_manual(values = colores_ensenanza) +
+  labs(
+    title = "Distribución de enseñanza por género",
+    subtitle = "Barras horizontales apiladas al 100%",
+    x = "Porcentaje",
+    y = "Género",
+    fill = "Tipo de enseñanza"
+  ) +
+  theme_minimal(base_size = 14, base_family = "Sitka Text") +
+  theme(
+    # fondos
+    plot.background  = element_rect(fill = bg_plot,  color = NA),
+    panel.background = element_rect(fill = bg_panel, color = NA),
+
+    # rejilla (suave)
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_line(color = grid_col, linewidth = 0.35),
+    panel.grid.major.y = element_blank(),
+
+    # textos en blanco
+    plot.title    = element_text(face = "bold", size = 16, hjust = 0, color = "white"),
+    plot.subtitle = element_text(size = 12, hjust = 0, color = scales::alpha("white", 0.78)),
+    axis.title    = element_text(color = scales::alpha("white", 0.90)),
+    axis.text     = element_text(color = scales::alpha("white", 0.85)),
+
+    # leyenda
+    legend.position = "right",
+    legend.background = element_rect(fill = NA, color = NA),
+    legend.key        = element_rect(fill = NA, color = NA),
+    legend.title      = element_text(face = "bold", color = "white"),
+    legend.text       = element_text(color = scales::alpha("white", 0.85))
+  )
+
+```
+
+## Prendas
+
+### Productos más frecuentes
+
+La información recopilada en los registros permite identificar una amplia diversidad de prendas producidas mediante las técnicas textiles documentadas. A partir del análisis de los términos mencionados por las artesanas y artesanos se estimó el número aproximado de productos distintos elaborados en las comunidades participantes.
+
+Se registraron aproximadamente **240 productos** distintos como parte del ejercicio.
+
+Top de productos mencionados; el tamaño del recuadro refleja su frecuencia y la etiqueta muestra el porcentaje.
+
+```{r productos, echo=FALSE, fig.width=12, fig.height=5}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(treemapify)
+library(stringr)
+library(tidytext)
+library(stopwords)
+library(SnowballC)
+library(scales)
+
+# ====== Estilo plataforma (si ya existen estas vars en tu Rmd, puedes borrar estas líneas) ======
+bg_plot  <- "#0b0d10"   # fondo muy oscuro
+bg_panel <- "#0b0d10"   # panel oscuro (ligeramente distinto)
+txt_main <- "white"
+txt_muted <- scales::alpha("white", 0.78)
+
+# --- Función interna ---
+contar_palabras <- function(df, columnas) {
+  df %>%
+    select(any_of(columnas)) %>%
+    pivot_longer(everything(), values_to = "texto") %>%
+    filter(!is.na(texto), texto != "") %>%
+    unnest_tokens(palabra, texto) %>%
+    mutate(palabra = str_squish(str_to_lower(palabra))) %>%
+    filter(
+      palabra != "",
+      !palabra %in% stopwords("es")
+    ) %>%
+    # Unificar singular/plural y variantes con stemming en español
+    mutate(stem = SnowballC::wordStem(palabra, language = "spanish")) %>%
+    group_by(stem) %>%
+    summarise(
+      n = n(),
+      palabra = dplyr::first(palabra),  # forma representativa para etiqueta (término)
+      .groups = "drop"
+    ) %>%
+    mutate(porcentaje = n / sum(n) * 100) %>%
+    arrange(desc(porcentaje)) %>%
+    head(15)
+}
+
+# --- Columnas de productos ---
+cols_prod <- c(
+  "group_sw8gp62_fila_1_prenda", "group_sw8gp62_fila_8_prenda", "group_sw8gp62_fila_2_prenda",
+  "group_sw8gp62_fila_4_prenda", "group_sw8gp62_fila_prenda",  "group_sw8gp62_fila_9_prenda",
+  "group_sw8gp62_fila_3_prenda", "group_sw8gp62_fila_5_prenda", "group_sw8gp62_fila_7_prenda",
+  "group_sw8gp62_fila_6_prenda"
+)
+
+prod_df <- contar_palabras(datos, cols_prod)
+
+# --- Paleta morada (claro → oscuro) ---
+color_base  <- "#883AA1"
+color_claro <- "#F1E6F8"
+pal <- colorRampPalette(c(color_claro, color_base))(max(nrow(prod_df), 2))
+
+prod_df <- prod_df %>%
+  mutate(
+    fill_color = pal[rank(-porcentaje, ties.method = "first")],
+    # Etiqueta centrada en el TÉRMINO (no en el número)
+    etiqueta = paste0(palabra, "\n", round(porcentaje, 1), "%")
+  )
+
+# --- Contraste automático de texto (pero usando blanco también en claros) ---
+hex_to_rgb <- function(h) {
+  h <- gsub("#", "", h)
+  c(
+    strtoi(substr(h, 1, 2), 16),
+    strtoi(substr(h, 3, 4), 16),
+    strtoi(substr(h, 5, 6), 16)
+  ) / 255
+}
+luminancia <- function(h) {
+  rgb <- hex_to_rgb(h)
+  adj <- ifelse(rgb <= 0.03928, rgb / 12.92, ((rgb + 0.055) / 1.055)^2.4)
+  0.2126 * adj[1] + 0.7152 * adj[2] + 0.0722 * adj[3]
+}
+
+prod_df <- prod_df %>%
+  rowwise() %>%
+  mutate(
+    # Si es muy claro, usa blanco semitransparente (en vez de gris/negro) para mantener coherencia del tema oscuro
+    text_color = ifelse(luminancia(fill_color) < 0.55, "white", scales::alpha("white", 0.88))
+  ) %>%
+  ungroup()
+
+# --- Treemap ---
+ggplot(prod_df, aes(area = porcentaje, fill = fill_color, label = etiqueta)) +
+  geom_treemap(color = scales::alpha("white", 0.30), lwd = 1) +
+  geom_treemap_text(
+    aes(colour = text_color),
+    place = "centre",
+    grow = TRUE,
+    reflow = TRUE,
+    fontface = "bold",
+    size = 12,
+    family = "Sitka Text"
+  ) +
+  scale_fill_identity() +
+  scale_colour_identity() +
+  theme_void(base_size = 14) +
+  theme(
+    plot.background  = element_rect(fill = bg_plot,  color = NA),
+    panel.background = element_rect(fill = bg_panel, color = NA),
+    legend.position  = "none",
+    plot.title       = element_text(face = "bold", size = 16, color = txt_main, family = "Sitka Text"),
+    plot.subtitle    = element_text(size = 12, color = txt_muted, family = "Sitka Text")
+  ) +
+  labs(
+    title = "Prendas / productos más mencionados",
+    subtitle = "Frecuencia de términos (se unifican variantes con stemming en español)"
+  )
+```
+
+
+```{r man_prenda_cerem, echo=FALSE, fig.width=14, fig.height=12}
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+library(stringr)
+
+# --- Columnas de prendas ceremoniales ---
+cols_prenda_cerem <- c(
+  "group_sw8gp62_fila_1_prenda", "group_sw8gp62_fila_8_prenda", "group_sw8gp62_fila_2_prenda",
+  "group_sw8gp62_fila_4_prenda", "group_sw8gp62_fila_prenda",  "group_sw8gp62_fila_9_prenda",
+  "group_sw8gp62_fila_3_prenda", "group_sw8gp62_fila_5_prenda", "group_sw8gp62_fila_7_prenda",
+  "group_sw8gp62_fila_6_prenda"
+)
+
+# --- Estilo plataforma (oscuro) ---
+bg_plot  <- "#0b0d10"
+bg_panel <- "#0b0d10"
+grid_col <- scales::alpha("white", 0.08)
+txt_main <- "white"
+txt_sub  <- scales::alpha("white", 0.78)
+txt_axis <- scales::alpha("white", 0.85)
+
+# --- Datos base: prenda ceremonial + tipos de manufactura ---
+df <- datos %>%
+  select(
+    dplyr::all_of(cols_prenda_cerem),
+    a_mano        = `Manufactura_de_la_t_cnica/se_realiza_a_mano`,
+    maquina       = `Manufactura_de_la_t_cnica/se_realiza_a_m_quina_de_pedal`,
+    tejido_mano   = `Manufactura_de_la_t_cnica/se_realiza_con_tejido_a_mano`,
+    telar_cintura = `Manufactura_de_la_t_cnica/otra`,
+    telar_pedal   = `Manufactura_de_la_t_cnica/se_realiza_con_telar_de_pedal`,
+    mixta         = `Manufactura_de_la_t_cnica/es_una_t_cnica_mixta`,
+    otra          = `Manufactura_de_la_t_cnica/otra_1`
+  ) %>%
+  pivot_longer(
+    cols = dplyr::all_of(cols_prenda_cerem),
+    names_to = "col_prenda",
+    values_to = "Prenda"
+  ) %>%
+  filter(!is.na(Prenda), Prenda != "") %>%
+  mutate(Prenda = str_squish(Prenda)) %>%
+  pivot_longer(
+    cols = c(a_mano, maquina, tejido_mano, telar_cintura, telar_pedal, mixta, otra),
+    names_to = "Tipo",
+    values_to = "Valor"
+  ) %>%
+  group_by(Prenda, Tipo) %>%
+  summarise(Total = sum(as.numeric(Valor), na.rm = TRUE), .groups = "drop") %>%
+  group_by(Prenda) %>%
+  mutate(
+    Total_prenda = sum(Total, na.rm = TRUE),
+    Porcentaje   = ifelse(Total_prenda > 0, 100 * Total / Total_prenda, 0)
+  ) %>%
+  ungroup()
+
+# Etiquetas legibles para tipo de manufactura
+df$Tipo <- recode(
+  df$Tipo,
+  "a_mano"        = "A mano",
+  "maquina"       = "Máquina",
+  "tejido_mano"   = "Tejido a mano",
+  "telar_cintura" = "Telar de cintura",
+  "telar_pedal"   = "Telar de pedal",
+  "mixta"         = "Mixta",
+  "otra"          = "Otra"
+)
+
+# --- Ordenar y quedarnos solo con las 20 prendas más frecuentes ---
+orden_prendas_tbl <- df %>%
+  distinct(Prenda, Total_prenda) %>%
+  arrange(desc(Total_prenda)) %>%
+  slice_head(n = 20)
+
+orden_prendas <- orden_prendas_tbl$Prenda
+
+df <- df %>%
+  filter(Prenda %in% orden_prendas) %>%
+  mutate(Prenda = factor(Prenda, levels = orden_prendas))
+
+# --- Paleta (tu misma, funciona bien sobre fondo oscuro) ---
+colores_manufactura <- c(
+  "A mano"           = "#883AA1",
+  "Máquina"          = "#A46BBF",
+  "Tejido a mano"    = "#C49FD9",
+  "Telar de cintura" = "#E0C6ED",
+  "Telar de pedal"   = "#F1E6F8",
+  "Mixta"            = "#F5D6F8",
+  "Otra"             = "#FBEFFC"
+)
+
+# --- Gráfico (oscuro + texto blanco) ---
+ggplot(df, aes(x = Prenda, y = Porcentaje, fill = Tipo)) +
+  geom_col(
+    position = "fill",
+    width = 0.7,
+    color = scales::alpha("white", 0.18)
+  ) +
+  scale_fill_manual(values = colores_manufactura) +
+  scale_y_continuous(labels = percent_format(scale = 1)) +
+  coord_flip() +
+  labs(
+    title = "Distribución de los tipos de manufactura por prenda",
+    subtitle = "Barras apiladas proporcionales (top 20 prendas)",
+    x = "Prenda",
+    y = "Porcentaje",
+    fill = "Tipo de manufactura"
+  ) +
+  theme_minimal(base_size = 14, base_family = "Sitka Text") +
+  theme(
+    plot.background  = element_rect(fill = bg_plot,  color = NA),
+    panel.background = element_rect(fill = bg_panel, color = NA),
+
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_line(color = grid_col, linewidth = 0.35),
+    panel.grid.major.y = element_blank(),
+
+    axis.title.x = element_text(color = scales::alpha("white", 0.90)),
+    axis.title.y = element_text(color = scales::alpha("white", 0.90)),
+    axis.text.x  = element_text(color = txt_axis),
+    axis.text.y  = element_text(color = txt_axis),
+
+    plot.title    = element_text(face = "bold", size = 16, hjust = 0, color = txt_main),
+    plot.subtitle = element_text(size = 12, hjust = 0, color = txt_sub),
+
+    legend.position = "bottom",
+    legend.background = element_rect(fill = NA, color = NA),
+    legend.key = element_rect(fill = NA, color = NA),
+    legend.title = element_text(face = "bold", color = txt_main),
+    legend.text  = element_text(color = txt_axis)
+  )
+
+```
+
+## Ceremonias
+
+### Ceremonias asociadas a las técnicas
+
+El diagrama aluvial muestra las conexiones más frecuentes entre los términos mencionados por las personas artesanas al describir ceremonias y las prendas que se utilizan en ellas. Los flujos ilustran cómo ciertos conceptos ceremoniales se vinculan recurrentemente con tipos específicos de indumentaria, permitiendo identificar patrones de uso, simbolismos compartidos y asociaciones tradicionales presentes en las prácticas textiles.
+
+```{r ceremonias, echo=FALSE, fig.width=12, fig.height=10}
+# ---- Alluvial: Ceremonias vs Prendas ceremoniales (estilo plataforma) ----
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+library(ggalluvial)
+library(tidytext)
+library(stopwords)
+library(SnowballC)
+library(scales)
+
+# ====== Estilo plataforma (reutilizable) ======
+bg_plot  <- "#0b0d10"                  # fondo general (gris muy oscuro)
+bg_panel <- "#0b0d10"                  # fondo panel
+grid_col <- scales::alpha("white", 0.08)
+
+# Parejas de columnas: ceremonia vs prenda ceremonial
+pares_cols <- tibble::tribble(
+  ~col_cere,                     ~col_prenda,
+  "group_ap2kl04_fila_11_cere",  "group_ap2kl04_fila_11_prenda_cerem",
+  "group_ap2kl04_fila_5_cere",   "group_ap2kl04_fila_5_prenda_cerem",
+  "group_ap2kl04_fila_9_cere",   "group_ap2kl04_fila_9_prenda_cerem",
+  "group_ap2kl04_fila_7_cere",   "group_ap2kl04_fila_7_prenda_cerem",
+  "group_ap2kl04_fila_1_cere",   "group_ap2kl04_fila_1_prenda_cerem",
+  "group_ap2kl04_fila_2_cere",   "group_ap2kl04_fila_2_prenda_cerem",
+  "group_ap2kl04_fila_cere",     "group_ap2kl04_fila_prenda_cerem",
+  "group_ap2kl04_fila_10_cere",  "group_ap2kl04_fila_10_prenda_cerem"
+) %>% dplyr::mutate(pair_id = dplyr::row_number())
+
+# Identificador de fila para cruzar términos dentro del mismo registro
+datos_long_cere <- datos %>%
+  mutate(id = row_number()) %>%
+  select(id, all_of(pares_cols$col_cere)) %>%
+  pivot_longer(cols = -id, names_to = "col_cere", values_to = "texto_cere") %>%
+  left_join(pares_cols, by = "col_cere")
+
+datos_long_prenda <- datos %>%
+  mutate(id = row_number()) %>%
+  select(id, all_of(pares_cols$col_prenda)) %>%
+  pivot_longer(cols = -id, names_to = "col_prenda", values_to = "texto_prenda") %>%
+  left_join(pares_cols, by = "col_prenda")
+
+# Stopwords y conectores extra a eliminar
+stop_es <- stopwords::stopwords("es")
+conectores_extra <- c("y","e","o","u","de","del","la","el","los","las","al","a","en","con","para","por")
+stop_total <- unique(c(stop_es, conectores_extra))
+
+# Tokenizar ceremonias
+tokens_cere <- datos_long_cere %>%
+  filter(!is.na(texto_cere), texto_cere != "") %>%
+  tidytext::unnest_tokens(palabra_cere, texto_cere) %>%
+  mutate(palabra_cere = str_squish(str_to_lower(palabra_cere))) %>%
+  filter(palabra_cere != "", !palabra_cere %in% stop_total) %>%
+  mutate(stem_cere = SnowballC::wordStem(palabra_cere, language = "spanish")) %>%
+  select(id, pair_id, stem_cere, palabra_cere)
+
+# Tokenizar prendas
+tokens_prenda <- datos_long_prenda %>%
+  filter(!is.na(texto_prenda), texto_prenda != "") %>%
+  tidytext::unnest_tokens(palabra_prenda, texto_prenda) %>%
+  mutate(palabra_prenda = str_squish(str_to_lower(palabra_prenda))) %>%
+  filter(palabra_prenda != "", !palabra_prenda %in% stop_total) %>%
+  mutate(stem_prenda = SnowballC::wordStem(palabra_prenda, language = "spanish")) %>%
+  select(id, pair_id, stem_prenda, palabra_prenda)
+
+# Parejas de términos (co-ocurrencia por registro y por par de columnas)
+pares_terminos <- tokens_cere %>%
+  inner_join(tokens_prenda, by = c("id", "pair_id")) %>%
+  group_by(stem_cere, stem_prenda) %>%
+  summarise(
+    n = n(),
+    etiqueta_cere   = first(palabra_cere),
+    etiqueta_prenda = first(palabra_prenda),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(n)) %>%
+  slice_head(n = 40)
+
+alluvial_df <- pares_terminos %>%
+  transmute(
+    termino_ceremonia = etiqueta_cere,
+    termino_prenda    = etiqueta_prenda,
+    frecuencia        = n
+  )
+
+# (Opcional) para mejorar legibilidad: ordenar factores por frecuencia
+ord_cer <- alluvial_df %>%
+  group_by(termino_ceremonia) %>% summarise(t = sum(frecuencia), .groups="drop") %>%
+  arrange(desc(t)) %>% pull(termino_ceremonia)
+
+ord_pre <- alluvial_df %>%
+  group_by(termino_prenda) %>% summarise(t = sum(frecuencia), .groups="drop") %>%
+  arrange(desc(t)) %>% pull(termino_prenda)
+
+alluvial_df <- alluvial_df %>%
+  mutate(
+    termino_ceremonia = factor(termino_ceremonia, levels = ord_cer),
+    termino_prenda    = factor(termino_prenda,    levels = ord_pre)
+  )
+
+ggplot(
+  alluvial_df,
+  aes(axis1 = termino_ceremonia, axis2 = termino_prenda, y = frecuencia)
+) +
+  ggalluvial::geom_alluvium(
+    aes(fill = termino_ceremonia),
+    width = 1/12,
+    alpha = 0.80,
+    color = NA
+  ) +
+  ggalluvial::geom_stratum(
+    width = 1/6,
+    fill  = scales::alpha("#12161b", 0.10),
+    color = scales::alpha("white", 0.22)
+  ) +
+  geom_text(
+    stat = "stratum",
+    aes(label = stringr::str_wrap(after_stat(stratum), 18)),
+    size = 3.6,
+    family = "Sitka Text",
+    fontface = "bold",
+    color = "white"
+  ) +
+  scale_x_discrete(
+    limits = c("Ceremonias", "Prendas ceremoniales"),
+    expand = c(.12, .12)
+  ) +
+  theme_minimal(base_size = 14, base_family = "Sitka Text") +
+  theme(
+    plot.background  = element_rect(fill = bg_plot,  color = NA),
+    panel.background = element_rect(fill = bg_panel, color = NA),
+
+    panel.grid       = element_blank(),
+    axis.title       = element_blank(),
+    axis.text.y      = element_blank(),
+    axis.ticks       = element_blank(),
+
+    axis.text.x      = element_text(face = "bold", color = "white", size = 12),
+    legend.position  = "none",
+
+    plot.title       = element_text(face = "bold", size = 16, color = "white"),
+    plot.subtitle    = element_text(size = 12, color = scales::alpha("white", 0.78))
+  ) +
+  ggtitle(
+    "Relación entre tipos de ceremonias y prendas ceremoniales",
+    "Cada flujo muestra cuántas veces coaparecen los términos en los registros"
+  )
+
+```
+
+```{r tec_prenda_cerem, echo=FALSE, fig.width=14, fig.height=12}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+library(stringr)
+
+# === Colores/estilo plataforma (oscuro) ===
+bg_plot  <- "#0b0d10"                 # gris muy oscuro
+bg_panel <- "#0b0d10"
+grid_col <- scales::alpha("white", 0.10)
+
+# --- Columnas de prendas ceremoniales ---
+cols_prenda_cerem <- c(
+  "group_ap2kl04_fila_11_prenda_cerem",
+  "group_ap2kl04_fila_5_prenda_cerem",
+  "group_ap2kl04_fila_9_prenda_cerem",
+  "group_ap2kl04_fila_7_prenda_cerem",
+  "group_ap2kl04_fila_1_prenda_cerem",
+  "group_ap2kl04_fila_2_prenda_cerem",
+  "group_ap2kl04_fila_prenda_cerem",
+  "group_ap2kl04_fila_10_prenda_cerem"
+)
+
+# --- Datos base: prenda ceremonial + técnica ---
+df <- datos %>%
+  dplyr::select(
+    dplyr::all_of(cols_prenda_cerem),
+    Tecnica = `Nombre_de_la_t_cnica_en_espa_ol`
+  ) %>%
+  tidyr::pivot_longer(
+    cols = dplyr::all_of(cols_prenda_cerem),
+    names_to = "col_prenda",
+    values_to = "Prenda"
+  ) %>%
+  dplyr::filter(
+    !is.na(Prenda), Prenda != "",
+    !is.na(Tecnica), Tecnica != ""
+  ) %>%
+  dplyr::mutate(
+    Prenda  = stringr::str_squish(Prenda),
+    Tecnica = stringr::str_squish(Tecnica)
+  ) %>%
+  dplyr::group_by(Prenda, Tecnica) %>%
+  dplyr::summarise(Total = dplyr::n(), .groups = "drop") %>%
+  dplyr::group_by(Prenda) %>%
+  dplyr::mutate(Total_prenda = sum(Total, na.rm = TRUE)) %>%
+  dplyr::ungroup()
+
+# --- 1) Top 20 prendas por número de registros ---
+orden_prendas_tbl <- df %>%
+  dplyr::distinct(Prenda, Total_prenda) %>%
+  dplyr::arrange(dplyr::desc(Total_prenda)) %>%
+  dplyr::slice_head(n = 20)
+
+orden_prendas <- orden_prendas_tbl$Prenda
+df <- df %>% dplyr::filter(Prenda %in% orden_prendas)
+
+# --- 2) Top 10 técnicas dentro de esas prendas ---
+top_tecnicas <- df %>%
+  dplyr::group_by(Tecnica) %>%
+  dplyr::summarise(Total_tec = sum(Total), .groups = "drop") %>%
+  dplyr::arrange(dplyr::desc(Total_tec)) %>%
+  dplyr::slice_head(n = 10) %>%
+  dplyr::pull(Tecnica)
+
+df <- df %>%
+  dplyr::filter(Tecnica %in% top_tecnicas) %>%
+  dplyr::group_by(Prenda) %>%
+  dplyr::mutate(
+    Total_prenda_filtrada = sum(Total, na.rm = TRUE),
+    Porcentaje = dplyr::if_else(
+      Total_prenda_filtrada > 0,
+      100 * Total / Total_prenda_filtrada,
+      0
+    )
+  ) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(
+    Prenda  = factor(Prenda, levels = orden_prendas),
+    Tecnica = factor(Tecnica, levels = top_tecnicas)
+  )
+
+# --- Paleta de 10 colores variados para técnicas ---
+tecnicas <- levels(df$Tecnica)
+colores_tecnicas <- c(
+  "#883AA1", "#E4572E", "#4E79A7", "#59A14F", "#F28E2B",
+  "#EDC948", "#B07AA1", "#76B7B2", "#FF9DA7", "#9C755F"
+)
+colores_tecnicas <- setNames(colores_tecnicas[seq_along(tecnicas)], tecnicas)
+
+# --- Gráfico (estilo oscuro) ---
+ggplot(df, aes(x = Prenda, y = Porcentaje, fill = Tecnica)) +
+  geom_col(
+    position = "fill",
+    width = 0.7,
+    color = scales::alpha("white", 0.18)
+  ) +
+  scale_fill_manual(values = colores_tecnicas, name = "Técnica") +
+  scale_y_continuous(labels = percent_format(scale = 1)) +
+  coord_flip() +
+  labs(
+    title = "Distribución de las 10 técnicas más frecuentes por prenda ceremonial",
+    subtitle = "20 prendas con mayor número de registros (barras apiladas proporcionales)",
+    x = "Prenda ceremonial",
+    y = "Porcentaje"
+  ) +
+  theme_minimal(base_size = 14, base_family = "Sitka Text") +
+  theme(
+    plot.background  = element_rect(fill = bg_plot,  color = NA),
+    panel.background = element_rect(fill = bg_panel, color = NA),
+
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_line(color = grid_col, linewidth = 0.35),
+    panel.grid.major.y = element_blank(),
+
+    axis.text.x  = element_text(color = scales::alpha("white", 0.85)),
+    axis.text.y  = element_text(color = scales::alpha("white", 0.85)),
+    axis.title.x = element_text(color = scales::alpha("white", 0.90)),
+    axis.title.y = element_text(color = scales::alpha("white", 0.90)),
+
+    plot.title    = element_text(face = "bold", size = 16, hjust = 0, color = "white"),
+    plot.subtitle = element_text(size = 12, hjust = 0, color = scales::alpha("white", 0.78)),
+
+    legend.position   = "bottom",
+    legend.background = element_rect(fill = NA, color = NA),
+    legend.key        = element_rect(fill = NA, color = NA),
+    legend.title      = element_text(face = "bold", color = "white"),
+    legend.text       = element_text(color = scales::alpha("white", 0.85))
+  )
+```

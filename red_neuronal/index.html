@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Red de técnicas | Atlas de Técnicas Textiles</title>
+  <link rel="stylesheet" href="./styles.css"/>
+  <!-- CSV parser -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <!-- D3 (force graph) -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar__inner">
+      <div class="brand">
+        <h1>Red de técnicas y manufactura</h1>
+        <p class="muted">Explora el universo de técnicas registradas y su relación con modalidades de manufactura.</p>
+      </div>
+
+      <div class="controls">
+        <label class="field">
+          <span>Estado</span>
+          <select id="fEstado">
+            <option value="">Todos</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Buscar técnica</span>
+          <input id="qTec" type="search" placeholder="Ej. bordado, telar, punto..." />
+        </label>
+
+        <div class="btnRow">
+          <button id="resetBtn" class="btn" type="button">Reset vista</button>
+          <button id="reloadBtn" class="btn" type="button">Recargar datos</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="kpis">
+      <article class="kpi">
+        <div class="kpi__label">Técnicas (visibles)</div>
+        <div class="kpi__value" id="kpiTec">—</div>
+      </article>
+      <article class="kpi">
+        <div class="kpi__label">Vínculos (visibles)</div>
+        <div class="kpi__value" id="kpiLinks">—</div>
+      </article>
+      <article class="kpi">
+        <div class="kpi__label">Modalidades</div>
+        <div class="kpi__value" id="kpiMods">—</div>
+      </article>
+    </section>
+
+    <section class="card">
+      <div class="card__head">
+        <div>
+          <h2>Grafo interactivo</h2>
+          <p class="muted">Arrastra nodos, haz zoom con la rueda, y pasa el cursor para ver detalles.</p>
+        </div>
+        <div class="legend">
+          <span class="dot dot--tech"></span><span class="muted">Técnica</span>
+          <span class="dot dot--man"></span><span class="muted">Manufactura</span>
+        </div>
+      </div>
+      <div class="card__body">
+        <div id="graph" class="graph"></div>
+        <div id="tooltip" class="tooltip hidden"></div>
+      </div>
+      <div class="card__foot muted">
+        Tip: clic en un nodo para resaltar sus conexiones. ESC para limpiar selección.
+      </div>
+    </section>
+
+    <section class="empty hidden" id="errBox">
+      <h2>Error</h2>
+      <p class="muted" id="errMsg"></p>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>

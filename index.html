@@ -1,137 +1,96 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Atlas Nacional de Técnicas Textiles</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Atlas Nacional de Técnicas Textiles</title>
+<link href="style.css" rel="stylesheet"/>
 </head>
 <body>
-  <!-- Pleca superior -->
-  <header class="top-bar">
-    <h1>Atlas Nacional de Técnicas Textiles</h1>
-    <img src="pics/unesco.png" alt="UNESCO Logo" class="unesco-logo">
-  </header>
-
-  <!-- Contenedor principal -->
-  <div class="main-container">
-    <!-- Barra lateral -->
-    <nav class="sidebar">
-      <button class="nav-btn active" id="btn-maps" title="Atlas">
-        <img src="pics/map.svg" alt="Mapa">
-      </button>
-      <button class="nav-btn" id="btn-graphic" title="Dashboard">
-        <img src="pics/graphic.svg" alt="Gráficos">
-      </button>
-      <button class="nav-btn" id="btn-info" title="Información">
-        <img src="pics/info.svg" alt="Información">
-      </button>
-      <button class="nav-btn" id="btn-send" title="Enviar aportación">
-        <img src="pics/send.svg" alt="Enviar">
-      </button>
-    </nav>
-
-    <!-- Contenido principal -->
-    <main id="content">
-      <!-- Sección 1: Atlas -->
-      <section id="maps-section" class="section active">
-        <iframe 
-        src="fichas/ficha.html" 
-        width="100%" 
-        height="800" 
-        style="border:none;"
-      ></iframe>
-
-      </section>
-
-      <!-- Sección 2: Dashboard -->
-      <section id="graphic-section" class="section">
-      
-    <section class="cards">
-      <div class="card naranja">
-        <h2>150</h2>
-        <p>Técnicas identificadas</p>
-      </div>
-      <div class="card rojo">
-        <h2>900</h2>
-        <p>Aportaciones</p>
-      </div>
-      <div class="card azul">
-        <h2>1,200</h2>
-        <p>Artesanos participantes</p>
-      </div>
-    </section>
-
-    <section class="dashboard">
-      <!-- Fila 1 -->
-      <div class="block">
-        <h3>Número de técnicas identificadas por estado</h3>
-        <div class="chart-space">Gráfica de columnas verticales con número de registros por estado</div>
-      </div>
-      <div class="block">
-        <h3>Número de técnicas identificadas por estado</h3>
-        <div class="chart-space">Mapa coroplético con el número de registros por estado de la república mexicana</div>
-      </div>
-
-      <!-- Fila 2 -->
-      <div class="block">
-        <h3>Número de técnicas identificadas por municipio</h3>
-        <div class="chart-space">Gráfica de columnas verticales con número de registros por municipio</div>
-      </div>
-
-      <!-- Fila 3 -->
-      <div class="block">
-        <h3>Manufactura</h3>
-        <div class="chart-space">Gráfica de pie con tipos de manufactura</div>
-      </div>
-      <div class="block">
-        <h3>Conocimientos</h3>
-        <div class="chart-space">Gráfica de rectángulos con los términos más comunes en la pregunta abierta de conocimientos</div>
-      </div>
-      <div class="block">
-        <h3>Materiales comunes</h3>
-        <div class="chart-space">Gráfica de rectángulos con los términos más comunes en la pregunta abierta de materiales</div>
-      </div>
-      <div class="block">
-        <h3>Aprendizaje</h3>
-        <div class="chart-space">Gráfica de barras horizontales con tipos de aprendizaje</div>
-      </div>
-      <div class="block">
-        <h3>Enseñanza</h3>
-        <div class="chart-space">Gráfica de barras horizontales con tipos de enseñanza</div>
-      </div>
-      <div class="block">
-        <h3>Tipo de teñido</h3>
-        <div class="chart-space">Gráfica de pie con tipos de teñido</div>
-      </div>
-    </section>
-    </section>
-  
-      <!-- Sección 3: Información -->
-      <section id="info-section" class="section">
-        <iframe 
-        src="informe/informe.html" 
-        width="100%" 
-        height="800" 
-        style="border:none;"
-      ></iframe>
-      </section>
-
-      <!-- Sección 4: Enviar aportación -->
-      <section id="send-section" class="section">
-        <iframe 
-        src="https://ee.kobotoolbox.org/x/BdMzwkGc" 
-        width="100%" 
-        height="800" 
-        style="border:none;"
-      ></iframe>
-      </section>
-    </main>
-  </div>
-
-  <script src="script.js"></script>
-
-  
+<!-- Pleca superior -->
+<header class="top-bar">
+<h1>Atlas Nacional de Técnicas Textiles</h1>
+</header>
+<!-- Contenedor principal -->
+<div class="main-container">
+<!-- Barra lateral -->
+<nav class="sidebar"><button class="nav-btn active" id="btn-home" title="Inicio"><span class="nav-icon">⌂</span></button>
+<button class="nav-btn" id="btn-fichas" title="Fichas">
+<img alt="Fichas" src="iconos/fichas.png"/>
+</button>
+<button class="nav-btn" id="btn-galeria" title="Galería">
+<img alt="Galería" src="iconos/statistics.png"/>
+</button>
+<button class="nav-btn" id="btn-info" title="Información">
+<img alt="Información" src="iconos/info.svg"/>
+</button>
+<button class="nav-btn" id="btn-diagram" title="Información">
+<img alt="Información" src="iconos/red.png"/>
+</button>
+<button class="nav-btn" id="btn-send" title="Enviar aportación">
+<img alt="Enviar aportación" src="iconos/send.svg"/>
+</button>
+</nav>
+<!-- Contenido principal -->
+<main id="content">
+<!-- Sección 1: Fichas -->
+<section class="section active" id="home-section">
+<div class="welcome">
+<div class="welcome-hero">
+<h2>Bienvenida</h2>
+<p class="welcome-lead">
+      El <strong>Atlas Nacional de Técnicas Textiles</strong> es un espacio digital para reconocer, documentar y visibilizar la diversidad de técnicas textiles en México,
+      a partir de registros construidos de forma participativa con artesanas y artesanos.
+      Aquí encontrarás fichas de técnicas, visualizaciones de datos y materiales de consulta que facilitan su análisis y su difusión.
+    </p>
+</div>
+<div class="welcome-grid">
+<div class="welcome-card">
+<h3>¿Qué encontrarás?</h3>
+<ul>
+<li><strong>Fichas de técnicas</strong> con información sintetizada por registro.</li>
+<li><strong>Visualizaciones</strong> para explorar patrones (manufactura, teñido, distribución, etc.).</li>
+<li><strong>Materiales de contexto</strong> y secciones de consulta.</li>
+</ul>
+</div>
+<div class="welcome-card">
+<h3>Cómo navegar</h3>
+<ul>
+<li><span class="kbd">⌂</span> Inicio (esta página).</li>
+<li><img alt="" class="mini-icon" src="iconos/fichas.png"/> Fichas de técnicas.</li>
+<li><img alt="" class="mini-icon" src="iconos/statistics.png"/> Dashboard.</li>
+<li><img alt="" class="mini-icon" src="iconos/info.svg"/> Información / Blog.</li>
+<li><img alt="" class="mini-icon" src="iconos/red.png"/> Diagrama / Red.</li>
+<li><img alt="" class="mini-icon" src="iconos/send.svg"/> Enviar aportación.</li>
+</ul>
+</div>
+</div>
+<p class="welcome-note">
+    Sugerencia: usa el menú lateral para cambiar de sección. Si estás en móvil, desplázate dentro de cada sección.
+  </p>
+</div>
+</section><section class="section" id="fichas-section">
+<iframe height="800" src="tecnicas/index.html" style="border:none;" width="100%"></iframe>
+</section>
+<!-- Sección 2: Dashboard -->
+<section class="section" id="galeria-section">
+<iframe height="800" src="dashboard/index.html" style="border:none;" width="100%"></iframe>
+</section>
+<!-- Sección 3: Información -->
+<section class="section" id="info-section">
+<iframe height="800" src="blog/index.html" style="border:none;" width="100%"></iframe>
+</section>
+<!-- Sección 4: Diagrama -->
+<section class="section" id="diagram-section">
+<iframe height="800" src="red_neuronal/index.html" style="border:none;" width="100%"></iframe>
+</section>
+<!-- Sección 5: Enviar aportación -->
+<section class="section" id="send-section">
+<iframe height="800" src="form_aportaciones/index.html" style="border:none;" width="100%"></iframe>
+</section>
+</main>
+</div>
+<script src="script.js"></script>
 </body>
 </html>
-

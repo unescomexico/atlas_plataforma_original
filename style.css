@@ -63,16 +63,20 @@ body {
   transform: scale(1.1);
 }
 
-/* Área de contenido */
-#content {
+/* ===== Contenido sin márgenes/padding para que el iframe ocupe todo ===== */
+#content{
   flex: 1;
-  padding: 40px;
+  padding: 0;          /* <- antes 40px */
+  margin: 0;
   background-color: #fff;
-  overflow-y: auto;
+  overflow: hidden;    /* <- evita scroll doble; el scroll será dentro del iframe */
 }
 
-.section {
+/* Cada sección debe ocupar todo el espacio disponible */
+.section{
   display: none;
+  width: 100%;
+  height: 100%;
 }
 
 .section.active {
@@ -80,7 +84,7 @@ body {
 }
 
 h2 {
-  color: #4b1d4a;
+  color: white;
   border-bottom: 3px solid #d8a657;
   display: inline-block;
   padding-bottom: 5px;
@@ -142,3 +146,153 @@ h2 {
   color: #666;
   font-size: 0.9rem;
 }
+
+/* Asegura que el área de contenido tenga altura real */
+.main-container { height: calc(100vh - 60px); } /* ajusta 60px si tu top-bar mide distinto */
+#content { height: 100%; }
+
+/* Que la sección active use el alto disponible */
+.section.active { height: 100%; }
+
+/* Que el iframe llene el contenedor sin depender del atributo height */
+.section iframe{
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+
+
+/* ===== Bienvenida ===== */
+.nav-icon{
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: #fff;
+  line-height: 1;
+}
+
+/* La sección de bienvenida necesita scroll propio (porque #content tiene overflow:hidden) */
+.section#welcome-section,
+#home-section.section.active{
+  height: 100%;
+}
+
+.welcome{
+  height: 100%;
+  overflow: auto;
+  padding: 36px 42px;
+  box-sizing: border-box;
+  background: #0f0f12;
+  color: #ffffff;
+}
+
+
+.welcome-hero{
+  max-width: 1100px;
+}
+
+.welcome-lead{
+  font-size: 1.05rem;
+  line-height: 1.55;
+  margin-top: 12px;
+  max-width: 900px;
+}
+
+.welcome-actions{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.welcome-btn{
+  border: 1px solid rgba(75,29,74,0.25);
+  background: #fff;
+  color: #4b1d4a;
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.welcome-btn.primary{
+  background: #4b1d4a;
+  color: #fff;
+  border-color: #4b1d4a;
+}
+
+.welcome-btn:hover{
+  transform: translateY(-1px);
+}
+
+.welcome-grid{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 22px;
+  max-width: 1100px;
+}
+
+.welcome-card{
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 16px;
+  padding: 18px 18px 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+}
+
+
+.welcome-card h3{
+  margin: 0 0 10px 0;
+  color: #ffffff;
+  font-size: 1.05rem;
+}
+
+
+.welcome-card ul{
+  margin: 0;
+  padding-left: 18px;
+  line-height: 1.55;
+}
+
+.mini-icon{
+  width: 16px;
+  height: 16px;
+  vertical-align: -3px;
+  margin-right: 6px;
+  opacity: 0.9;
+}
+
+.kbd{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgba(0,0,0,0.08);
+  font-weight: 700;
+  margin-right: 6px;
+}
+
+.welcome-note{
+  margin-top: 18px;
+  color: #666;
+  max-width: 1100px;
+}
+
+/* Responsive */
+@media (max-width: 900px){
+  .welcome{ padding: 24px 18px; }
+  .welcome-grid{ grid-template-columns: 1fr; }
+}
+
+.welcome a{ color: #ffffff; text-decoration: underline; }
+.welcome a:hover{ opacity: 0.9; }
+
+.welcome strong{ color: #ffffff; }
