@@ -1,205 +1,96 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Atlas Nacional de Técnicas del Arte Textil — Taller Participativo con artesanas y artesanos de México">
-<title>Atlas de Técnicas del Arte Textil</title>
-
-<!-- Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
-
-<!-- Leaflet -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<!-- Chart.js (para el reporte) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-
-<!-- App styles -->
-<link rel="stylesheet" href="styles.css">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Atlas Nacional de Técnicas Textiles</title>
+<link href="style.css" rel="stylesheet"/>
 </head>
 <body>
-
-<!-- ═══════════════════════════════════════
-     LOADING OVERLAY
-════════════════════════════════════════ -->
-<div id="loading-overlay">
-  <div class="loading-spinner"></div>
-  <div class="loading-msg">Cargando datos…</div>
-  <div id="error-banner" class="error-banner">
-    <h3>No se pudieron cargar los datos</h3>
-    <p></p>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════
-     HEADER
-════════════════════════════════════════ -->
-<header class="header">
-  <div class="header-weave"></div>
-  <div class="header-inner">
-    <div class="header-wordmark">
-      <h1>Atlas de <em>Técnicas</em> del Arte Textil</h1>
-      <p>Taller Participativo con artesanas y artesanos de México participantes en Original</p>
-    </div>
-    <div class="header-divider"></div>
-    <div class="header-stats">
-      <div class="hstat"><div class="hstat-num">—</div><div class="hstat-lbl">Técnicas</div></div>
-      <div class="hstat"><div class="hstat-num">—</div><div class="hstat-lbl">Registros</div></div>
-      <div class="hstat"><div class="hstat-num">—</div><div class="hstat-lbl">Estados</div></div>
-    </div>
-  </div>
+<!-- Pleca superior -->
+<header class="top-bar">
+<h1>Atlas Nacional de Técnicas Textiles</h1>
 </header>
-
-<!-- ═══════════════════════════════════════
-     NAVIGATION
-════════════════════════════════════════ -->
-<nav class="nav-tabs">
-  <button class="nav-tab active" data-tab="mapa">Mapa interactivo</button>
-  <button class="nav-tab" data-tab="catalogo">Catálogo de técnicas</button>
-  <button class="nav-tab" data-tab="red">Red de técnicas</button>
-  <button class="nav-tab nav-tab-info" onclick="openInfo()">Acerca del Atlas</button>
+<!-- Contenedor principal -->
+<div class="main-container">
+<!-- Barra lateral -->
+<nav class="sidebar"><button class="nav-btn active" id="btn-home" title="Inicio"><span class="nav-icon">⌂</span></button>
+<button class="nav-btn" id="btn-fichas" title="Fichas">
+<img alt="Fichas" src="iconos/fichas.png"/>
+</button>
+<button class="nav-btn" id="btn-galeria" title="Galería">
+<img alt="Galería" src="iconos/statistics.png"/>
+</button>
+<button class="nav-btn" id="btn-info" title="Información">
+<img alt="Información" src="iconos/info.svg"/>
+</button>
+<button class="nav-btn" id="btn-diagram" title="Información">
+<img alt="Información" src="iconos/red.png"/>
+</button>
+<button class="nav-btn" id="btn-send" title="Enviar aportación">
+<img alt="Enviar aportación" src="iconos/send.svg"/>
+</button>
 </nav>
-
-<!-- ═══════════════════════════════════════
-     VIEW: MAPA
-════════════════════════════════════════ -->
-<div id="view-mapa" class="view active">
-  <div class="map-panel">
-    <div class="map-search-wrap">
-      <input class="map-search" type="text" id="map-search" placeholder="Buscar estado...">
-    </div>
-    <div id="map"></div>
-    <div class="map-legend">
-      <h4>Técnicas por estado</h4>
-      <div class="legend-item"><div class="legend-dot" style="background:#A91E45"></div><span>40 o más</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:#FCBC52FF"></div><span>20 – 39</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:#A4D984FF"></div><span>10 – 19</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:#F588AFFF"></div><span>1 – 9</span></div>
-    </div>
-  </div>
-
-  <div class="side-panel">
-    <div class="panel-header">
-      <div class="panel-title" id="panel-title">Selecciona un estado</div>
-      <div class="panel-subtitle" id="panel-subtitle">Haz clic en el mapa para explorar las técnicas de cada estado</div>
-    </div>
-    <div class="panel-body" id="panel-body">
-      <div class="welcome-state">
-        <h3>Explora el mapa</h3>
-        <p>Cada estado está coloreado según el número de técnicas textiles documentadas. Haz clic para ver el detalle.</p>
-      </div>
-    </div>
-  </div>
+<!-- Contenido principal -->
+<main id="content">
+<!-- Sección 1: Fichas -->
+<section class="section active" id="home-section">
+<div class="welcome">
+<div class="welcome-hero">
+<h2>Bienvenida</h2>
+<p class="welcome-lead">
+      El <strong>Atlas Nacional de Técnicas Textiles</strong> es un espacio digital para reconocer, documentar y visibilizar la diversidad de técnicas textiles en México,
+      a partir de registros construidos de forma participativa con artesanas y artesanos.
+      Aquí encontrarás fichas de técnicas, visualizaciones de datos y materiales de consulta que facilitan su análisis y su difusión.
+    </p>
 </div>
-
-<!-- ═══════════════════════════════════════
-     VIEW: CATÁLOGO
-════════════════════════════════════════ -->
-<div id="view-catalogo" class="view">
-  <div class="catalog-view">
-    <div class="catalog-toolbar">
-      <input class="catalog-search" type="text" id="catalog-search" placeholder="Buscar técnica...">
-      <button class="filter-btn active" data-grupo="all">Todas</button>
-      <button class="filter-btn" data-grupo="Bordado a mano">Bordado a mano</button>
-      <button class="filter-btn" data-grupo="Bordado a máquina">Bordado a máquina</button>
-      <button class="filter-btn" data-grupo="Telar de cintura">Telar de cintura</button>
-      <button class="filter-btn" data-grupo="Tejido a mano">Tejido a mano</button>
-      <button class="filter-btn" data-grupo="Telar de pedal">Telar de pedal</button>
-      <button class="filter-btn" data-grupo="Telar de cajón">Telar de cajón</button>
-    </div>
-    <div class="catalog-results" id="catalog-results">Cargando…</div>
-    <div class="tecnicas-grid" id="tecnicas-grid"></div>
-  </div>
+<div class="welcome-grid">
+<div class="welcome-card">
+<h3>¿Qué encontrarás?</h3>
+<ul>
+<li><strong>Fichas de técnicas</strong> con información sintetizada por registro.</li>
+<li><strong>Visualizaciones</strong> para explorar patrones (manufactura, teñido, distribución, etc.).</li>
+<li><strong>Materiales de contexto</strong> y secciones de consulta.</li>
+</ul>
 </div>
-
-<!-- ═══════════════════════════════════════
-     VIEW: RED DE TÉCNICAS
-════════════════════════════════════════ -->
-<div id="view-red" class="view">
-  <div class="network-view">
-    <div class="network-toolbar">
-      <h2>Red de técnicas</h2>
-      <div id="network-filters"></div>
-    </div>
-    <div class="network-container">
-      <canvas id="network-canvas" style="height:580px"></canvas>
-      <div class="network-tooltip" id="network-tooltip"></div>
-      <div class="network-controls">
-        <button class="net-ctrl-btn" id="net-zoom-in" title="Acercar">+</button>
-        <button class="net-ctrl-btn" id="net-zoom-out" title="Alejar">−</button>
-        <button class="net-ctrl-btn" id="net-reset" title="Restablecer vista">↺</button>
-      </div>
-      <div class="network-legend">
-        <span class="network-legend-title">Grupos</span>
-        <div id="network-legend-items" style="display:flex;flex-wrap:wrap;gap:8px"></div>
-        <span style="margin-left:auto;font-size:.68rem;color:var(--arena)">Nodo mayor = más registros · Clic para abrir ficha</span>
-      </div>
-    </div>
-  </div>
+<div class="welcome-card">
+<h3>Cómo navegar</h3>
+<ul>
+<li><span class="kbd">⌂</span> Inicio (esta página).</li>
+<li><img alt="" class="mini-icon" src="iconos/fichas.png"/> Fichas de técnicas.</li>
+<li><img alt="" class="mini-icon" src="iconos/statistics.png"/> Dashboard.</li>
+<li><img alt="" class="mini-icon" src="iconos/info.svg"/> Información / Blog.</li>
+<li><img alt="" class="mini-icon" src="iconos/red.png"/> Diagrama / Red.</li>
+<li><img alt="" class="mini-icon" src="iconos/send.svg"/> Enviar aportación.</li>
+</ul>
 </div>
-
-<!-- ═══════════════════════════════════════
-     FICHA MODAL
-════════════════════════════════════════ -->
-<div class="modal-overlay" id="modal-overlay">
-  <div class="modal-card">
-    <div class="modal-hero" id="modal-hero"></div>
-    <div class="modal-body" id="modal-body"></div>
-  </div>
 </div>
-
-<!-- ═══════════════════════════════════════
-     LIGHTBOX
-════════════════════════════════════════ -->
-<div class="lightbox" id="lightbox">
-  <button class="lightbox-close" id="lightbox-close">✕</button>
-  <img id="lightbox-img" src="" alt="">
+<p class="welcome-note">
+    Sugerencia: usa el menú lateral para cambiar de sección. Si estás en móvil, desplázate dentro de cada sección.
+  </p>
 </div>
-
-
-<!-- ═══════════════════════════════════════
-     DRAWER — REPORTE "ACERCA DEL ATLAS"
-════════════════════════════════════════ -->
-<div class="report-overlay" id="report-overlay" onclick="closeReport()"></div>
-<div class="report-drawer" id="report-drawer">
-  <div class="report-drawer-header">
-    <div class="report-drawer-title">Acerca del Atlas</div>
-    <button class="report-drawer-close" onclick="closeReport()">✕</button>
-  </div>
-  <div class="report-drawer-body" id="report-drawer-body">
-    <!-- contenido inyectado por JS -->
-  </div>
+</section><section class="section" id="fichas-section">
+<iframe height="800" src="tecnicas/index.html" style="border:none;" width="100%"></iframe>
+</section>
+<!-- Sección 2: Dashboard -->
+<section class="section" id="galeria-section">
+<iframe height="800" src="dashboard/index.html" style="border:none;" width="100%"></iframe>
+</section>
+<!-- Sección 3: Información -->
+<section class="section" id="info-section">
+<iframe height="800" src="Blog/index.html" style="border:none;" width="100%"></iframe>
+</section>
+<!-- Sección 4: Diagrama -->
+<section class="section" id="diagram-section">
+<iframe height="800" src="red_neuronal/index.html" style="border:none;" width="100%"></iframe>
+</section>
+<!-- Sección 5: Enviar aportación -->
+<section class="section" id="send-section">
+<iframe height="800" src="form_aportaciones/index.html" style="border:none;" width="100%"></iframe>
+</section>
+</main>
 </div>
-
-<!-- Scripts — NO atlas_data.js: los datos se leen desde los CSV -->
-<script src="main.js"></script>
-
-<!-- ═══════════════════════════════════════
-     OVERLAY — ACERCA DEL ATLAS
-════════════════════════════════════════ -->
-<div class="info-overlay" id="info-overlay" onclick="closeInfo(event)">
-  <div class="info-modal">
-    <button class="info-close" onclick="closeInfo()">✕</button>
-    <iframe class="info-iframe" src="atlas_textil_v2.html" title="Acerca del Atlas" loading="lazy"></iframe>
-  </div>
-</div>
-
-<script>
-function openInfo() {
-  document.getElementById('info-overlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeInfo(e) {
-  if (e && e.target !== document.getElementById('info-overlay')) return;
-  document.getElementById('info-overlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { document.getElementById('info-overlay').classList.remove('open'); document.body.style.overflow = ''; }});
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
