@@ -61,6 +61,8 @@
   <button class="nav-tab active" data-tab="mapa">Mapa interactivo</button>
   <button class="nav-tab" data-tab="catalogo">Catálogo de técnicas</button>
   <button class="nav-tab" data-tab="red">Red de técnicas</button>
+  <button class="nav-tab" data-tab="arbol">Clasificación</button>
+  <button class="nav-tab nav-tab-contribuir" data-tab="contribuir">Contribuir</button>
   <button class="nav-tab nav-tab-info" onclick="openInfo()">Acerca del Atlas</button>
 </nav>
 
@@ -143,8 +145,59 @@
 </div>
 
 <!-- ═══════════════════════════════════════
-     FICHA MODAL
+     VIEW: CLASIFICACIÓN (ÁRBOL)
 ════════════════════════════════════════ -->
+<div id="view-arbol" class="view">
+  <div class="arbol-view">
+    <div class="arbol-header">
+      <h2>Clasificación de técnicas</h2>
+      <p>Explora las técnicas según su método de manufactura y tipo de teñido. Una técnica puede aparecer en más de una rama.</p>
+    </div>
+    <div class="arbol-container" id="arbol-container">
+      <div class="arbol-loading">Cargando clasificación…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     VIEW: CONTRIBUIR
+════════════════════════════════════════ -->
+<div id="view-contribuir" class="view">
+  <div class="contribuir-view">
+    <div class="contribuir-header">
+      <h2>Contribuye al Atlas</h2>
+      <p>Este atlas es un proyecto vivo. Tu conocimiento y experiencia pueden enriquecerlo. Elige cómo deseas participar:</p>
+    </div>
+    <div class="contribuir-cards">
+      <div class="contribuir-card" onclick="openKobo('nueva')">
+        <div class="contribuir-card-icon" style="background:var(--magenta)">+</div>
+        <div class="contribuir-card-body">
+          <div class="contribuir-card-title">Registrar nueva técnica</div>
+          <div class="contribuir-card-desc">¿Practicas una técnica textil que no está en el atlas? Comparte tu conocimiento y ayúdanos a documentarla.</div>
+        </div>
+        <div class="contribuir-card-arrow">→</div>
+      </div>
+      <div class="contribuir-card" onclick="openKobo('cambio')">
+        <div class="contribuir-card-icon" style="background:var(--azul-mar)">✎</div>
+        <div class="contribuir-card-body">
+          <div class="contribuir-card-title">Proponer cambio a una técnica</div>
+          <div class="contribuir-card-desc">¿Hay información incorrecta o incompleta sobre una técnica ya registrada? Ayúdanos a corregirla o ampliarla.</div>
+        </div>
+        <div class="contribuir-card-arrow">→</div>
+      </div>
+      <div class="contribuir-card" onclick="openKobo('comentario')">
+        <div class="contribuir-card-icon" style="background:var(--verde)">✉</div>
+        <div class="contribuir-card-body">
+          <div class="contribuir-card-title">Enviar un comentario</div>
+          <div class="contribuir-card-desc">¿Tienes una observación general, sugerencia o deseas contactarnos? Escríbenos.</div>
+        </div>
+        <div class="contribuir-card-arrow">→</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal-card">
     <div class="modal-hero" id="modal-hero"></div>
@@ -188,7 +241,35 @@
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════
+     OVERLAY — KOBO FORMULARIOS
+════════════════════════════════════════ -->
+<div class="info-overlay" id="kobo-overlay" onclick="closeKobo(event)">
+  <div class="info-modal">
+    <button class="info-close" onclick="closeKobo()">✕</button>
+    <iframe class="info-iframe" id="kobo-iframe" src="" title="Formulario" loading="lazy"></iframe>
+  </div>
+</div>
+
 <script>
+const KOBO_URLS = {
+  nueva:      'https://ee.kobotoolbox.org/x/GTRuQbob',
+  cambio:     'https://ee.kobotoolbox.org/x/q1s1Q5ht',
+  comentario: 'https://ee.kobotoolbox.org/x/8V6qx7Dj',
+};
+
+function openKobo(tipo) {
+  document.getElementById('kobo-iframe').src = KOBO_URLS[tipo] || KOBO_URLS.comentario;
+  document.getElementById('kobo-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeKobo(e) {
+  if (e && e.target !== document.getElementById('kobo-overlay')) return;
+  document.getElementById('kobo-overlay').classList.remove('open');
+  document.getElementById('kobo-iframe').src = '';
+  document.body.style.overflow = '';
+}
+
 function openInfo() {
   document.getElementById('info-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -198,8 +279,15 @@ function closeInfo(e) {
   document.getElementById('info-overlay').classList.remove('open');
   document.body.style.overflow = '';
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { document.getElementById('info-overlay').classList.remove('open'); document.body.style.overflow = ''; }});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.getElementById('info-overlay').classList.remove('open');
+    closeKobo();
+    document.body.style.overflow = '';
+  }
+});
 </script>
 
 </body>
 </html>
+

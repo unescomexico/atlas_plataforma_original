@@ -414,6 +414,7 @@ function getTecnicasForEstado(name) {
 let currentTab = 'mapa';
 let networkInitialized = false;
 let catalogInitialized = false;
+let arbolInitialized = false;
 
 document.querySelectorAll('.nav-tab').forEach(tab => {
   tab.addEventListener('click', () => {
@@ -431,6 +432,8 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
       catalogInitialized = true; renderCatalog();
     } else if (id === 'red' && !networkInitialized) {
       networkInitialized = true; initNetwork();
+    } else if (id === 'arbol' && !arbolInitialized) {
+      arbolInitialized = true; initArbol();
     }
   });
 });
@@ -764,6 +767,9 @@ function openFicha(tecnicaNombre) {
     </button>
     <button onclick="goToCatalog('${escJs(t.grupo)}')" style="background:transparent;color:var(--arena);border:1px solid var(--border);padding:10px 20px;border-radius:4px;font-family:var(--font-body);font-size:.8rem;font-weight:600;cursor:pointer;letter-spacing:.3px;margin-left:8px;">
       Ver técnicas de este grupo
+    </button>
+    <button onclick="closeFicha();openKobo('cambio')" style="background:transparent;color:var(--azul-mar);border:1px solid var(--azul-mar);padding:10px 20px;border-radius:4px;font-family:var(--font-body);font-size:.8rem;font-weight:600;cursor:pointer;letter-spacing:.3px;margin-left:8px;">
+      ✎ ¿Deseas proponer algún cambio a esta técnica?
     </button>
   </div>`;
 
@@ -1831,6 +1837,188 @@ new Chart(document.getElementById('r-chart-aprendizaje'), {
   options: { ...baseOpts('y') }
 });
 
+}
+
+// ────────────────────────────────────────────────
+// ÁRBOL DE CLASIFICACIÓN
+// ────────────────────────────────────────────────
+function initArbol() {
+  if (!ATLAS) return;
+  const tecnicas = ATLAS.tecnicas;
+
+  // Build classification buckets
+  const tree = {
+    manufactura: {
+      label: 'Manufactura',
+      color: COLORS.azulMar,
+      children: {
+        'Bordado': {
+          color: COLORS.magenta,
+          children: {
+            'Bordado a mano':    { col: 'n_man_mano',        tecnicas: [] },
+            'Bordado a máquina': { col: 'n_man_otra',        tecnicas: [] },
+          }
+        },
+        'Tejido': {
+          color: COLORS.cyan,
+          children: {
+            'Tejido a mano': { col: 'n_man_tejido',      tecnicas: [] },
+            'Telar': {
+              color: COLORS.azulMar,
+              children: {
+                'Telar de cintura': { col: 'n_man_telar',       tecnicas: [] },
+                'Telar de pedal':   { col: 'n_man_telar_pedal', tecnicas: [] },
+              }
+            },
+          }
+        },
+      }
+    },
+    tenido: {
+      label: 'Teñido',
+      color: COLORS.verde,
+      children: {
+        'Plantas':   { col: 'n_tenido_plantas',   color: COLORS.verde,   tecnicas: [] },
+        'Animales':  { col: 'n_tenido_animales',  color: COLORS.naranja, tecnicas: [] },
+        'Minerales': { col: 'n_tenido_minerales', color: COLORS.azulMar, tecnicas: [] },
+      }
+    }
+  };
+
+  // Map raw CSV rows by tecnica name for column access
+  const rawByTec = {};
+  // We need raw technique rows; rebuild from ATLAS data we stored
+  ATLAS.tecnicas.forEach(t => { rawByTec[t.tecnica] = t; });
+
+  // Bordado a mano → grupo Bordado a mano / Bordado a máquina
+  tecnicas.forEach(t => {
+    const g = (t.grupo || '').toLowerCase();
+    const man = t.manufactura;
+
+    // Manufactura leaves
+    if (g.includes('bordado') && !g.includes('máquina')) {
+      tree.manufactura.children['Bordado'].children['Bordado a mano'].tecnicas.push(t.tecnica);
+    }
+    if (g.includes('bordado') && g.includes('máquina')) {
+      tree.manufactura.children['Bordado'].children['Bordado a máquina'].tecnicas.push(t.tecnica);
+    }
+    if (man.tejido > 0 || g === 'tejido a mano') {
+      tree.manufactura.children['Tejido'].children['Tejido a mano'].tecnicas.push(t.tecnica);
+    }
+    if (man.telar > 0 || g === 'telar de cintura') {
+      tree.manufactura.children['Tejido'].children['Telar'].children['Telar de cintura'].tecnicas.push(t.tecnica);
+    }
+    if (man.telar_pedal > 0 || g === 'telar de pedal') {
+      tree.manufactura.children['Tejido'].children['Telar'].children['Telar de pedal'].tecnicas.push(t.tecnica);
+    }
+
+    // Teñido leaves
+    if (t.tenido.plantas > 0)   tree.tenido.children['Plantas'].tecnicas.push(t.tecnica);
+    if (t.tenido.animales > 0)  tree.tenido.children['Animales'].tecnicas.push(t.tecnica);
+    if (t.tenido.minerales > 0) tree.tenido.children['Minerales'].tecnicas.push(t.tecnica);
+  });
+
+  let activeLeaf = null;
+
+  function renderTree() {
+    const container = document.getElementById('arbol-container');
+
+    function leafHTML(name, node, color) {
+      const isActive = activeLeaf === name;
+      const count = (node.tecnicas || []).length;
+      return `<div class="arbol-leaf ${isActive ? 'active' : ''}" data-leaf="${esc(name)}" style="--leaf-color:${color}">
+        <span class="arbol-leaf-name">${esc(name)}</span>
+        <span class="arbol-leaf-count">${count}</span>
+      </div>`;
+    }
+
+    function subgroupHTML(name, node, parentColor) {
+      const color = node.color || parentColor;
+      if (node.tecnicas) {
+        return leafHTML(name, node, color || parentColor);
+      }
+      // Has children
+      const childrenHTML = Object.entries(node.children || {}).map(([cName, cNode]) =>
+        subgroupHTML(cName, cNode, color)
+      ).join('');
+      return `<div class="arbol-subgroup">
+        <div class="arbol-subgroup-label" style="color:${color}">${esc(name)}</div>
+        <div class="arbol-subgroup-children">${childrenHTML}</div>
+      </div>`;
+    }
+
+    const mainBranches = Object.entries(tree).map(([key, branch]) => {
+      const childrenHTML = Object.entries(branch.children).map(([cName, cNode]) =>
+        subgroupHTML(cName, cNode, branch.color)
+      ).join('');
+      return `<div class="arbol-branch">
+        <div class="arbol-branch-label" style="background:${branch.color}">${branch.label}</div>
+        <div class="arbol-branch-children">${childrenHTML}</div>
+      </div>`;
+    }).join('');
+
+    // Find active leaf node
+    let activeTecnicas = [];
+    let activeColor = COLORS.magenta;
+    if (activeLeaf) {
+      // Search all leaves
+      function findLeaf(name, node, color) {
+        if (node.tecnicas && name === activeLeaf) {
+          activeTecnicas = node.tecnicas;
+          activeColor = node.color || color;
+          return true;
+        }
+        for (const [cName, cNode] of Object.entries(node.children || {})) {
+          if (findLeaf(cName, cNode, node.color || color)) return true;
+        }
+        return false;
+      }
+      Object.entries(tree).forEach(([, branch]) => {
+        Object.entries(branch.children).forEach(([cName, cNode]) => {
+          findLeaf(cName, cNode, branch.color);
+        });
+      });
+    }
+
+    const panelHTML = activeLeaf ? `
+      <div class="arbol-panel">
+        <div class="arbol-panel-header" style="border-color:${activeColor}">
+          <span class="arbol-panel-title" style="color:${activeColor}">${esc(activeLeaf)}</span>
+          <span class="arbol-panel-count">${activeTecnicas.length} técnica${activeTecnicas.length !== 1 ? 's' : ''}</span>
+          <button class="arbol-panel-close" onclick="arbolClosePanel()">✕</button>
+        </div>
+        <div class="arbol-panel-note">Una técnica puede clasificarse en más de una rama.</div>
+        <div class="arbol-panel-list">
+          ${activeTecnicas.map(tname => {
+            const td = tecnicasMap[tname];
+            const color = GRUPO_COLOR[(td && td.grupo) || ''] || COLORS.arena;
+            return `<div class="arbol-tec-item" onclick="openFicha('${escJs(tname)}')">
+              <div class="arbol-tec-dot" style="background:${color}"></div>
+              <span>${esc(tname)}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>` : `<div class="arbol-panel arbol-panel-empty">
+        <p>Selecciona una categoría para ver las técnicas clasificadas en ella.</p>
+      </div>`;
+
+    container.innerHTML = `
+      <div class="arbol-layout">
+        <div class="arbol-tree">${mainBranches}</div>
+        ${panelHTML}
+      </div>`;
+
+    // Bind leaf clicks
+    container.querySelectorAll('.arbol-leaf').forEach(el => {
+      el.addEventListener('click', () => {
+        activeLeaf = el.dataset.leaf === activeLeaf ? null : el.dataset.leaf;
+        renderTree();
+      });
+    });
+  }
+
+  window.arbolClosePanel = function() { activeLeaf = null; renderTree(); };
+  renderTree();
 }
 
 // ────────────────────────────────────────────────
