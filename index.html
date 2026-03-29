@@ -210,6 +210,9 @@
 ════════════════════════════════════════ -->
 <div class="lightbox" id="lightbox">
   <button class="lightbox-close" id="lightbox-close">✕</button>
+  <button class="lightbox-nav lightbox-prev" id="lightbox-prev" onclick="_lbCurrent=(_lbCurrent-1+_lbImages.length)%_lbImages.length;_renderLightbox()">&#8249;</button>
+  <button class="lightbox-nav lightbox-next" id="lightbox-next" onclick="_lbCurrent=(_lbCurrent+1)%_lbImages.length;_renderLightbox()">&#8250;</button>
+  <div class="lightbox-counter" id="lightbox-counter"></div>
   <img id="lightbox-img" src="" alt="">
 </div>
 

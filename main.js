@@ -601,17 +601,43 @@ function openFicha(tecnicaNombre) {
   const t = tecnicasMap[tecnicaNombre];
   if (!t) return;
 
-  // ── HERO ──
+  // ── HERO — Carrusel ──
   const hero = document.getElementById('modal-hero');
   if (t.imagenes && t.imagenes.length > 0) {
-    const imgs = t.imagenes.map(fn =>
-      `<img class="gallery-img" src="${imgPath(esc(fn))}" alt="${esc(t.tecnica)}" loading="lazy" onclick="openLightbox('${escJs(imgPath(fn))}')">`
+    const slides = t.imagenes.map((fn, i) =>
+      `<div class="carousel-slide" data-index="${i}">
+        <img class="carousel-img" src="${imgPath(esc(fn))}" alt="${esc(t.tecnica)} ${i+1}" loading="${i === 0 ? 'eager' : 'lazy'}">
+      </div>`
     ).join('');
+
+    const dots = t.imagenes.length > 1
+      ? `<div class="carousel-dots">${t.imagenes.map((_, i) =>
+          `<button class="carousel-dot${i === 0 ? ' active' : ''}" data-i="${i}" onclick="carouselGoTo(${i})"></button>`
+        ).join('')}</div>`
+      : '';
+
+    const arrows = t.imagenes.length > 1
+      ? `<button class="carousel-btn carousel-prev" onclick="carouselPrev()">&#8249;</button>
+         <button class="carousel-btn carousel-next" onclick="carouselNext()">&#8250;</button>`
+      : '';
+
     hero.innerHTML = `
-      <div class="modal-gallery">${imgs}</div>
+      <div class="carousel-track" id="carousel-track">${slides}</div>
+      ${arrows}
+      ${dots}
       <button class="modal-close" onclick="closeFicha()">✕</button>
       <div class="modal-badge">${t.n_fichas} registro${t.n_fichas !== 1 ? 's' : ''}</div>
-      <div class="gallery-count">${t.imagenes.length} imagen${t.imagenes.length !== 1 ? 'es' : ''}</div>`;
+      <div class="carousel-counter" id="carousel-counter">1 / ${t.imagenes.length}</div>`;
+
+    // Click on image → lightbox
+    hero.querySelectorAll('.carousel-img').forEach((img, i) => {
+      img.addEventListener('click', () => openLightbox(imgPath(t.imagenes[i]), t.imagenes, i));
+    });
+
+    // Store images on hero for navigation functions
+    hero._images = t.imagenes;
+    hero._current = 0;
+
   } else {
     hero.innerHTML = `
       <div class="gallery-placeholder">
@@ -833,19 +859,105 @@ function goToCatalog(grupo) {
 // ────────────────────────────────────────────────
 // LIGHTBOX
 // ────────────────────────────────────────────────
-function openLightbox(src) {
-  document.getElementById('lightbox-img').src = src;
+// ────────────────────────────────────────────────
+// CARRUSEL
+// ────────────────────────────────────────────────
+function _carousel() {
+  return document.getElementById('modal-hero');
+}
+
+function carouselGoTo(i) {
+  const hero  = _carousel();
+  const track = document.getElementById('carousel-track');
+  if (!track) return;
+  const slides = track.querySelectorAll('.carousel-slide');
+  if (!slides.length) return;
+  i = ((i % slides.length) + slides.length) % slides.length;   // wrap
+  hero._current = i;
+  track.style.transform = `translateX(-${i * 100}%)`;
+
+  // Dots
+  hero.querySelectorAll('.carousel-dot').forEach((d, idx) =>
+    d.classList.toggle('active', idx === i)
+  );
+  // Counter
+  const counter = document.getElementById('carousel-counter');
+  if (counter) counter.textContent = `${i + 1} / ${slides.length}`;
+}
+
+function carouselPrev() {
+  const hero = _carousel();
+  carouselGoTo((hero._current || 0) - 1);
+}
+
+function carouselNext() {
+  const hero = _carousel();
+  carouselGoTo((hero._current || 0) + 1);
+}
+
+// Keyboard navigation while modal is open
+document.addEventListener('keydown', e => {
+  const modal = document.getElementById('modal-overlay');
+  if (!modal.classList.contains('open')) return;
+  if (e.key === 'ArrowRight') carouselNext();
+  if (e.key === 'ArrowLeft')  carouselPrev();
+});
+
+// Touch/swipe support
+(function() {
+  let startX = null;
+  document.addEventListener('touchstart', e => {
+    const hero = document.getElementById('modal-hero');
+    if (hero && hero.contains(e.target)) startX = e.touches[0].clientX;
+  }, { passive: true });
+  document.addEventListener('touchend', e => {
+    if (startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    startX = null;
+    if (Math.abs(dx) < 40) return;
+    if (dx < 0) carouselNext(); else carouselPrev();
+  }, { passive: true });
+})();
+
+// ────────────────────────────────────────────────
+// LIGHTBOX — con navegación entre imágenes
+// ────────────────────────────────────────────────
+let _lbImages  = [];
+let _lbCurrent = 0;
+
+function openLightbox(src, images, index) {
+  _lbImages  = images  || [src];
+  _lbCurrent = index   || 0;
+  _renderLightbox();
   document.getElementById('lightbox').classList.add('open');
+}
+
+function _renderLightbox() {
+  document.getElementById('lightbox-img').src = _lbImages[_lbCurrent]
+    ? `imagenes/${_lbImages[_lbCurrent]}` : _lbImages[_lbCurrent];
+  const counter = document.getElementById('lightbox-counter');
+  if (counter) counter.textContent = `${_lbCurrent + 1} / ${_lbImages.length}`;
+  // show/hide arrows
+  const prev = document.getElementById('lightbox-prev');
+  const next = document.getElementById('lightbox-next');
+  if (prev) prev.style.display = _lbImages.length > 1 ? '' : 'none';
+  if (next) next.style.display = _lbImages.length > 1 ? '' : 'none';
 }
 
 document.getElementById('lightbox-close').addEventListener('click', () => {
   document.getElementById('lightbox').classList.remove('open');
 });
 document.getElementById('lightbox').addEventListener('click', e => {
-  if (e.target === document.getElementById('lightbox') ||
-      e.target === document.getElementById('lightbox-img')) {
+  if (e.target === document.getElementById('lightbox')) {
     document.getElementById('lightbox').classList.remove('open');
   }
+});
+document.addEventListener('keydown', e => {
+  const lb = document.getElementById('lightbox');
+  if (!lb.classList.contains('open')) return;
+  if (e.key === 'Escape')      lb.classList.remove('open');
+  if (e.key === 'ArrowRight')  { _lbCurrent = (_lbCurrent + 1) % _lbImages.length; _renderLightbox(); }
+  if (e.key === 'ArrowLeft')   { _lbCurrent = (_lbCurrent - 1 + _lbImages.length) % _lbImages.length; _renderLightbox(); }
 });
 
 // ────────────────────────────────────────────────

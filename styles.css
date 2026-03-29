@@ -245,21 +245,77 @@ body {
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.modal-hero { height: 260px; background: var(--negro); position: relative; overflow: hidden; }
-
-.modal-gallery {
-  display: flex; height: 100%; overflow-x: auto;
-  scroll-snap-type: x mandatory; gap: 2px;
+/* ── HERO — Carrusel ──────────────────────────── */
+.modal-hero {
+  height: 300px;
+  background: var(--negro);
+  position: relative;
+  overflow: hidden;
 }
-.modal-gallery::-webkit-scrollbar { height: 3px; }
-.modal-gallery::-webkit-scrollbar-thumb { background: rgba(255,255,255,.2); }
 
-.gallery-img {
-  flex-shrink: 0; height: 100%; width: auto;
-  min-width: 240px; max-width: 380px; object-fit: cover;
-  scroll-snap-align: start; cursor: pointer; transition: filter .2s;
+/* Track deslizable */
+.carousel-track {
+  display: flex;
+  height: 100%;
+  transition: transform .35s cubic-bezier(.4,0,.2,1);
+  will-change: transform;
 }
-.gallery-img:hover { filter: brightness(1.08); }
+
+.carousel-slide {
+  flex-shrink: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.carousel-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  cursor: zoom-in;
+  display: block;
+  transition: transform .3s ease;
+}
+.carousel-img:hover { transform: scale(1.02); }
+
+/* Botones anterior / siguiente */
+.carousel-btn {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(26,16,24,.65); border: none;
+  color: white; font-size: 26px; line-height: 1;
+  cursor: pointer; z-index: 5;
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+  transition: background .2s, opacity .2s;
+  font-family: var(--font-body);
+  padding: 0;
+}
+.carousel-btn:hover { background: var(--magenta); }
+.carousel-prev { left: 12px; }
+.carousel-next { right: 12px; }
+
+/* Dots indicadores */
+.carousel-dots {
+  position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 6px; z-index: 5;
+}
+.carousel-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(255,248,245,.35); border: none; cursor: pointer;
+  padding: 0; transition: background .2s, transform .2s;
+}
+.carousel-dot.active {
+  background: var(--ocre); transform: scale(1.3);
+}
+
+/* Contador esquina derecha */
+.carousel-counter {
+  position: absolute; bottom: 12px; right: 14px;
+  background: rgba(26,16,24,.7); color: rgba(255,248,245,.75);
+  padding: 3px 9px; border-radius: 4px;
+  font-size: 0.68rem; font-family: var(--font-mono);
+  backdrop-filter: blur(4px); z-index: 5;
+}
 
 .gallery-placeholder {
   width: 100%; height: 100%;
@@ -282,18 +338,12 @@ body {
 .modal-close:hover { background: var(--magenta); }
 
 .modal-badge {
-  position: absolute; bottom: 14px; left: 16px;
+  position: absolute; bottom: 12px; left: 14px;
   background: rgba(26,16,24,.8); color: var(--ocre);
   padding: 4px 12px; border-radius: 4px;
   font-size: 0.7rem; font-weight: 600; letter-spacing: 0.5px;
   border-left: 2px solid var(--ocre); backdrop-filter: blur(4px);
-}
-
-.gallery-count {
-  position: absolute; bottom: 14px; right: 16px;
-  background: rgba(26,16,24,.75); color: rgba(255,248,245,.7);
-  padding: 4px 10px; border-radius: 4px;
-  font-size: 0.68rem; font-family: var(--font-mono); backdrop-filter: blur(4px);
+  z-index: 5;
 }
 
 .modal-body { padding: 28px 32px 36px; }
@@ -526,7 +576,7 @@ body {
   display: none; align-items: center; justify-content: center; flex-direction: column; gap: 14px;
 }
 .lightbox.open { display: flex; }
-.lightbox img { max-width: 90vw; max-height: 85vh; object-fit: contain; border-radius: var(--radius-sm); }
+.lightbox img { max-width: 88vw; max-height: 82vh; object-fit: contain; border-radius: var(--radius-sm); }
 
 .lightbox-close {
   position: absolute; top: 18px; right: 18px; background: none;
@@ -536,6 +586,25 @@ body {
   transition: border-color .2s, background .2s; font-family: var(--font-body);
 }
 .lightbox-close:hover { background: var(--magenta); border-color: var(--magenta); }
+
+/* Botones anterior / siguiente en lightbox */
+.lightbox-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 48px; height: 48px; border-radius: 50%;
+  background: rgba(255,248,245,.1); border: 1.5px solid rgba(255,248,245,.25);
+  color: white; font-size: 30px; line-height: 1;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background .2s; font-family: var(--font-body); padding: 0;
+}
+.lightbox-nav:hover { background: var(--magenta); border-color: var(--magenta); }
+.lightbox-prev { left: 24px; }
+.lightbox-next { right: 24px; }
+
+.lightbox-counter {
+  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+  color: rgba(255,248,245,.5); font-size: .75rem; font-family: var(--font-mono);
+  letter-spacing: 1px;
+}
 
 /* ==============================================
    SCROLLBAR
