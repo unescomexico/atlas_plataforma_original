@@ -23,24 +23,39 @@ const COLORS = {
   crema:    '#FFF8F5',
 };
 
-// Colores por grupo de técnica
-const GRUPO_COLOR = {
-  'Bordado a mano':    COLORS.magenta,
-  'Bordado a máquina': COLORS.rosa,
-  'Telar de cintura':  COLORS.azulMar,
-  'Tejido a mano':     COLORS.cyan,
-  'Telar de pedal':    COLORS.verde,
-  'Telar de cajón':    COLORS.naranja,
+// Colores por categoría experta (CAT-N-1)
+const CAT1_COLOR = {
+  'Tejido':               COLORS.azulMar,
+  'Técnicas decorativas': COLORS.magenta,
+  'Acabados':             COLORS.ocre,
+  'Teñidos':              COLORS.verde,
 };
 
-const GRUPO_CHIP = {
-  'Bordado a mano':    'chip-bordado-mano',
-  'Bordado a máquina': 'chip-bordado-maquina',
-  'Telar de cintura':  'chip-telar-cintura',
-  'Tejido a mano':     'chip-tejido-mano',
-  'Telar de pedal':    'chip-telar-pedal',
-  'Telar de cajón':    'chip-telar-cajon',
+// Colores por CAT-N-2 (subcategorías)
+const CAT2_COLOR = {
+  'Tejidos':       COLORS.cyan,
+  'Anudados':      COLORS.azulMar,
+  'Tapicería':     '#5B4FCF',
+  'Bordados':      COLORS.magenta,
+  'Aplicaciones':  COLORS.rosa,
+  'Otras':         COLORS.gris,
+  'Artesanales':   COLORS.verde,
 };
+
+function getCatColor(t) {
+  return CAT2_COLOR[t.cat2] || CAT1_COLOR[t.cat1] || COLORS.arena;
+}
+
+// Compat: chip CSS class derivada de CAT-N-1
+function catChipClass(cat1) {
+  const map = {
+    'Tejido':               'chip-tejido',
+    'Técnicas decorativas': 'chip-decorativas',
+    'Acabados':             'chip-acabados',
+    'Teñidos':              'chip-tenidos',
+  };
+  return map[cat1] || 'chip-other';
+}
 
 // Degradado coropletas: #F588AFFF → #A4D984FF → #FCBC52FF → #A91E45
 function getMapColor(count) {
@@ -218,12 +233,16 @@ function buildAtlasFromCSV(techRows, recordRows, imgRows) {
     const prendas_resumen    = row['prendas_resumen']    || '';
     const ceremonias_resumen = row['ceremonias_resumen'] || '';
 
+    // ── Clasificación experta (CAT-N-1 a 4 desde technique_id) ──────
+    const cat1 = (row['CAT-N-1'] || '').trim();
+    const cat2 = (row['CAT-N-2'] || '').trim();
+    const cat3 = (row['CAT-N-3'] || '').trim();
+    const cat4 = (row['CAT-N-4'] || '').trim();
+
     // ── Desde data_by_RECORD_id (solo campos cualitativos únicos) ─────
 
-    // Grupo de técnica (campo solo disponible en records)
-    const grupo = records.length > 0
-      ? (records[0]['tecnica_grupo'] || 'Otras')
-      : 'Otras';
+    // Grupo derivado de clasificación experta CAT-N-1
+    const grupo = cat1 || (records.length > 0 ? (records[0]['tecnica_grupo'] || 'Otras') : 'Otras');
 
     // Lenguas — lista única de las que declaran los artesanos de esta técnica
     const lenguas = [...new Set(
@@ -290,6 +309,7 @@ function buildAtlasFromCSV(techRows, recordRows, imgRows) {
       imagenes,
       // Contenido textual consolidado
       historia, significados,
+      cat1, cat2, cat3, cat4,
     };
   }).filter(t => t.tecnica);
 
@@ -347,6 +367,8 @@ async function loadCSVs() {
 
     // Init map
     initMap();
+    // Init map filter panel (needs ATLAS)
+    initMapFilter();
 
   } catch (err) {
     console.error('Error cargando CSV:', err);
@@ -434,7 +456,13 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
       networkInitialized = true; initNetwork();
     } else if (id === 'arbol' && !arbolInitialized) {
       arbolInitialized = true; initArbol();
+    } else if (id === 'tenido') {
+      initTenidoView();
+    } else if (id === 'tenido') {
+      initTenidoView();
     }
+    if (id !== 'red' && _animFrame) { cancelAnimationFrame(_animFrame); _animFrame = null; }
+    if (id === 'red' && networkInitialized && !_animFrame) { _simAlpha = 0.05; (function loop(){drawNetwork(); _animFrame=requestAnimationFrame(loop);})(); }
   });
 });
 
@@ -467,8 +495,25 @@ function initMap() {
             );
           }
           layer.on({
-            mouseover: e => { if (name !== selectedStateName) e.target.setStyle(highlightStyle(feat)); },
-            mouseout:  e => { if (name !== selectedStateName) geojsonLayer.resetStyle(e.target); },
+            mouseover: e => {
+              if (name !== selectedStateName) {
+                if (mapFilteredTecnicas) {
+                  const base = filteredStateStyle(name);
+                  e.target.setStyle({ ...base, weight: 2.5, color: COLORS.negro });
+                } else {
+                  e.target.setStyle(highlightStyle(feat));
+                }
+              }
+            },
+            mouseout: e => {
+              if (name !== selectedStateName) {
+                if (mapFilteredTecnicas) {
+                  e.target.setStyle(filteredStateStyle(name));
+                } else {
+                  geojsonLayer.resetStyle(e.target);
+                }
+              }
+            },
             click: () => onStateClick(name, layer, feat),
           });
         }
@@ -494,15 +539,24 @@ function highlightStyle(feature) {
 function onStateClick(name, layer, feat) {
   selectedStateName = name;
   if (geojsonLayer) {
-    geojsonLayer.eachLayer(l => geojsonLayer.resetStyle(l));
-    layer.setStyle({ weight: 3, color: COLORS.negro, fillOpacity: 0.92, fillColor: getMapColor(countForEstado(name)) });
+    geojsonLayer.eachLayer(l => {
+      const lname = l.feature?.properties?.name || l.feature?.properties?.NAME_1 || '';
+      if (mapFilteredTecnicas) {
+        l.setStyle(filteredStateStyle(lname));
+      } else {
+        geojsonLayer.resetStyle(l);
+      }
+    });
+    const count = mapFilteredTecnicas ? countForEstadoFiltered(name) : countForEstado(name);
+    layer.setStyle({ weight: 3, color: COLORS.negro, fillOpacity: 0.92, fillColor: getMapColor(count) });
   }
-  const tecnicas = getTecnicasForEstado(name);
+  let tecnicas = getTecnicasForEstado(name);
+  if (mapFilteredTecnicas) tecnicas = tecnicas.filter(t => mapFilteredTecnicas.has(t));
   document.getElementById('panel-title').textContent = name;
   document.getElementById('panel-subtitle').textContent =
     tecnicas.length > 0
       ? `${tecnicas.length} técnica${tecnicas.length !== 1 ? 's' : ''} identificada${tecnicas.length !== 1 ? 's' : ''}`
-      : 'Sin técnicas registradas en el taller';
+      : 'Sin técnicas que coincidan con el filtro';
   renderSidePanel(tecnicas);
 }
 
@@ -512,38 +566,298 @@ function renderSidePanel(tecnicas) {
     body.innerHTML = `<div class="welcome-state"><h3>Sin registros</h3><p>No se documentaron técnicas en este estado.</p></div>`;
     return;
   }
-  const grupos = {};
+  // Agrupar por CAT-N-1 → CAT-N-2
+  const cat1Map = {};
   tecnicas.forEach(tname => {
-    const td = tecnicasMap[tname];
-    const g  = td ? (td.grupo || 'Otras') : 'Otras';
-    if (!grupos[g]) grupos[g] = [];
-    grupos[g].push(tname);
+    const td  = tecnicasMap[tname];
+    const c1  = td ? (td.cat1 || 'Sin clasificar') : 'Sin clasificar';
+    const c2  = td ? (td.cat2 || '') : '';
+    const key = c1;
+    if (!cat1Map[key]) cat1Map[key] = {};
+    const sub = c2 || '_';
+    if (!cat1Map[key][sub]) cat1Map[key][sub] = [];
+    cat1Map[key][sub].push(tname);
   });
   let html = '';
-  Object.entries(grupos).sort().forEach(([grupo, tecs]) => {
-    const chipCls = GRUPO_CHIP[grupo] || 'chip-other';
+  Object.keys(cat1Map).sort().forEach(c1 => {
+    const color1   = CAT1_COLOR[c1] || COLORS.arena;
+    const chipCls  = catChipClass(c1);
     html += `<div class="grupo-section">
-      <div class="grupo-label">${esc(grupo)}</div>
-      <div class="chips-wrap">`;
-    tecs.forEach(tname => {
-      const td = tecnicasMap[tname];
-      const hasImg = td && td.imagenes && td.imagenes.length > 0;
-      html += `<span class="tecnica-chip ${chipCls}" onclick="openFicha('${escJs(tname)}')">
-        ${hasImg ? '<span class="has-img-dot"></span>' : ''}${esc(tname)}</span>`;
+      <div class="grupo-label" style="color:${color1}">${esc(c1)}</div>`;
+    Object.keys(cat1Map[c1]).sort().forEach(c2 => {
+      if (c2 !== '_') {
+        const color2 = CAT2_COLOR[c2] || color1;
+        html += `<div class="cat2-label" style="color:${color2}">${esc(c2)}</div>`;
+      }
+      html += `<div class="chips-wrap">`;
+      cat1Map[c1][c2].forEach(tname => {
+        const td = tecnicasMap[tname];
+        const hasImg = td && td.imagenes && td.imagenes.length > 0;
+        html += `<span class="tecnica-chip ${chipCls}" onclick="openFicha('${escJs(tname)}')">
+          ${hasImg ? '<span class="has-img-dot"></span>' : ''}${esc(tname)}</span>`;
+      });
+      html += `</div>`;
     });
-    html += `</div></div>`;
+    html += `</div>`;
   });
   body.innerHTML = html;
 }
 
-document.getElementById('map-search').addEventListener('input', function() {
-  const q = this.value.toLowerCase().trim();
-  if (!geojsonLayer || !q) return;
-  geojsonLayer.eachLayer(l => {
-    const name = (l.feature?.properties?.name || l.feature?.properties?.NAME_1 || '').toLowerCase();
-    if (name.includes(q)) l.openTooltip();
+// ────────────────────────────────────────────────
+// MAP FILTER — filtro jerárquico por categoría y técnica
+// ────────────────────────────────────────────────
+let mapFilterState = { cat1: null, cat2: null, cat3: null, cat4: null, tecnica: null };
+let mapFilteredTecnicas = null; // Set de nombres de técnica activas, null = todas
+
+function initMapFilter() {
+  if (!ATLAS) return;
+  // Construir los chips de CAT-N-1
+  const cat1s = [...new Set(ATLAS.tecnicas.map(t => t.cat1).filter(Boolean))].sort();
+  const wrap1 = document.getElementById('map-chips-cat1');
+  if (!wrap1) return;
+  wrap1.innerHTML = '';
+  cat1s.forEach(c1 => {
+    const color = CAT1_COLOR[c1] || COLORS.arena;
+    const btn = document.createElement('button');
+    btn.className = 'map-chip';
+    btn.dataset.val = c1;
+    btn.textContent = c1;
+    btn.style.setProperty('--chip-color', color);
+    btn.addEventListener('click', () => onMapChipClick('cat1', c1));
+    wrap1.appendChild(btn);
   });
-});
+
+  // Autocomplete
+  const searchEl = document.getElementById('map-filter-search');
+  const acEl = document.getElementById('map-filter-autocomplete');
+  if (searchEl) {
+    searchEl.addEventListener('input', function() {
+      const q = this.value.toLowerCase().trim();
+      acEl.innerHTML = '';
+      acEl.style.display = 'none';
+      if (q.length < 2) return;
+      const matches = ATLAS.tecnicas
+        .filter(t => t.tecnica.toLowerCase().includes(q))
+        .slice(0, 10);
+      if (!matches.length) return;
+      matches.forEach(t => {
+        const item = document.createElement('div');
+        item.className = 'map-ac-item';
+        item.innerHTML = `<span class="map-ac-name">${esc(t.tecnica)}</span>
+          <span class="map-ac-cat" style="color:${CAT1_COLOR[t.cat1]||COLORS.arena}">${esc(t.cat1||'')}</span>`;
+        item.addEventListener('click', () => {
+          searchEl.value = t.tecnica;
+          acEl.style.display = 'none';
+          selectTecnicaOnMap(t.tecnica);
+        });
+        acEl.appendChild(item);
+      });
+      acEl.style.display = 'block';
+    });
+    document.addEventListener('click', e => {
+      if (!searchEl.contains(e.target) && !acEl.contains(e.target)) acEl.style.display = 'none';
+    });
+  }
+}
+
+function onMapChipClick(level, val) {
+  // Toggle
+  if (mapFilterState[level] === val) {
+    // Deselect — reset to parent level
+    mapFilterState[level] = null;
+    if (level === 'cat1') { mapFilterState.cat2 = null; mapFilterState.cat3 = null; mapFilterState.cat4 = null; mapFilterState.tecnica = null; }
+    if (level === 'cat2') { mapFilterState.cat3 = null; mapFilterState.cat4 = null; mapFilterState.tecnica = null; }
+    if (level === 'cat3') { mapFilterState.cat4 = null; mapFilterState.tecnica = null; }
+    if (level === 'cat4') { mapFilterState.tecnica = null; }
+  } else {
+    mapFilterState[level] = val;
+    // Reset children
+    if (level === 'cat1') { mapFilterState.cat2 = null; mapFilterState.cat3 = null; mapFilterState.cat4 = null; mapFilterState.tecnica = null; }
+    if (level === 'cat2') { mapFilterState.cat3 = null; mapFilterState.cat4 = null; mapFilterState.tecnica = null; }
+    if (level === 'cat3') { mapFilterState.cat4 = null; mapFilterState.tecnica = null; }
+  }
+  rebuildMapFilterCascade();
+  applyMapFilter();
+}
+
+function selectTecnicaOnMap(nombre) {
+  mapFilterState = { cat1: null, cat2: null, cat3: null, cat4: null, tecnica: nombre };
+  const t = tecnicasMap[nombre];
+  if (t) {
+    mapFilterState.cat1 = t.cat1;
+    mapFilterState.cat2 = t.cat2;
+    mapFilterState.cat3 = t.cat3;
+    mapFilterState.cat4 = t.cat4;
+  }
+  rebuildMapFilterCascade();
+  applyMapFilter();
+}
+
+function clearMapFilter() {
+  mapFilterState = { cat1: null, cat2: null, cat3: null, cat4: null, tecnica: null };
+  const search = document.getElementById('map-filter-search');
+  if (search) search.value = '';
+  rebuildMapFilterCascade();
+  applyMapFilter();
+}
+
+function rebuildMapFilterCascade() {
+  const { cat1, cat2, cat3 } = mapFilterState;
+
+  // Highlight active chip level 1
+  document.querySelectorAll('#map-chips-cat1 .map-chip').forEach(b => {
+    b.classList.toggle('active', b.dataset.val === cat1);
+  });
+
+  // CAT-N-2
+  const level2 = document.getElementById('map-level-cat2');
+  const chips2 = document.getElementById('map-chips-cat2');
+  if (cat1 && chips2) {
+    const cat2s = [...new Set(ATLAS.tecnicas.filter(t => t.cat1 === cat1 && t.cat2).map(t => t.cat2))].sort();
+    if (cat2s.length) {
+      chips2.innerHTML = '';
+      cat2s.forEach(c2 => {
+        const color = CAT2_COLOR[c2] || CAT1_COLOR[cat1] || COLORS.arena;
+        const btn = document.createElement('button');
+        btn.className = 'map-chip' + (c2 === cat2 ? ' active' : '');
+        btn.dataset.val = c2; btn.textContent = c2;
+        btn.style.setProperty('--chip-color', color);
+        btn.addEventListener('click', () => onMapChipClick('cat2', c2));
+        chips2.appendChild(btn);
+      });
+      level2.style.display = '';
+    } else { level2.style.display = 'none'; }
+  } else { if (level2) level2.style.display = 'none'; }
+
+  // CAT-N-3
+  const level3 = document.getElementById('map-level-cat3');
+  const chips3 = document.getElementById('map-chips-cat3');
+  if (cat2 && chips3) {
+    const cat3s = [...new Set(ATLAS.tecnicas.filter(t => t.cat2 === cat2 && t.cat3).map(t => t.cat3))].sort();
+    if (cat3s.length) {
+      chips3.innerHTML = '';
+      cat3s.forEach(c3 => {
+        const btn = document.createElement('button');
+        btn.className = 'map-chip' + (c3 === cat3 ? ' active' : '');
+        btn.dataset.val = c3; btn.textContent = c3;
+        btn.style.setProperty('--chip-color', CAT2_COLOR[cat2] || COLORS.arena);
+        btn.addEventListener('click', () => onMapChipClick('cat3', c3));
+        chips3.appendChild(btn);
+      });
+      level3.style.display = '';
+    } else { level3.style.display = 'none'; }
+  } else { if (level3) level3.style.display = 'none'; }
+
+  // CAT-N-4
+  const level4 = document.getElementById('map-level-cat4');
+  const chips4 = document.getElementById('map-chips-cat4');
+  if (mapFilterState.cat3 && chips4) {
+    const cat4s = [...new Set(ATLAS.tecnicas.filter(t => t.cat3 === mapFilterState.cat3 && t.cat4).map(t => t.cat4))].sort();
+    if (cat4s.length) {
+      chips4.innerHTML = '';
+      cat4s.forEach(c4 => {
+        const btn = document.createElement('button');
+        btn.className = 'map-chip' + (c4 === mapFilterState.cat4 ? ' active' : '');
+        btn.dataset.val = c4; btn.textContent = c4;
+        btn.style.setProperty('--chip-color', COLORS.arena);
+        btn.addEventListener('click', () => onMapChipClick('cat4', c4));
+        chips4.appendChild(btn);
+      });
+      level4.style.display = '';
+    } else { level4.style.display = 'none'; }
+  } else { if (level4) level4.style.display = 'none'; }
+
+  // Técnicas resultantes
+  const levelT = document.getElementById('map-level-tecs');
+  const chipsT = document.getElementById('map-chips-tecs');
+  const labelT = document.getElementById('map-tecs-label');
+  const filtered = getFilteredTecnicas();
+  if (cat1 && filtered.length > 0 && filtered.length < 80 && chipsT) {
+    chipsT.innerHTML = '';
+    filtered.slice(0, 60).forEach(t => {
+      const btn = document.createElement('button');
+      btn.className = 'map-chip map-chip-tec' + (mapFilterState.tecnica === t.tecnica ? ' active' : '');
+      btn.dataset.val = t.tecnica;
+      btn.textContent = t.tecnica;
+      btn.style.setProperty('--chip-color', getCatColor(t));
+      btn.addEventListener('click', () => {
+        mapFilterState.tecnica = mapFilterState.tecnica === t.tecnica ? null : t.tecnica;
+        rebuildMapFilterCascade();
+        applyMapFilter();
+      });
+      chipsT.appendChild(btn);
+    });
+    if (labelT) labelT.textContent = `Técnicas (${filtered.length})`;
+    levelT.style.display = '';
+  } else { if (levelT) levelT.style.display = 'none'; }
+}
+
+function getFilteredTecnicas() {
+  const { cat1, cat2, cat3, cat4, tecnica } = mapFilterState;
+  return ATLAS.tecnicas.filter(t => {
+    if (tecnica && t.tecnica !== tecnica) return false;
+    if (cat4 && t.cat4 !== cat4) return false;
+    if (cat3 && t.cat3 !== cat3) return false;
+    if (cat2 && t.cat2 !== cat2) return false;
+    if (cat1 && t.cat1 !== cat1) return false;
+    return true;
+  });
+}
+
+function applyMapFilter() {
+  const filtered = getFilteredTecnicas();
+  const activeEl = document.getElementById('map-filter-active');
+  const activeText = document.getElementById('map-filter-active-text');
+  const { cat1, cat2, cat3, cat4, tecnica } = mapFilterState;
+
+  const hasFilter = cat1 || tecnica;
+
+  if (!hasFilter) {
+    mapFilteredTecnicas = null;
+    if (activeEl) activeEl.style.display = 'none';
+    const badge = document.getElementById('map-filter-badge');
+    if (badge) badge.style.display = 'none';
+  } else {
+    mapFilteredTecnicas = new Set(filtered.map(t => t.tecnica));
+    const parts = [cat1, cat2, cat3, cat4, tecnica].filter(Boolean);
+    const label = parts.join(' › ');
+    if (activeText) activeText.textContent = `${label} · ${filtered.length} técnica${filtered.length!==1?'s':''}`;
+    if (activeEl) activeEl.style.display = '';
+    const badge = document.getElementById('map-filter-badge');
+    if (badge) badge.style.display = '';
+  }
+
+  // Repaint map
+  if (geojsonLayer) {
+    geojsonLayer.eachLayer(l => {
+      const name = l.feature?.properties?.name || l.feature?.properties?.NAME_1 || '';
+      l.setStyle(mapFilteredTecnicas ? filteredStateStyle(name) : stateStyle(l.feature));
+      // update tooltip
+      l.unbindTooltip();
+      const count = mapFilteredTecnicas ? countForEstadoFiltered(name) : countForEstado(name);
+      if (count > 0) {
+        l.bindTooltip(`<b>${name}</b><br>${count} técnica${count!==1?'s':''}`,
+          { className: 'leaflet-tooltip-atlas', direction: 'top', sticky: true });
+      }
+    });
+  }
+  // Reset panel
+  document.getElementById('panel-title').textContent = 'Selecciona un estado';
+  document.getElementById('panel-subtitle').textContent = hasFilter
+    ? `Mostrando ${filtered.length} técnica${filtered.length!==1?'s':''} filtrada${filtered.length!==1?'s':''}`
+    : 'Haz clic en el mapa para explorar las técnicas de cada estado';
+  document.getElementById('panel-body').innerHTML = `<div class="welcome-state"><h3>${hasFilter ? 'Filtro activo' : 'Explora el mapa'}</h3><p>${hasFilter ? 'Los estados coloreados tienen técnicas que coinciden con el filtro.' : 'Cada estado está coloreado según el número de técnicas documentadas.'}</p></div>`;
+}
+
+function countForEstadoFiltered(name) {
+  const tecs = getTecnicasForEstado(name);
+  return tecs.filter(t => mapFilteredTecnicas && mapFilteredTecnicas.has(t)).length;
+}
+
+function filteredStateStyle(name) {
+  const count = countForEstadoFiltered(name);
+  return { fillColor: getMapColor(count), weight: 1.2, opacity: 1, color: '#fff', fillOpacity: count > 0 ? 0.88 : 0.08 };
+}
 
 // ────────────────────────────────────────────────
 // CATALOG VIEW
@@ -554,14 +868,15 @@ let activeSearch = '';
 function renderCatalog() {
   if (!ATLAS) return;
   const tecnicas = ATLAS.tecnicas.filter(t => {
-    const gMatch = activeGrupo === 'all' || t.grupo === activeGrupo;
+    const gMatch = activeGrupo === 'all' || t.cat1 === activeGrupo;
     const sMatch = !activeSearch || t.tecnica.toLowerCase().includes(activeSearch);
     return gMatch && sMatch;
   });
   document.getElementById('catalog-results').textContent = `${tecnicas.length} técnica${tecnicas.length !== 1 ? 's' : ''}`;
   document.getElementById('tecnicas-grid').innerHTML = tecnicas.map(t => {
     const img   = t.imagenes && t.imagenes.length > 0 ? t.imagenes[0] : null;
-    const color = GRUPO_COLOR[t.grupo] || COLORS.arena;
+    const color = getCatColor(t);
+    const catLabel = [t.cat1, t.cat2].filter(Boolean).join(' › ');
     const estados = (t.estados || []).slice(0, 3).join(', ');
     return `<div class="tec-card" onclick="openFicha('${escJs(t.tecnica)}')">
       <div class="tec-card-img" style="background:${COLORS.negro}">
@@ -569,7 +884,7 @@ function renderCatalog() {
         <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${color}"></div>
       </div>
       <div class="tec-card-body">
-        <div class="tec-card-grupo">${esc(t.grupo)}</div>
+        <div class="tec-card-grupo">${esc(catLabel)}</div>
         <div class="tec-card-name">${esc(t.tecnica)}</div>
         <div class="tec-card-meta">
           ${estados ? `<span class="tec-card-tag">${esc(estados)}</span>` : ''}
@@ -652,9 +967,15 @@ function openFicha(tecnicaNombre) {
   let html = '';
 
   html += `<div class="modal-titulo">${esc(t.tecnica)}</div>`;
-  if (t.grupo) {
-    const color = GRUPO_COLOR[t.grupo] || COLORS.arena;
-    html += `<div class="modal-grupo" style="background:${color}">${esc(t.grupo)}</div>`;
+  // Clasificación experta
+  if (t.cat1) {
+    const color1 = CAT1_COLOR[t.cat1] || COLORS.arena;
+    const color2 = CAT2_COLOR[t.cat2] || color1;
+    let breadcrumb = esc(t.cat1);
+    if (t.cat2) breadcrumb += ` <span style="opacity:.6">›</span> ${esc(t.cat2)}`;
+    if (t.cat3) breadcrumb += ` <span style="opacity:.6">›</span> ${esc(t.cat3)}`;
+    if (t.cat4) breadcrumb += ` <span style="opacity:.6">›</span> ${esc(t.cat4)}`;
+    html += `<div class="modal-grupo" style="background:${color1}">${breadcrumb}</div>`;
   }
 
   // Temporalidad badge
@@ -732,18 +1053,19 @@ function openFicha(tecnicaNombre) {
     </div>`;
   }
 
-  const man = t.manufactura;
-  const manTotal = Object.values(man).reduce((a, b) => a + b, 0);
-  if (manTotal > 0) {
+  // Clasificación experta en ficha
+  if (t.cat1) {
+    const color1 = CAT1_COLOR[t.cat1] || COLORS.arena;
+    const color2 = CAT2_COLOR[t.cat2] || color1;
+    const color3 = color2;
+    const color4 = COLORS.arena;
     html += `<div class="section">
-      <div class="section-head"><span class="section-title">Técnica de Manufactura</span></div>
-      <div class="bar-chart">
-        ${barRow('A mano',        man.mano,        manTotal, COLORS.cyan)}
-        ${barRow('Telar cintura', man.telar,        manTotal, COLORS.azulMar)}
-        ${barRow('Telar pedal',   man.telar_pedal,  manTotal, COLORS.verde)}
-        ${barRow('Pedal',         man.pedal,        manTotal, COLORS.ocre)}
-        ${barRow('Tejido',        man.tejido,       manTotal, COLORS.rosa)}
-        ${barRow('Mixta',         man.mixta,        manTotal, COLORS.naranja)}
+      <div class="section-head"><span class="section-title">Clasificación</span></div>
+      <div class="clasificacion-tree">
+        <div class="clas-row"><div class="clas-dot" style="background:${color1}"></div><div class="clas-level">Categoría</div><div class="clas-val" style="color:${color1}">${esc(t.cat1)}</div></div>
+        ${t.cat2 ? `<div class="clas-row"><div class="clas-dot" style="background:${color2}"></div><div class="clas-level">Subcategoría</div><div class="clas-val" style="color:${color2}">${esc(t.cat2)}</div></div>` : ''}
+        ${t.cat3 ? `<div class="clas-row"><div class="clas-dot" style="background:${color3}"></div><div class="clas-level">Tipo</div><div class="clas-val">${esc(t.cat3)}</div></div>` : ''}
+        ${t.cat4 ? `<div class="clas-row"><div class="clas-dot" style="background:${color4}"></div><div class="clas-level">Variante</div><div class="clas-val">${esc(t.cat4)}</div></div>` : ''}
       </div>
     </div>`;
   }
@@ -791,8 +1113,8 @@ function openFicha(tecnicaNombre) {
     <button onclick="goToNetwork('${escJs(t.tecnica)}')" style="background:var(--negro);color:var(--crema);border:none;padding:10px 20px;border-radius:4px;font-family:var(--font-body);font-size:.8rem;font-weight:600;cursor:pointer;letter-spacing:.3px;">
       Ver en la red de técnicas
     </button>
-    <button onclick="goToCatalog('${escJs(t.grupo)}')" style="background:transparent;color:var(--arena);border:1px solid var(--border);padding:10px 20px;border-radius:4px;font-family:var(--font-body);font-size:.8rem;font-weight:600;cursor:pointer;letter-spacing:.3px;margin-left:8px;">
-      Ver técnicas de este grupo
+    <button onclick="goToCatalog('${escJs(t.cat1)}')" style="background:transparent;color:var(--arena);border:1px solid var(--border);padding:10px 20px;border-radius:4px;font-family:var(--font-body);font-size:.8rem;font-weight:600;cursor:pointer;letter-spacing:.3px;margin-left:8px;">
+      Ver técnicas de esta categoría
     </button>
     <button onclick="closeFicha();openKobo('cambio')" style="background:transparent;color:var(--azul-mar);border:1px solid var(--azul-mar);padding:10px 20px;border-radius:4px;font-family:var(--font-body);font-size:.8rem;font-weight:600;cursor:pointer;letter-spacing:.3px;margin-left:8px;">
       ✎ ¿Deseas proponer algún cambio a esta técnica?
@@ -845,11 +1167,11 @@ function goToNetwork(tecnicaNombre) {
   setTimeout(() => highlightNetworkNode(tecnicaNombre), 600);
 }
 
-function goToCatalog(grupo) {
+function goToCatalog(cat1) {
   closeFicha();
   document.querySelector('[data-tab="catalogo"]').click();
   if (!catalogInitialized) catalogInitialized = true;
-  activeGrupo = grupo || 'all';
+  activeGrupo = cat1 || 'all';
   document.querySelectorAll('.filter-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.grupo === activeGrupo);
   });
@@ -975,13 +1297,11 @@ let isPanning = false;
 let panStart = null;
 
 const NET_FILTERS = [
-  { id: 'all',             label: 'Todas' },
-  { id: 'mano',            label: 'A mano' },
-  { id: 'telar',           label: 'Telar' },
-  { id: 'bordado',         label: 'Bordado' },
-  { id: 'tenido-plantas',  label: 'Teñido con plantas' },
-  { id: 'tenido-animales', label: 'Teñido animal' },
-  { id: 'tenido-minerales',label: 'Teñido mineral' },
+  { id: 'all',         label: 'Todas' },
+  { id: 'Tejido',      label: 'Tejido' },
+  { id: 'decorativas', label: 'Técnicas decorativas' },
+  { id: 'Acabados',    label: 'Acabados' },
+  { id: 'Teñidos',     label: 'Teñidos' },
 ];
 
 function initNetwork() {
@@ -994,6 +1314,7 @@ function initNetwork() {
   bindNetworkEvents();
   renderNetworkFilters();
   renderNetworkLegend();
+  initNetworkSearch();
 }
 
 function resizeCanvas() {
@@ -1005,32 +1326,37 @@ function resizeCanvas() {
 
 function buildNetworkData() {
   const tecnicas = ATLAS.tecnicas;
-  const grupos   = [...new Set(tecnicas.map(t => t.grupo).filter(Boolean))];
+  // Use CAT-N-2 as hub nodes (more granular than cat1, fewer than individual tecnicas)
+  const hubs = [...new Set(tecnicas.map(t => t.cat1 + '||' + (t.cat2 || '')).filter(Boolean))];
   networkNodes = [];
 
-  grupos.forEach(g => {
+  hubs.forEach(hubKey => {
+    const [c1, c2] = hubKey.split('||');
+    const label = c2 || c1;
+    const color = CAT2_COLOR[c2] || CAT1_COLOR[c1] || COLORS.arena;
     networkNodes.push({
-      id: `grupo:${g}`, label: g, type: 'grupo', grupo: g, r: 22,
-      color: GRUPO_COLOR[g] || COLORS.arena,
+      id: `hub:${hubKey}`, label, type: 'grupo', cat1: c1, cat2: c2, r: 22,
+      color,
       x: Math.random() * 600 + 100, y: Math.random() * 400 + 80, vx: 0, vy: 0, fx: null, fy: null,
     });
   });
 
   tecnicas.forEach(t => {
+    const color = getCatColor(t);
     networkNodes.push({
-      id: t.tecnica, label: t.tecnica, type: 'tecnica', grupo: t.grupo,
+      id: t.tecnica, label: t.tecnica, type: 'tecnica', grupo: t.cat1, cat1: t.cat1, cat2: t.cat2,
       estados: t.estados, n_fichas: t.n_fichas,
-      manufactura_tipos: t.manufactura_tipos || [],
-      tenido_tipos: t.tenido_tipos || [],
+      cat3: t.cat3, cat4: t.cat4,
       r: Math.max(6, Math.min(16, 5 + t.n_fichas * 0.7)),
-      color: GRUPO_COLOR[t.grupo] || COLORS.arena,
+      color,
       x: Math.random() * 700 + 50, y: Math.random() * 500 + 40, vx: 0, vy: 0, fx: null, fy: null,
     });
   });
 
   networkLinks = [];
   tecnicas.forEach(t => {
-    if (t.grupo) networkLinks.push({ source: `grupo:${t.grupo}`, target: t.tecnica, strength: 0.6 });
+    const hubKey = t.cat1 + '||' + (t.cat2 || '');
+    networkLinks.push({ source: `hub:${hubKey}`, target: t.tecnica, strength: 0.6 });
   });
 }
 
@@ -1044,48 +1370,63 @@ function getVisibleNodes() {
 
 function matchesFilter(n) {
   if (activeNetworkFilter === 'all') return true;
-  const m   = n.manufactura_tipos || [];
-  const ten = n.tenido_tipos || [];
-  const g   = (n.grupo || '').toLowerCase();
+  const c1 = (n.cat1 || '');
   switch (activeNetworkFilter) {
-    case 'mano':             return m.includes('Mano');
-    case 'telar':            return m.includes('Telar') || m.includes('Telar de pedal');
-    case 'bordado':          return g.includes('bordado');
-    case 'tenido-plantas':   return ten.includes('Plantas');
-    case 'tenido-animales':  return ten.includes('Animales/Insectos');
-    case 'tenido-minerales': return ten.includes('Minerales');
+    case 'Tejido':      return c1 === 'Tejido';
+    case 'decorativas': return c1 === 'Técnicas decorativas';
+    case 'Acabados':    return c1 === 'Acabados';
+    case 'Teñidos':     return c1 === 'Teñidos';
     default: return true;
   }
 }
 
+let _simAlpha = 0;
+let _animFrame = null;
+
 function startSimulation() {
   const W = networkCanvas.width, H = networkCanvas.height;
   const grupos = networkNodes.filter(n => n.type === 'grupo');
+
+  // Place hub nodes in a circle — fixed so tecnicas cluster around them
   grupos.forEach((g, i) => {
     const angle = (i / grupos.length) * Math.PI * 2 - Math.PI / 2;
-    g.x = W / 2 + Math.cos(angle) * 180;
-    g.y = H / 2 + Math.sin(angle) * 150;
+    const rx = Math.min(W, H) * 0.28;
+    const ry = Math.min(W, H) * 0.24;
+    g.x = W / 2 + Math.cos(angle) * rx;
+    g.y = H / 2 + Math.sin(angle) * ry;
     g.fx = g.x; g.fy = g.y;
   });
 
+  // Spread tecnicas near their hub
   networkNodes.filter(n => n.type === 'tecnica').forEach(n => {
-    const hub = networkNodes.find(h => h.type === 'grupo' && h.label === n.grupo);
-    if (hub) {
-      const angle = Math.random() * Math.PI * 2;
-      const dist  = 40 + Math.random() * 60;
-      n.x = hub.x + Math.cos(angle) * dist;
-      n.y = hub.y + Math.sin(angle) * dist;
-    } else {
-      n.x = W / 2 + (Math.random() - 0.5) * 300;
-      n.y = H / 2 + (Math.random() - 0.5) * 250;
-    }
+    const hubKey = `hub:${n.cat1}||${n.cat2 || ''}`;
+    const hub = networkNodes.find(h => h.id === hubKey);
+    const angle = Math.random() * Math.PI * 2;
+    const dist  = 30 + Math.random() * 80;
+    if (hub) { n.x = hub.x + Math.cos(angle) * dist; n.y = hub.y + Math.sin(angle) * dist; }
+    else { n.x = W / 2 + (Math.random() - .5) * 300; n.y = H / 2 + (Math.random() - .5) * 250; }
     n.vx = 0; n.vy = 0;
   });
 
-  let alpha = 1;
-  for (let i = 0; i < 300; i++) { alpha *= 0.96; applyForces(alpha); }
-  grupos.forEach(g => { g.fx = null; g.fy = null; });
-  drawNetwork();
+  // Warm-up: 150 silent iters
+  _simAlpha = 1;
+  for (let i = 0; i < 150; i++) { _simAlpha *= 0.97; applyForces(_simAlpha); }
+
+  // Release hubs after warm-up (optional drift)
+  // grupos.forEach(g => { g.fx = null; g.fy = null; });
+
+  // Start live animation loop
+  if (_animFrame) cancelAnimationFrame(_animFrame);
+  _simAlpha = 0.25;
+  function loop() {
+    if (_simAlpha > 0.003) {
+      _simAlpha *= 0.985;
+      applyForces(_simAlpha);
+    }
+    drawNetwork();
+    _animFrame = requestAnimationFrame(loop);
+  }
+  loop();
 }
 
 function applyForces(alpha) {
@@ -1093,41 +1434,53 @@ function applyForces(alpha) {
   const nodes   = networkNodes.filter(n => visible.has(n.id));
   const W = networkCanvas.width, H = networkCanvas.height;
 
+  // Repulsion — only between same-cluster nodes to avoid overcrowding globally
   for (let i = 0; i < nodes.length; i++) {
     for (let j = i + 1; j < nodes.length; j++) {
       const a = nodes[i], b = nodes[j];
+      if (a.type === 'grupo' || b.type === 'grupo') continue; // hubs handle themselves via spring
+      if (a.cat2 !== b.cat2) continue; // only repel within same cluster
       let dx = b.x - a.x || 0.01, dy = b.y - a.y || 0.01;
       const dist2 = dx * dx + dy * dy;
       const dist  = Math.sqrt(dist2) || 0.01;
-      const ideal = a.r + b.r + 28;
-      if (dist < ideal * 5) {
-        const force = (alpha * 60) / dist2;
+      const ideal = a.r + b.r + 18;
+      if (dist < ideal * 4) {
+        const force = (alpha * 45) / dist2;
         a.vx -= dx * force; a.vy -= dy * force;
         b.vx += dx * force; b.vy += dy * force;
       }
     }
   }
 
+  // Spring links — strong pull toward hub
   networkLinks.forEach(link => {
     const s = networkNodes.find(n => n.id === link.source);
     const t = networkNodes.find(n => n.id === link.target);
     if (!s || !t || !visible.has(s.id) || !visible.has(t.id)) return;
     const dx = t.x - s.x, dy = t.y - s.y;
     const dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
-    const force = (dist - 75) * 0.018 * alpha;
+    // Preferred distance scales with how many nodes in cluster
+    const preferred = 55 + t.r * 1.5;
+    const force = (dist - preferred) * 0.032 * alpha;
     const fx = (dx / dist) * force, fy = (dy / dist) * force;
-    s.vx += fx; s.vy += fy; t.vx -= fx; t.vy -= fy;
+    if (s.fx === null || s.fx === undefined) { s.vx += fx; s.vy += fy; }
+    t.vx -= fx * 0.5; t.vy -= fy * 0.5;
   });
 
   nodes.forEach(n => {
     if (n.fx !== null && n.fx !== undefined) { n.x = n.fx; n.vx = 0; return; }
     if (n.fy !== null && n.fy !== undefined) { n.y = n.fy; n.vy = 0; return; }
-    n.vx += (W / 2 - n.x) * 0.002 * alpha;
-    n.vy += (H / 2 - n.y) * 0.002 * alpha;
-    n.vx *= 0.78; n.vy *= 0.78;
+    // Light gravity to hub rather than canvas center
+    const hubKey = `hub:${n.cat1}||${n.cat2 || ''}`;
+    const hub = networkNodes.find(h => h.id === hubKey);
+    if (hub) {
+      n.vx += (hub.x - n.x) * 0.004 * alpha;
+      n.vy += (hub.y - n.y) * 0.004 * alpha;
+    }
+    n.vx *= 0.72; n.vy *= 0.72;
     n.x += n.vx; n.y += n.vy;
-    n.x = Math.max(n.r + 8, Math.min(W - n.r - 8, n.x));
-    n.y = Math.max(n.r + 8, Math.min(H - n.r - 8, n.y));
+    n.x = Math.max(n.r + 10, Math.min(W - n.r - 10, n.x));
+    n.y = Math.max(n.r + 10, Math.min(H - n.r - 10, n.y));
   });
 }
 
@@ -1138,26 +1491,35 @@ function drawNetwork() {
 
   ctx.save();
   ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = '#ffffff';
+  // Subtle warm background
+  ctx.fillStyle = '#FDFAF8';
   ctx.fillRect(0, 0, W, H);
   ctx.translate(transform.x, transform.y);
   ctx.scale(transform.k, transform.k);
 
+  // Draw links
   networkLinks.forEach(link => {
     const s = networkNodes.find(n => n.id === link.source);
     const t = networkNodes.find(n => n.id === link.target);
     if (!s || !t || !visible.has(s.id) || !visible.has(t.id)) return;
-    const isHi = highlightedNode && (highlightedNode.id === s.id || highlightedNode.id === t.id);
-    const isHov= hoveredNode    && (hoveredNode.id    === s.id || hoveredNode.id    === t.id);
+    const isHovLink = hoveredNode && (hoveredNode.id === s.id || hoveredNode.id === t.id);
+    const isHiLink  = highlightedNode && (highlightedNode.id === s.id || highlightedNode.id === t.id
+      || (highlightedNode.type === 'grupo' && t.cat2 === highlightedNode.cat2));
     ctx.beginPath();
     ctx.moveTo(s.x, s.y); ctx.lineTo(t.x, t.y);
-    ctx.strokeStyle = isHi || isHov ? (s.color + 'cc') : 'rgba(26,16,24,0.08)';
-    ctx.lineWidth = isHi ? 2 : 1;
+    if (isHovLink) {
+      ctx.strokeStyle = s.color + 'bb'; ctx.lineWidth = 1.5;
+    } else if (isHiLink) {
+      ctx.strokeStyle = s.color + '88'; ctx.lineWidth = 1.2;
+    } else {
+      ctx.strokeStyle = 'rgba(26,16,24,0.06)'; ctx.lineWidth = 0.8;
+    }
     ctx.stroke();
   });
 
+  // Sort: tecnicas behind grupos
   const nodes = networkNodes.filter(n => visible.has(n.id));
-  nodes.sort((a, b) => {
+  nodes.sort((a,b) => {
     if (a.type === 'grupo' && b.type !== 'grupo') return 1;
     if (b.type === 'grupo' && a.type !== 'grupo') return -1;
     return 0;
@@ -1165,27 +1527,58 @@ function drawNetwork() {
 
   nodes.forEach(n => {
     const isHov = hoveredNode     && hoveredNode.id     === n.id;
-    const isHi  = highlightedNode && highlightedNode.id === n.id;
+    const isHi  = highlightedNode && (highlightedNode.id === n.id
+      || (highlightedNode.type === 'grupo' && n.cat2 === highlightedNode.cat2 && n.type === 'tecnica'));
     const dimmed = (highlightedNode || hoveredNode) && !isHi && !isHov;
-    const r = n.r * (isHov || isHi ? 1.25 : 1);
+    const r = n.r * (isHov || isHi ? 1.3 : 1);
 
-    if (isHov || isHi) { ctx.shadowColor = n.color; ctx.shadowBlur = 12; }
+    // Glow for hub nodes always, for tecnica on hover/highlight
+    if (n.type === 'grupo' || isHov || isHi) {
+      ctx.shadowColor = n.color;
+      ctx.shadowBlur = n.type === 'grupo' ? 18 : 10;
+    }
+
     ctx.beginPath();
     ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
-    ctx.fillStyle = dimmed ? (n.color + '44') : n.color;
-    ctx.fill();
-    if (n.type === 'grupo') {
-      ctx.strokeStyle = dimmed ? 'rgba(255,255,255,.3)' : 'rgba(255,255,255,.7)';
-      ctx.lineWidth = 2; ctx.stroke();
-    }
-    ctx.shadowBlur = 0;
 
-    if (n.type === 'grupo' || isHov || isHi) {
-      ctx.font = n.type === 'grupo' ? `700 11px "DM Sans", sans-serif` : `500 9.5px "DM Sans", sans-serif`;
+    if (n.type === 'grupo') {
+      // Hub: solid fill + white ring
+      ctx.fillStyle = dimmed ? (n.color + '55') : n.color;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = dimmed ? 'rgba(255,255,255,.2)' : 'rgba(255,255,255,.85)';
+      ctx.lineWidth = 2.5; ctx.stroke();
+    } else {
+      // Tecnica: filled circle
+      ctx.fillStyle = dimmed ? (n.color + '30') : (isHov || isHi ? n.color : n.color + 'cc');
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    // Labels
+    if (n.type === 'grupo') {
+      // Hub label always visible — pill background
+      const label = n.label;
+      ctx.font = `700 10.5px "DM Sans", sans-serif`;
+      const tw = ctx.measureText(label).width;
+      const px = 6, py = 3;
+      ctx.fillStyle = dimmed ? 'rgba(26,16,24,.08)' : 'rgba(255,255,255,0.92)';
+      ctx.beginPath();
+      const lx = n.x - tw/2 - px, ly = n.y + r + 3;
+      ctx.roundRect(lx, ly, tw + px*2, 16 + py*2, 4);
+      ctx.fill();
+      ctx.fillStyle = dimmed ? 'rgba(26,16,24,.25)' : n.color;
       ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-      ctx.fillStyle = dimmed ? 'rgba(26,16,24,.25)' : COLORS.negro;
-      const label = n.label.length > 22 ? n.label.slice(0, 20) + '…' : n.label;
-      ctx.fillText(label, n.x, n.y + r + 4);
+      ctx.fillText(label, n.x, ly + py);
+    } else if (isHov || isHi) {
+      ctx.font = `500 9px "DM Sans", sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      const label = n.label.length > 24 ? n.label.slice(0, 22) + '…' : n.label;
+      const tw = ctx.measureText(label).width;
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.fillRect(n.x - tw/2 - 3, n.y + r + 2, tw + 6, 13);
+      ctx.fillStyle = COLORS.negro;
+      ctx.fillText(label, n.x, n.y + r + 3);
     }
   });
 
@@ -1229,8 +1622,17 @@ function bindNetworkEvents() {
     canvas.style.cursor = node ? 'pointer' : 'grab';
 
     if (node) {
-      tooltip.innerHTML = `<strong>${esc(node.label)}</strong>
-        ${node.type === 'tecnica' ? `${node.n_fichas} registro${node.n_fichas !== 1 ? 's' : ''} · ${(node.estados || []).slice(0, 3).join(', ')}` : 'Grupo de técnicas'}`;
+      if (node.type === 'tecnica') {
+        const catBreadcrumb = [node.cat1, node.cat2].filter(Boolean).join(' › ');
+        tooltip.innerHTML = `<strong>${esc(node.label)}</strong><br>
+          <span style="font-size:.72rem;opacity:.7">${esc(catBreadcrumb)}</span><br>
+          ${node.n_fichas} registro${node.n_fichas !== 1 ? 's' : ''} · ${(node.estados || []).slice(0, 2).join(', ')}`;
+      } else {
+        const count = networkNodes.filter(n => n.type === 'tecnica' && n.cat2 === node.cat2).length;
+        tooltip.innerHTML = `<strong>${esc(node.label)}</strong><br>
+          <span style="font-size:.72rem;opacity:.7">${esc(node.cat1||'')}</span><br>
+          ${count} técnica${count !== 1 ? 's' : ''}`;
+      }
       tooltip.style.left = (mx + 14) + 'px';
       tooltip.style.top  = (my - 10) + 'px';
       tooltip.classList.add('visible');
@@ -1297,19 +1699,18 @@ function renderNetworkFilters() {
 }
 
 function renderNetworkLegend() {
-  const wrap  = document.getElementById('network-legend-items');
-  const grupos = [...new Set(ATLAS.tecnicas.map(t => t.grupo).filter(Boolean))];
-  wrap.innerHTML = grupos.map(g => {
-    const color = GRUPO_COLOR[g] || COLORS.arena;
-    return `<div class="net-legend-item" data-grupo="${g}">
-      <div class="net-legend-dot" style="background:${color}"></div>${g}</div>`;
-  }).join('');
+  const wrap = document.getElementById('network-legend-items');
+  wrap.innerHTML = Object.entries(CAT1_COLOR).map(([cat1, color]) =>
+    `<div class="net-legend-item" data-cat1="${cat1}">
+      <div class="net-legend-dot" style="background:${color}"></div>${cat1}</div>`
+  ).join('');
   wrap.querySelectorAll('.net-legend-item').forEach(item => {
     item.addEventListener('click', () => {
-      const g    = item.dataset.grupo;
-      const node = networkNodes.find(n => n.type === 'grupo' && n.label === g);
-      if (node) {
-        highlightedNode = highlightedNode?.id === node.id ? null : node;
+      const cat1 = item.dataset.cat1;
+      // highlight all hub nodes of this cat1
+      const hubNode = networkNodes.find(n => n.type === 'grupo' && n.cat1 === cat1);
+      if (hubNode) {
+        highlightedNode = highlightedNode?.id === hubNode.id ? null : hubNode;
         item.classList.toggle('filtered', !!highlightedNode); drawNetwork();
       }
     });
@@ -1325,6 +1726,52 @@ function highlightNetworkNode(tecnicaNombre) {
     transform.y = H / 2 - node.y * transform.k;
     drawNetwork();
   }
+}
+
+function initNetworkSearch() {
+  const input = document.getElementById('network-search');
+  const ac    = document.getElementById('network-search-ac');
+  if (!input || !ac) return;
+
+  input.addEventListener('input', function() {
+    const q = this.value.toLowerCase().trim();
+    ac.innerHTML = ''; ac.style.display = 'none';
+    if (q.length < 2) { highlightedNode = null; drawNetwork(); return; }
+    const matches = ATLAS.tecnicas
+      .filter(t => t.tecnica.toLowerCase().includes(q))
+      .slice(0, 12);
+    if (!matches.length) return;
+    matches.forEach(t => {
+      const item = document.createElement('div');
+      item.className = 'network-ac-item';
+      const color = getCatColor(t);
+      item.innerHTML = `<span class="network-ac-dot" style="background:${color}"></span>
+        <span class="network-ac-name">${esc(t.tecnica)}</span>
+        <span class="network-ac-cat" style="color:${CAT1_COLOR[t.cat1]||COLORS.arena}">${esc(t.cat1||'')}</span>`;
+      item.addEventListener('click', () => {
+        input.value = t.tecnica;
+        ac.style.display = 'none';
+        highlightNetworkNode(t.tecnica);
+        // also open ficha on double intent: just highlight
+        const node = networkNodes.find(n => n.id === t.tecnica);
+        if (node) { highlightedNode = node; drawNetwork(); }
+      });
+      ac.appendChild(item);
+    });
+    ac.style.display = 'block';
+  });
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { ac.style.display = 'none'; input.value = ''; highlightedNode = null; drawNetwork(); }
+    if (e.key === 'Enter') {
+      const first = ac.querySelector('.network-ac-item');
+      if (first) first.click();
+    }
+  });
+
+  document.addEventListener('click', e => {
+    if (!input.contains(e.target) && !ac.contains(e.target)) ac.style.display = 'none';
+  });
 }
 
 /* ────────────────────────────────────────────────
@@ -1530,13 +1977,13 @@ const REPORT_HTML = `<nav class="report-internal-nav" id="report-internal-nav">
 
     <div class="two-col">
       <div class="chart-card">
-        <div class="chart-card-title">Grupo de técnica general</div>
-        <div class="chart-card-sub">Agrupación según tipo de manufactura artesanal</div>
+        <div class="chart-card-title">Categoría de técnica (clasificación experta)</div>
+        <div class="chart-card-sub">Distribución de registros por categoría principal según el esquema experto</div>
         <canvas id="r-chart-grupos" height="260"></canvas>
       </div>
       <div class="chart-card">
-        <div class="chart-card-title">Tipo de manufactura</div>
-        <div class="chart-card-sub">Forma en que se realiza la técnica reportada</div>
+        <div class="chart-card-title">Subcategoría (CAT-N-2)</div>
+        <div class="chart-card-sub">Número de registros por subcategoría dentro del esquema de clasificación experto</div>
         <canvas id="r-chart-manufactura" height="260"></canvas>
       </div>
     </div>
@@ -1857,23 +2304,23 @@ new Chart(document.getElementById('r-chart-top-tec'), {
   options: { ...baseOpts('y') }
 });
 
-/* ── GRUPOS ── */
+/* ── CATEGORÍA EXPERTA (CAT-N-1) ── */
 new Chart(document.getElementById('r-chart-grupos'), {
   type: 'doughnut',
   data: {
-    labels: ['Bordado a mano','Telar de cintura','Bordado a máquina','Tejido a mano','Telar de pedal','Telar de cajón'],
-    datasets: [{ data:[184,91,36,15,15,1], backgroundColor:[MAGENTA,AZUL,ROSA,CYAN,VERDE,ARENA], borderWidth:3, borderColor:'#FFF8F5' }]
+    labels: ['Tejido','Técnicas decorativas','Acabados','Teñidos'],
+    datasets: [{ data:[317,310,5,5], backgroundColor:[AZUL,MAGENTA,OCRE,VERDE], borderWidth:3, borderColor:'#FFF8F5' }]
   },
   options: { cutout:'52%', plugins:{ legend:{ position:'bottom', labels:{ color:ARENA, font:{size:11}, padding:10 } } } }
 });
 
-/* ── MANUFACTURA ── */
-const manData = [['A mano',370],['Telar cintura',232],['Máquina/pedal',56],['Mixta',40],['Tejido a mano',34],['Otra',26],['Telar pedal',25]];
+/* ── SUBCATEGORÍA EXPERTA (CAT-N-2) ── */
+const catN2Data = [['Bordados',309],['Tejidos',284],['Anudados',24],['Tapicería',9],['Artesanales',5],['Aplicaciones',1]];
 new Chart(document.getElementById('r-chart-manufactura'), {
   type: 'bar',
   data: {
-    labels: manData.map(d=>d[0]),
-    datasets: [{ data: manData.map(d=>d[1]), backgroundColor:[MAGENTA,AZUL,ROSA,OCRE,CYAN,ARENA,VERDE], borderWidth:0, borderRadius:3 }]
+    labels: catN2Data.map(d=>d[0]),
+    datasets: [{ data: catN2Data.map(d=>d[1]), backgroundColor:[MAGENTA,AZUL,CYAN,'#5B4FCF',VERDE,ROSA], borderWidth:0, borderRadius:3 }]
   },
   options: {
     plugins:{legend:{display:false}},
@@ -1958,76 +2405,36 @@ function initArbol() {
   if (!ATLAS) return;
   const tecnicas = ATLAS.tecnicas;
 
-  // Build classification buckets
-  const tree = {
-    manufactura: {
-      label: 'Manufactura',
-      color: COLORS.azulMar,
-      children: {
-        'Bordado': {
-          color: COLORS.magenta,
-          children: {
-            'Bordado a mano':    { col: 'n_man_mano',        tecnicas: [] },
-            'Bordado a máquina': { col: 'n_man_otra',        tecnicas: [] },
-          }
-        },
-        'Tejido': {
-          color: COLORS.cyan,
-          children: {
-            'Tejido a mano': { col: 'n_man_tejido',      tecnicas: [] },
-            'Telar': {
-              color: COLORS.azulMar,
-              children: {
-                'Telar de cintura': { col: 'n_man_telar',       tecnicas: [] },
-                'Telar de pedal':   { col: 'n_man_telar_pedal', tecnicas: [] },
-              }
-            },
-          }
-        },
-      }
-    },
-    tenido: {
-      label: 'Teñido',
-      color: COLORS.verde,
-      children: {
-        'Plantas':   { col: 'n_tenido_plantas',   color: COLORS.verde,   tecnicas: [] },
-        'Animales':  { col: 'n_tenido_animales',  color: COLORS.naranja, tecnicas: [] },
-        'Minerales': { col: 'n_tenido_minerales', color: COLORS.azulMar, tecnicas: [] },
-      }
-    }
-  };
-
-  // Map raw CSV rows by tecnica name for column access
-  const rawByTec = {};
-  // We need raw technique rows; rebuild from ATLAS data we stored
-  ATLAS.tecnicas.forEach(t => { rawByTec[t.tecnica] = t; });
-
-  // Bordado a mano → grupo Bordado a mano / Bordado a máquina
+  // Build tree from expert classification CAT-N-1 → N-2 → N-3 → N-4
+  const tree = {};
   tecnicas.forEach(t => {
-    const g = (t.grupo || '').toLowerCase();
-    const man = t.manufactura;
-
-    // Manufactura leaves
-    if (g.includes('bordado') && !g.includes('máquina')) {
-      tree.manufactura.children['Bordado'].children['Bordado a mano'].tecnicas.push(t.tecnica);
+    const c1 = t.cat1 || 'Sin clasificar';
+    const c2 = t.cat2 || null;
+    const c3 = t.cat3 || null;
+    const c4 = t.cat4 || null;
+    if (!tree[c1]) tree[c1] = { color: CAT1_COLOR[c1] || COLORS.arena, children: {} };
+    if (!c2) {
+      // leaf at level 1
+      if (!tree[c1].tecnicas) tree[c1].tecnicas = [];
+      tree[c1].tecnicas.push(t.tecnica);
+      return;
     }
-    if (g.includes('bordado') && g.includes('máquina')) {
-      tree.manufactura.children['Bordado'].children['Bordado a máquina'].tecnicas.push(t.tecnica);
+    if (!tree[c1].children[c2]) tree[c1].children[c2] = { color: CAT2_COLOR[c2] || tree[c1].color, children: {} };
+    const node2 = tree[c1].children[c2];
+    if (!c3) {
+      if (!node2.tecnicas) node2.tecnicas = [];
+      node2.tecnicas.push(t.tecnica);
+      return;
     }
-    if (man.tejido > 0 || g === 'tejido a mano') {
-      tree.manufactura.children['Tejido'].children['Tejido a mano'].tecnicas.push(t.tecnica);
+    if (!node2.children[c3]) node2.children[c3] = { color: node2.color, children: {} };
+    const node3 = node2.children[c3];
+    if (!c4) {
+      if (!node3.tecnicas) node3.tecnicas = [];
+      node3.tecnicas.push(t.tecnica);
+      return;
     }
-    if (man.telar > 0 || g === 'telar de cintura') {
-      tree.manufactura.children['Tejido'].children['Telar'].children['Telar de cintura'].tecnicas.push(t.tecnica);
-    }
-    if (man.telar_pedal > 0 || g === 'telar de pedal') {
-      tree.manufactura.children['Tejido'].children['Telar'].children['Telar de pedal'].tecnicas.push(t.tecnica);
-    }
-
-    // Teñido leaves
-    if (t.tenido.plantas > 0)   tree.tenido.children['Plantas'].tecnicas.push(t.tecnica);
-    if (t.tenido.animales > 0)  tree.tenido.children['Animales'].tecnicas.push(t.tecnica);
-    if (t.tenido.minerales > 0) tree.tenido.children['Minerales'].tecnicas.push(t.tecnica);
+    if (!node3.children[c4]) node3.children[c4] = { color: node3.color, tecnicas: [] };
+    node3.children[c4].tecnicas.push(t.tecnica);
   });
 
   let activeLeaf = null;
@@ -2059,13 +2466,15 @@ function initArbol() {
       </div>`;
     }
 
-    const mainBranches = Object.entries(tree).map(([key, branch]) => {
-      const childrenHTML = Object.entries(branch.children).map(([cName, cNode]) =>
+    const mainBranches = Object.entries(tree).map(([branchName, branch]) => {
+      const childrenHTML = Object.entries(branch.children || {}).map(([cName, cNode]) =>
         subgroupHTML(cName, cNode, branch.color)
       ).join('');
+      // If branch itself has tecnicas (no sub-children)
+      const selfLeafs = (branch.tecnicas || []).length > 0 ? leafHTML(branchName, branch, branch.color) : '';
       return `<div class="arbol-branch">
-        <div class="arbol-branch-label" style="background:${branch.color}">${branch.label}</div>
-        <div class="arbol-branch-children">${childrenHTML}</div>
+        <div class="arbol-branch-label" style="background:${branch.color}">${esc(branchName)}</div>
+        <div class="arbol-branch-children">${selfLeafs}${childrenHTML}</div>
       </div>`;
     }).join('');
 
@@ -2073,7 +2482,6 @@ function initArbol() {
     let activeTecnicas = [];
     let activeColor = COLORS.magenta;
     if (activeLeaf) {
-      // Search all leaves
       function findLeaf(name, node, color) {
         if (node.tecnicas && name === activeLeaf) {
           activeTecnicas = node.tecnicas;
@@ -2085,8 +2493,9 @@ function initArbol() {
         }
         return false;
       }
-      Object.entries(tree).forEach(([, branch]) => {
-        Object.entries(branch.children).forEach(([cName, cNode]) => {
+      Object.entries(tree).forEach(([branchName, branch]) => {
+        findLeaf(branchName, branch, branch.color);
+        Object.entries(branch.children || {}).forEach(([cName, cNode]) => {
           findLeaf(cName, cNode, branch.color);
         });
       });
@@ -2103,7 +2512,7 @@ function initArbol() {
         <div class="arbol-panel-list">
           ${activeTecnicas.map(tname => {
             const td = tecnicasMap[tname];
-            const color = GRUPO_COLOR[(td && td.grupo) || ''] || COLORS.arena;
+            const color = td ? getCatColor(td) : COLORS.arena;
             return `<div class="arbol-tec-item" onclick="openFicha('${escJs(tname)}')">
               <div class="arbol-tec-dot" style="background:${color}"></div>
               <span>${esc(tname)}</span>
@@ -2136,4 +2545,132 @@ function initArbol() {
 // ────────────────────────────────────────────────
 // ARRANQUE
 // ────────────────────────────────────────────────
+
+// ────────────────────────────────────────────────
+// SECCIÓN TEÑIDO — visualización técnica × tipo teñido
+// ────────────────────────────────────────────────
+let tenidoInitialized = false;
+
+const TENIDO_TYPES = [
+  { key: 'n_tenido_plantas',   label: 'Con plantas',       color: '#05B794' },
+  { key: 'n_tenido_animales',  label: 'Insectos/animales', color: '#FB4801' },
+  { key: 'n_tenido_minerales', label: 'Sales y minerales', color: '#FFA329' },
+  { key: 'n_tenido_otro',      label: 'Otro',              color: '#8C7A80' },
+];
+
+let activeTenidoFilter = null;
+
+function initTenidoView() {
+  if (tenidoInitialized) return;
+  tenidoInitialized = true;
+  if (!ATLAS) return;
+
+  // Build filter buttons
+  const filtersEl = document.getElementById('tenido-filters');
+  filtersEl.innerHTML = '';
+  TENIDO_TYPES.forEach(tipo => {
+    const btn = document.createElement('button');
+    btn.className = 'tenido-filter-btn';
+    btn.dataset.key = tipo.key;
+    btn.style.setProperty('--tc', tipo.color);
+    btn.innerHTML = `<span class="tenido-filter-dot" style="background:${tipo.color}"></span>${tipo.label}`;
+    btn.addEventListener('click', () => {
+      activeTenidoFilter = activeTenidoFilter === tipo.key ? null : tipo.key;
+      document.querySelectorAll('.tenido-filter-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.key === activeTenidoFilter)
+      );
+      renderTenidoMatrix();
+    });
+    filtersEl.appendChild(btn);
+  });
+
+  renderTenidoMatrix();
+}
+
+function renderTenidoMatrix() {
+  if (!ATLAS) return;
+
+  // Get tecnicas that have at least one tenido type
+  let tecnicas = ATLAS.tecnicas.filter(t =>
+    TENIDO_TYPES.some(tipo => t.tenido && t.tenido[tipo.key.replace('n_tenido_','')] > 0)
+  );
+
+  if (activeTenidoFilter) {
+    const fieldKey = activeTenidoFilter.replace('n_tenido_', '');
+    tecnicas = tecnicas.filter(t => t.tenido && t.tenido[fieldKey] > 0);
+  }
+
+  tecnicas = tecnicas.sort((a,b) => {
+    if (a.cat1 !== b.cat1) return (a.cat1 || '').localeCompare(b.cat1 || '');
+    if (a.cat2 !== b.cat2) return (a.cat2 || '').localeCompare(b.cat2 || '');
+    return a.tecnica.localeCompare(b.tecnica);
+  });
+
+  const body = document.getElementById('tenido-body');
+  if (!tecnicas.length) {
+    body.innerHTML = '<div style="padding:40px;text-align:center;color:var(--arena)">Sin datos de teñido disponibles.</div>';
+    return;
+  }
+
+  // Build matrix HTML
+  const activeTypes = activeTenidoFilter
+    ? TENIDO_TYPES.filter(t => t.key === activeTenidoFilter)
+    : TENIDO_TYPES;
+
+  const colCount = activeTypes.length + 1; // row-head + type columns
+  let html = `<div class="tenido-matrix" style="grid-template-columns: minmax(190px,260px) repeat(${activeTypes.length}, minmax(72px,110px))">`;
+
+  // Header row
+  html += '<div class="tenido-matrix-row tenido-matrix-header">';
+  html += '<div class="tenido-matrix-cell tenido-matrix-corner"></div>';
+  activeTypes.forEach(tipo => {
+    html += `<div class="tenido-matrix-cell tenido-matrix-col-head" title="${tipo.label}">
+      <div class="tenido-col-dot" style="background:${tipo.color}"></div>
+      <span class="tenido-col-label">${tipo.label.replace('Con ','').replace('/animales','')}</span>
+    </div>`;
+  });
+  html += '</div>';
+
+  // Group rows by cat1
+  let lastCat1 = null;
+  tecnicas.forEach(t => {
+    if (t.cat1 !== lastCat1) {
+      lastCat1 = t.cat1;
+      const color = CAT1_COLOR[t.cat1] || COLORS.arena;
+      // span all columns — need explicit cell count
+      const emptyColsHtml = activeTypes.map(() => '<div class="tenido-matrix-cell"></div>').join('');
+      html += `<div class="tenido-matrix-row">
+        <div class="tenido-matrix-cell tenido-cat-label" style="color:${color}; font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; padding: 10px 10px 4px; background:var(--bg-page); border-bottom:none">${esc(t.cat1)}</div>
+        ${emptyColsHtml}
+      </div>`;
+    }
+
+    html += `<div class="tenido-matrix-row" data-tecnica="${esc(t.tecnica)}">`;
+    const catColor = getCatColor(t);
+    html += `<div class="tenido-matrix-cell tenido-matrix-row-head">
+      <span class="tenido-row-dot" style="background:${catColor}"></span>
+      <button class="tenido-tec-btn" onclick="openFicha('${escJs(t.tecnica)}')">${esc(t.tecnica)}</button>
+    </div>`;
+
+    activeTypes.forEach(tipo => {
+      const fieldKey = tipo.key.replace('n_tenido_', '');
+      const val = (t.tenido && t.tenido[fieldKey]) || 0;
+      const intensity = val > 0 ? Math.min(1, 0.25 + val / 10) : 0;
+      if (val > 0) {
+        html += `<div class="tenido-matrix-cell tenido-matrix-val tenido-matrix-val-on"
+          style="--tc:${tipo.color};--intensity:${intensity}"
+          title="${t.tecnica} · ${tipo.label}: ${val}">
+          <span class="tenido-val-num">${val}</span>
+        </div>`;
+      } else {
+        html += `<div class="tenido-matrix-cell tenido-matrix-val tenido-matrix-val-off"></div>`;
+      }
+    });
+    html += '</div>';
+  });
+
+  html += '</div>';
+  body.innerHTML = html;
+}
+
 loadCSVs();

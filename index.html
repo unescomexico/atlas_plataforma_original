@@ -62,6 +62,7 @@
   <button class="nav-tab" data-tab="catalogo">Catálogo de técnicas</button>
   <button class="nav-tab" data-tab="red">Red de técnicas</button>
   <button class="nav-tab" data-tab="arbol">Clasificación</button>
+  <button class="nav-tab" data-tab="tenido">Teñido</button>
   <button class="nav-tab nav-tab-contribuir" data-tab="contribuir">Contribuir</button>
   <button class="nav-tab nav-tab-info" onclick="openInfo()">Acerca del Atlas</button>
 </nav>
@@ -71,9 +72,63 @@
 ════════════════════════════════════════ -->
 <div id="view-mapa" class="view active">
   <div class="map-panel">
-    <div class="map-search-wrap">
-      <input class="map-search" type="text" id="map-search" placeholder="Buscar estado...">
+    <!-- Botón flotante para abrir/cerrar filtros -->
+    <button class="map-filter-toggle" id="map-filter-toggle" onclick="toggleMapFilter()" title="Filtrar técnicas">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+      <span>Filtrar</span>
+      <span class="map-filter-badge" id="map-filter-badge" style="display:none">●</span>
+    </button>
+
+    <!-- Panel lateral colapsable de filtros -->
+    <div class="map-filter-sidebar" id="map-filter-sidebar">
+      <div class="map-filter-panel">
+        <div class="map-filter-header">
+          <span class="map-filter-title">Filtrar técnicas</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="map-filter-clear" id="map-filter-clear" onclick="clearMapFilter()">Limpiar</button>
+            <button class="map-filter-collapse" onclick="toggleMapFilter()" title="Cerrar">✕</button>
+          </div>
+        </div>
+        <div class="map-filter-levels" id="map-filter-levels">
+          <!-- Nivel 0: búsqueda libre -->
+          <div class="map-filter-level">
+            <div class="map-filter-level-label">Buscar</div>
+            <input class="map-filter-search" type="text" id="map-filter-search" placeholder="Técnica, categoría…" autocomplete="off">
+            <div class="map-filter-autocomplete" id="map-filter-autocomplete"></div>
+          </div>
+          <!-- Nivel 1: CAT-N-1 -->
+          <div class="map-filter-level">
+            <div class="map-filter-level-label">Categoría</div>
+            <div class="map-filter-chips" id="map-chips-cat1"></div>
+          </div>
+          <!-- Nivel 2: CAT-N-2 (condicional) -->
+          <div class="map-filter-level" id="map-level-cat2" style="display:none">
+            <div class="map-filter-level-label">Subcategoría</div>
+            <div class="map-filter-chips" id="map-chips-cat2"></div>
+          </div>
+          <!-- Nivel 3: CAT-N-3 (condicional) -->
+          <div class="map-filter-level" id="map-level-cat3" style="display:none">
+            <div class="map-filter-level-label">Tipo</div>
+            <div class="map-filter-chips" id="map-chips-cat3"></div>
+          </div>
+          <!-- Nivel 4: CAT-N-4 (condicional) -->
+          <div class="map-filter-level" id="map-level-cat4" style="display:none">
+            <div class="map-filter-level-label">Variante</div>
+            <div class="map-filter-chips" id="map-chips-cat4"></div>
+          </div>
+          <!-- Técnicas (resultado) -->
+          <div class="map-filter-level" id="map-level-tecs" style="display:none">
+            <div class="map-filter-level-label" id="map-tecs-label">Técnicas</div>
+            <div class="map-filter-chips" id="map-chips-tecs"></div>
+          </div>
+        </div>
+        <!-- Resultado activo -->
+        <div class="map-filter-active" id="map-filter-active" style="display:none">
+          <span id="map-filter-active-text"></span>
+        </div>
+      </div>
     </div>
+
     <div id="map"></div>
     <div class="map-legend">
       <h4>Técnicas por estado</h4>
@@ -106,12 +161,10 @@
     <div class="catalog-toolbar">
       <input class="catalog-search" type="text" id="catalog-search" placeholder="Buscar técnica...">
       <button class="filter-btn active" data-grupo="all">Todas</button>
-      <button class="filter-btn" data-grupo="Bordado a mano">Bordado a mano</button>
-      <button class="filter-btn" data-grupo="Bordado a máquina">Bordado a máquina</button>
-      <button class="filter-btn" data-grupo="Telar de cintura">Telar de cintura</button>
-      <button class="filter-btn" data-grupo="Tejido a mano">Tejido a mano</button>
-      <button class="filter-btn" data-grupo="Telar de pedal">Telar de pedal</button>
-      <button class="filter-btn" data-grupo="Telar de cajón">Telar de cajón</button>
+      <button class="filter-btn" data-grupo="Tejido">Tejido</button>
+      <button class="filter-btn" data-grupo="Técnicas decorativas">Técnicas decorativas</button>
+      <button class="filter-btn" data-grupo="Acabados">Acabados</button>
+      <button class="filter-btn" data-grupo="Teñidos">Teñidos</button>
     </div>
     <div class="catalog-results" id="catalog-results">Cargando…</div>
     <div class="tecnicas-grid" id="tecnicas-grid"></div>
@@ -124,7 +177,13 @@
 <div id="view-red" class="view">
   <div class="network-view">
     <div class="network-toolbar">
-      <h2>Red de técnicas</h2>
+      <div class="network-toolbar-left">
+        <h2>Red de técnicas</h2>
+        <div class="network-search-wrap">
+          <input class="network-search-input" id="network-search" type="text" placeholder="Buscar técnica…" autocomplete="off">
+          <div class="network-search-ac" id="network-search-ac"></div>
+        </div>
+      </div>
       <div id="network-filters"></div>
     </div>
     <div class="network-container">
@@ -136,9 +195,9 @@
         <button class="net-ctrl-btn" id="net-reset" title="Restablecer vista">↺</button>
       </div>
       <div class="network-legend">
-        <span class="network-legend-title">Grupos</span>
+        <span class="network-legend-title">Categorías</span>
         <div id="network-legend-items" style="display:flex;flex-wrap:wrap;gap:8px"></div>
-        <span style="margin-left:auto;font-size:.68rem;color:var(--arena)">Nodo mayor = más registros · Clic para abrir ficha</span>
+        <span class="network-legend-hint">Nodo mayor = más registros · <strong>Clic</strong> en grupo para resaltar · <strong>Arrastra</strong> nodos · <strong>Scroll</strong> para zoom</span>
       </div>
     </div>
   </div>
@@ -151,7 +210,7 @@
   <div class="arbol-view">
     <div class="arbol-header">
       <h2>Clasificación de técnicas</h2>
-      <p>Explora las técnicas según su método de manufactura y tipo de teñido. Una técnica puede aparecer en más de una rama.</p>
+      <p>Explora las técnicas según la clasificación elaborada por expertas y expertos en textiles mexicanos, organizada en cuatro niveles jerárquicos.</p>
     </div>
     <div class="arbol-container" id="arbol-container">
       <div class="arbol-loading">Cargando clasificación…</div>
@@ -197,6 +256,22 @@
   </div>
 </div>
 
+
+<!-- ═══════════════════════════════════════
+     VIEW: TEÑIDO
+════════════════════════════════════════ -->
+<div id="view-tenido" class="view">
+  <div class="tenido-view">
+    <div class="tenido-header">
+      <h2>Técnicas y Teñido</h2>
+      <p>Explora qué tipo de teñido se aplica a cada técnica textil. Filtra por tipo de teñido para resaltar las técnicas que lo utilizan, o haz clic en cualquier técnica para ver su ficha.</p>
+    </div>
+    <div class="tenido-filters" id="tenido-filters"></div>
+    <div class="tenido-body" id="tenido-body">
+      <!-- JS inyecta la matriz aquí -->
+    </div>
+  </div>
+</div>
 
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal-card">
@@ -271,6 +346,13 @@ function closeKobo(e) {
   document.getElementById('kobo-overlay').classList.remove('open');
   document.getElementById('kobo-iframe').src = '';
   document.body.style.overflow = '';
+}
+
+function toggleMapFilter() {
+  const sidebar = document.getElementById('map-filter-sidebar');
+  const toggle  = document.getElementById('map-filter-toggle');
+  const open    = sidebar.classList.toggle('open');
+  toggle.classList.toggle('active', open);
 }
 
 function openInfo() {

@@ -5,14 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Reporte de Registros — Atlas Textil ORIGINAL</title>
 
-<!-- Fonts del sistema de diseño -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 
 <style>
 /* ============================================================
-   VARIABLES Y BASE — heredadas del sistema de diseño
+   VARIABLES Y BASE
    ============================================================ */
 :root {
   --magenta:  #B50552;
@@ -23,6 +22,7 @@
   --gris:     #C8B8C0;
   --cyan:     #00B2C0;
   --rosa:     #DE599B;
+  --morado:   #5B4FCF;
 
   --negro:    #1A1018;
   --tinta:    #2A1E24;
@@ -59,397 +59,191 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ============================================================
-   BARRA DE PROGRESO
-   ============================================================ */
+/* ── LOADING ── */
+#page-loading {
+  position: fixed; inset: 0; background: var(--bg-page);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 16px; z-index: 9999; transition: opacity .4s ease;
+}
+#page-loading.hidden { opacity: 0; pointer-events: none; }
+.loading-spinner {
+  width: 36px; height: 36px; border: 3px solid rgba(181,5,82,.15);
+  border-top-color: var(--magenta); border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+.loading-text { font-size: .82rem; color: var(--arena); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── PROGRESS ── */
 #progress-bar {
-  position: fixed;
-  top: 0; left: 0;
-  height: 3px;
-  width: 0%;
+  position: fixed; top: 0; left: 0; height: 3px; width: 0%;
   background: linear-gradient(90deg, var(--magenta), var(--ocre));
-  z-index: 1100;
-  transition: width 0.1s linear;
+  z-index: 1100; transition: width 0.1s linear;
 }
 
-/* ============================================================
-   NAV FLOTANTE
-   ============================================================ */
+/* ── NAV ── */
 nav {
-  position: fixed;
-  top: 3px; left: 0; right: 0;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  padding: 0 32px;
-  gap: 2px;
-  background: var(--negro);
-  border-bottom: 1px solid rgba(255,255,255,.07);
+  position: fixed; top: 3px; left: 0; right: 0; z-index: 1000;
+  display: flex; align-items: center; padding: 0 32px; gap: 2px;
+  background: var(--negro); border-bottom: 1px solid rgba(255,255,255,.07);
   overflow-x: auto;
 }
-
 .nav-tab {
-  padding: 12px 22px;
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: rgba(255,248,245,.45);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  white-space: nowrap;
-  transition: all .2s ease;
-  letter-spacing: 0.2px;
-  font-family: var(--font-body);
-  background: none;
+  padding: 12px 22px; font-size: 0.82rem; font-weight: 500;
+  color: rgba(255,248,245,.45); cursor: pointer;
+  border-bottom: 2px solid transparent; white-space: nowrap;
+  transition: all .2s ease; letter-spacing: 0.2px;
+  font-family: var(--font-body); background: none;
   border-top: none; border-left: none; border-right: none;
-  text-decoration: none;
-  display: inline-block;
+  text-decoration: none; display: inline-block;
 }
 .nav-tab:hover { color: rgba(255,248,245,.80); }
 .nav-tab.active { color: var(--ocre); border-bottom-color: var(--ocre); }
 
-/* ============================================================
-   LAYOUT GENERAL
-   ============================================================ */
-.report-wrap {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 40px 80px;
-}
+/* ── LAYOUT ── */
+.report-wrap { max-width: 1100px; margin: 0 auto; padding: 0 40px 80px; }
 
-/* ============================================================
-   INTRO / HERO COMPACTO
-   ============================================================ */
-#intro {
-  padding: 80px 40px 60px;
-  max-width: 1100px;
-  margin: 0 auto;
-  position: relative;
-}
+/* ── INTRO ── */
+#intro { padding: 80px 40px 60px; max-width: 1100px; margin: 0 auto; position: relative; }
 
 .intro-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--magenta);
-  margin-bottom: 14px;
+  font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--magenta); margin-bottom: 14px;
 }
-
 .intro-title {
-  font-family: var(--font-display);
-  font-size: clamp(2.2rem, 5vw, 3.6rem);
-  font-weight: 900;
-  color: var(--negro);
-  line-height: 1.08;
-  margin-bottom: 1rem;
+  font-family: var(--font-display); font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-weight: 900; color: var(--negro); line-height: 1.08; margin-bottom: 1rem;
 }
-
-.intro-title em {
-  font-style: italic;
-  color: var(--magenta);
-}
-
-.intro-lead {
-  font-size: 1.05rem;
-  color: var(--arena);
-  max-width: 680px;
-  line-height: 1.75;
-  margin-bottom: 2rem;
-}
-
+.intro-title em { font-style: italic; color: var(--magenta); }
+.intro-lead { font-size: 1.05rem; color: var(--arena); max-width: 680px; line-height: 1.75; margin-bottom: 2rem; }
 .intro-lead strong { color: var(--tinta); font-weight: 500; }
+.intro-divider { width: 56px; height: 3px; background: var(--magenta); border-radius: 2px; margin-bottom: 3.5rem; }
 
-.intro-divider {
-  width: 56px; height: 3px;
-  background: var(--magenta);
-  border-radius: 2px;
-  margin-bottom: 3.5rem;
-}
-
-/* ============================================================
-   SECCIONES
-   ============================================================ */
+/* ── SECCIONES ── */
 .section-block {
-  padding: 56px 0;
-  border-top: 1px solid var(--border);
-  opacity: 0;
-  transform: translateY(28px);
+  padding: 56px 0; border-top: 1px solid var(--border);
+  opacity: 0; transform: translateY(28px);
   transition: opacity .7s ease, transform .7s ease;
 }
-
-.section-block.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
+.section-block.visible { opacity: 1; transform: translateY(0); }
 
 .section-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  color: var(--arena);
-  margin-bottom: 8px;
+  font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--arena); margin-bottom: 8px;
 }
-
 .section-title {
-  font-family: var(--font-display);
-  font-size: clamp(1.5rem, 3vw, 2.2rem);
-  font-weight: 700;
-  color: var(--negro);
-  line-height: 1.15;
-  margin-bottom: 1rem;
+  font-family: var(--font-display); font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-weight: 700; color: var(--negro); line-height: 1.15; margin-bottom: 1rem;
 }
-
-.section-lead {
-  font-size: 0.97rem;
-  color: var(--arena);
-  max-width: 720px;
-  line-height: 1.75;
-  margin-bottom: 2rem;
-}
-
+.section-lead { font-size: 0.97rem; color: var(--arena); max-width: 720px; line-height: 1.75; margin-bottom: 2rem; }
 .section-lead strong { color: var(--tinta); font-weight: 500; }
 
-/* ============================================================
-   CALLOUT
-   ============================================================ */
+/* ── CALLOUT ── */
 .callout {
-  border-left: 3px solid var(--magenta);
-  padding: 1.1rem 1.4rem;
-  background: rgba(181,5,82,.05);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  margin: 1.75rem 0;
-  font-size: 0.95rem;
-  line-height: 1.7;
-  color: var(--tinta);
-  font-style: italic;
-  max-width: 720px;
+  border-left: 3px solid var(--magenta); padding: 1.1rem 1.4rem;
+  background: rgba(181,5,82,.05); border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin: 1.75rem 0; font-size: 0.95rem; line-height: 1.7;
+  color: var(--tinta); font-style: italic; max-width: 720px;
 }
 
-/* ============================================================
-   ÁRBOL DE CATEGORÍAS
-   ============================================================ */
+/* ── TARJETAS DE CATEGORÍA (árbol experto) ── */
 .tree-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin: 2rem 0;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px; margin: 2rem 0;
 }
-
 .tree-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 20px;
-  box-shadow: var(--shadow-sm);
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-sm);
 }
-
 .tree-card-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1.5px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1.5px solid var(--border);
 }
-
-.tree-card-dot {
-  width: 9px; height: 9px;
-  border-radius: 2px;
-  flex-shrink: 0;
+.tree-card-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+.tree-card-label { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--negro); }
+.tree-card-count {
+  margin-left: auto; font-family: var(--font-mono); font-size: 0.72rem;
+  color: var(--arena); background: rgba(26,16,24,.05);
+  padding: 2px 7px; border-radius: 40px;
 }
-
-.tree-card-label {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--negro);
-}
-
-.tree-card-desc {
-  font-size: 0.78rem;
-  color: var(--arena);
-  line-height: 1.6;
-  margin-bottom: 12px;
-}
-
+.tree-card-desc { font-size: 0.78rem; color: var(--arena); line-height: 1.6; margin-bottom: 12px; }
 .tree-item {
-  font-size: 0.8rem;
-  color: var(--tinta);
-  padding: 5px 0;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 7px;
+  font-size: 0.8rem; color: var(--tinta); padding: 5px 0;
+  border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 7px;
 }
 .tree-item:last-child { border-bottom: none; }
-.tree-item::before {
-  content: '—';
-  font-size: 0.65rem;
-  opacity: 0.4;
+.tree-item::before { content: '—'; font-size: 0.65rem; opacity: 0.4; }
+.tree-item-count {
+  margin-left: auto; font-family: var(--font-mono); font-size: 0.7rem; color: var(--arena);
 }
+.tree-sub { padding-left: 1.2rem; font-size: 0.74rem; color: var(--arena); }
 
-.tree-sub {
-  padding-left: 1.2rem;
-  font-size: 0.74rem;
-  color: var(--arena);
-}
-
-/* ============================================================
-   GRILLAS DE GRÁFICAS
-   ============================================================ */
-.two-col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin: 2rem 0;
-}
+/* ── GRILLAS ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 2rem 0; }
 
 .chart-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 22px;
-  box-shadow: var(--shadow-sm);
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 22px; box-shadow: var(--shadow-sm);
 }
-
-.chart-card-title {
-  font-family: var(--font-display);
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--negro);
-  margin-bottom: 3px;
-}
-
-.chart-card-sub {
-  font-size: 0.75rem;
-  color: var(--arena);
-  margin-bottom: 18px;
-  line-height: 1.5;
-}
+.chart-card-title { font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; color: var(--negro); margin-bottom: 3px; }
+.chart-card-sub { font-size: 0.75rem; color: var(--arena); margin-bottom: 18px; line-height: 1.5; }
 
 .chart-card-full {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 22px;
-  box-shadow: var(--shadow-sm);
-  margin: 1.5rem 0;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 22px; box-shadow: var(--shadow-sm); margin: 1.5rem 0;
 }
 
-/* ============================================================
-   DONA + LEYENDA
-   ============================================================ */
-.donut-wrap {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-}
-
+/* ── DONA ── */
+.donut-wrap { display: flex; align-items: center; gap: 2rem; }
 .donut-canvas-wrap { flex: 0 0 200px; }
-
 .donut-legend { flex: 1; }
-
 .donut-legend-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 0.82rem;
+  display: flex; align-items: center; gap: 8px; padding: 6px 0;
+  border-bottom: 1px solid var(--border); font-size: 0.82rem;
 }
 .donut-legend-item:last-child { border-bottom: none; }
-
-.donut-legend-dot {
-  width: 9px; height: 9px;
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-
+.donut-legend-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
 .donut-legend-name { color: var(--tinta); flex: 1; }
 .donut-legend-val { font-family: var(--font-mono); font-size: 0.78rem; color: var(--arena); }
 
-/* ============================================================
-   TABLA
-   ============================================================ */
-.table-search-wrap {
-  margin-bottom: 12px;
-}
-
+/* ── TABLA ── */
+.table-search-wrap { margin-bottom: 12px; }
 .table-search {
-  width: 100%; max-width: 400px;
-  padding: 9px 18px;
-  border-radius: 40px;
-  border: 1.5px solid var(--border);
-  font-size: 0.85rem;
-  background: white;
-  font-family: var(--font-body);
-  outline: none;
-  transition: border .2s;
-  color: var(--negro);
+  width: 100%; max-width: 400px; padding: 9px 18px; border-radius: 40px;
+  border: 1.5px solid var(--border); font-size: 0.85rem; background: white;
+  font-family: var(--font-body); outline: none; transition: border .2s; color: var(--negro);
 }
 .table-search:focus { border-color: var(--azul-mar); }
 .table-search::placeholder { color: var(--arena); }
-
 .data-table-wrap { overflow-x: auto; }
-
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.84rem;
-}
-
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
 .data-table th {
-  background: var(--negro);
-  color: rgba(255,248,245,.6);
-  padding: 10px 14px;
-  text-align: left;
-  font-size: 0.65rem;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  font-family: var(--font-mono);
-  font-weight: 400;
-  white-space: nowrap;
+  background: var(--negro); color: rgba(255,248,245,.6); padding: 10px 14px;
+  text-align: left; font-size: 0.65rem; letter-spacing: 1.5px; text-transform: uppercase;
+  font-family: var(--font-mono); font-weight: 400; white-space: nowrap;
 }
-
-.data-table td {
-  padding: 9px 14px;
-  border-bottom: 1px solid var(--border);
-  color: var(--arena);
-}
-
+.data-table td { padding: 9px 14px; border-bottom: 1px solid var(--border); color: var(--arena); }
 .data-table tr:last-child td { border-bottom: none; }
 .data-table tr:hover td { background: rgba(181,5,82,.03); color: var(--tinta); }
-
 .tec-badge {
-  display: inline-block;
-  padding: 2px 9px;
-  border-radius: 3px;
-  font-size: 0.73rem;
-  font-weight: 500;
-  background: rgba(3,90,121,.08);
-  color: var(--azul-mar);
-  border: 1px solid rgba(3,90,121,.20);
+  display: inline-block; padding: 2px 9px; border-radius: 3px;
+  font-size: 0.73rem; font-weight: 500;
+  background: rgba(3,90,121,.08); color: var(--azul-mar); border: 1px solid rgba(3,90,121,.20);
+}
+.num-badge { font-family: var(--font-mono); font-size: 0.78rem; color: var(--magenta); font-weight: 700; }
+
+/* ── CAT BADGE (tabla) ── */
+.cat-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 3px;
+  font-size: 0.68rem; font-weight: 600; color: white; margin-left: 4px; opacity: .85;
 }
 
-.num-badge {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--magenta);
-  font-weight: 700;
-}
-
-/* ============================================================
-   SCROLLBAR
-   ============================================================ */
+/* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(26,16,24,.15); border-radius: 40px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(26,16,24,.3); }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
 @media (max-width: 840px) {
   .two-col { grid-template-columns: 1fr; }
   .tree-grid { grid-template-columns: 1fr; }
@@ -461,10 +255,13 @@ nav {
 </head>
 <body>
 
-<!-- BARRA DE PROGRESO -->
+<div id="page-loading">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Cargando datos del Atlas…</div>
+</div>
+
 <div id="progress-bar"></div>
 
-<!-- NAV -->
 <nav>
   <a class="nav-tab active" href="#metodologia">Metodología</a>
   <a class="nav-tab" href="#participacion">Participación</a>
@@ -474,9 +271,7 @@ nav {
   <a class="nav-tab" href="#transmision">Transmisión</a>
 </nav>
 
-<!-- ============================================================
-     INTRO
-     ============================================================ -->
+<!-- INTRO -->
 <div id="intro">
   <div class="intro-eyebrow">Reporte de registros</div>
   <h1 class="intro-title">Aplicación y<br><em>metodología</em></h1>
@@ -494,48 +289,17 @@ nav {
 
 <div class="report-wrap">
 
-  <!-- ============================================================
-       01 METODOLOGÍA
-       ============================================================ -->
+  <!-- 01 METODOLOGÍA -->
   <section class="section-block" id="metodologia">
     <div class="section-eyebrow">01 — Técnicas del arte textil</div>
-    <h2 class="section-title">Las tres grandes categorías</h2>
-    <p class="section-lead">Son los diversos métodos usados en la elaboración y manipulación de telas y tejidos, esenciales para producir prendas de vestir, decoración de interiores y otros productos textiles.</p>
+    <h2 class="section-title">Clasificación experta de las técnicas</h2>
+    <p class="section-lead">
+      Las técnicas registradas en el Atlas han sido clasificadas en cuatro niveles jerárquicos por un equipo de expertas y expertos en textiles mexicanos. Esta taxonomía organiza las <strong id="total-tecnicas">—</strong> técnicas documentadas en categorías, subcategorías, tipos y variantes.
+    </p>
 
-    <div class="tree-grid">
-      <div class="tree-card">
-        <div class="tree-card-header">
-          <div class="tree-card-dot" style="background:var(--magenta)"></div>
-          <span class="tree-card-label">Bordado</span>
-        </div>
-        <p class="tree-card-desc">Actividad artística sobre telas tejidas con agujas e hilos que forman motivos decorativos. Pueden incorporarse perlas, abalorios o lentejuelas.</p>
-        <div class="tree-item">Bordado a mano</div>
-        <div class="tree-item">Bordado a máquina de pedal</div>
-        <div class="tree-item">Bordado a máquina de motor</div>
-        <div class="tree-item tree-sub">+300 tipos de puntadas en el mundo</div>
-      </div>
-      <div class="tree-card">
-        <div class="tree-card-header">
-          <div class="tree-card-dot" style="background:var(--azul-mar)"></div>
-          <span class="tree-card-label">Tejido</span>
-        </div>
-        <p class="tree-card-desc">Técnicas que implican el entrelazado de hilos para crear prendas o telas, a mano o con telares tradicionales o mecánicos.</p>
-        <div class="tree-item">Tejido a mano (punto y crochet)</div>
-        <div class="tree-item">Telar de cintura</div>
-        <div class="tree-item">Telar de pedal / mecánico</div>
-        <div class="tree-item">Telar de cajón</div>
-      </div>
-      <div class="tree-card">
-        <div class="tree-card-header">
-          <div class="tree-card-dot" style="background:var(--verde)"></div>
-          <span class="tree-card-label">Teñido</span>
-        </div>
-        <p class="tree-card-desc">Técnica transversal que añade color a los tejidos. Puede incorporarse a cualquier práctica de bordado o tejido.</p>
-        <div class="tree-item">Tintes naturales (plantas)</div>
-        <div class="tree-item">Sales y minerales</div>
-        <div class="tree-item">Productos animales</div>
-        <div class="tree-item">Tintes sintéticos</div>
-      </div>
+    <!-- Tarjetas de categorías — generadas desde CSV -->
+    <div class="tree-grid" id="cat-tree-grid">
+      <!-- Inyectado por JS -->
     </div>
 
     <h2 class="section-title" style="margin-top:3rem">Recolección de datos</h2>
@@ -547,22 +311,18 @@ nav {
     </p>
   </section>
 
-  <!-- ============================================================
-       02 PARTICIPACIÓN
-       ============================================================ -->
+  <!-- 02 PARTICIPACIÓN -->
   <section class="section-block" id="participacion">
     <div class="section-eyebrow">02 — Participación</div>
     <h2 class="section-title">¿Quiénes participaron?</h2>
     <p class="section-lead">Se recibieron un total de <strong>638 aportaciones</strong>, correspondientes a <strong>516 participantes</strong> provenientes de <strong>29 estados</strong> y <strong>205 municipios</strong> del país, con técnicas vinculadas a <strong>31 lenguas indígenas</strong>.</p>
 
-    <!-- Sede + Género -->
     <div class="two-col">
       <div class="chart-card">
         <div class="chart-card-title">Participantes por sede</div>
         <div class="chart-card-sub">Personas únicas registradas en cada sede del evento</div>
         <canvas id="chart-sede" height="210"></canvas>
       </div>
-
       <div class="chart-card">
         <div class="chart-card-title">Distribución por género</div>
         <div class="chart-card-sub">Porcentaje de participantes según género declarado</div>
@@ -591,14 +351,11 @@ nav {
       </div>
     </div>
 
-    <!-- Participantes por estado -->
     <div class="chart-card-full">
       <div class="chart-card-title">Participantes por estado de origen</div>
       <div class="chart-card-sub">Top 15 estados con mayor número de participantes únicos registrados</div>
       <canvas id="chart-part-estado" height="320"></canvas>
     </div>
-
-    <!-- Lenguas -->
     <div class="chart-card-full">
       <div class="chart-card-title">Participantes por lengua indígena</div>
       <div class="chart-card-sub">Las 12 lenguas con mayor número de portadores registrados en el Atlas</div>
@@ -606,9 +363,7 @@ nav {
     </div>
   </section>
 
-  <!-- ============================================================
-       03 DISTRIBUCIÓN GEOGRÁFICA
-       ============================================================ -->
+  <!-- 03 DISTRIBUCIÓN GEOGRÁFICA -->
   <section class="section-block" id="distribucion">
     <div class="section-eyebrow">03 — Distribución geográfica</div>
     <h2 class="section-title">El mapa del textil mexicano</h2>
@@ -616,7 +371,7 @@ nav {
 
     <div class="chart-card-full">
       <div class="chart-card-title">Técnicas distintas por estado</div>
-      <div class="chart-card-sub">Número de técnicas únicas registradas en cada entidad federativa</div>
+      <div class="chart-card-sub">Número de técnicas únicas registradas en cada entidad federativa — calculado desde el CSV</div>
       <canvas id="chart-tec-estado" height="320"></canvas>
     </div>
 
@@ -626,10 +381,9 @@ nav {
       <canvas id="chart-municipios" height="320"></canvas>
     </div>
 
-    <!-- Tabla -->
     <div class="chart-card-full" style="margin-top:2rem">
       <div class="chart-card-title">Técnica más representativa por estado</div>
-      <div class="chart-card-sub" style="margin-bottom:14px">Para cada estado, la técnica con mayor número de registros</div>
+      <div class="chart-card-sub" style="margin-bottom:14px">Para cada estado, la técnica con mayor número de registros · incluye categoría experta</div>
       <div class="table-search-wrap">
         <input class="table-search" type="text" id="table-search" placeholder="Buscar estado o técnica…" oninput="filterTable()">
       </div>
@@ -639,6 +393,7 @@ nav {
             <tr>
               <th>Estado</th>
               <th>Técnica más común</th>
+              <th>Categoría</th>
               <th style="text-align:center">Registros</th>
             </tr>
           </thead>
@@ -648,29 +403,32 @@ nav {
     </div>
   </section>
 
-  <!-- ============================================================
-       04 TÉCNICAS
-       ============================================================ -->
+  <!-- 04 TÉCNICAS -->
   <section class="section-block" id="tecnicas">
     <div class="section-eyebrow">04 — Características de las técnicas</div>
     <h2 class="section-title">Técnicas registradas</h2>
-    <p class="section-lead">Se identificaron <strong>161 técnicas distintas</strong> en todo el ejercicio. Las más reportadas son el <strong>Telar de cintura</strong> y el <strong>Punto de Cruz</strong>, presentes en múltiples estados y lenguas indígenas.</p>
+    <p class="section-lead" id="tecnicas-lead">Cargando datos…</p>
 
     <div class="chart-card-full">
       <div class="chart-card-title">Las 20 técnicas más frecuentes</div>
-      <div class="chart-card-sub">Número total de registros por técnica en el Atlas</div>
+      <div class="chart-card-sub">Número total de registros por técnica en el Atlas · coloreado por categoría experta</div>
       <canvas id="chart-top-tec" height="400"></canvas>
     </div>
 
     <div class="two-col">
       <div class="chart-card">
-        <div class="chart-card-title">Grupo de técnica general</div>
-        <div class="chart-card-sub">Agrupación según tipo de manufactura artesanal</div>
-        <canvas id="chart-grupos" height="260"></canvas>
+        <div class="chart-card-title">Categoría de técnica (CAT-N-1)</div>
+        <div class="chart-card-sub">Distribución de registros por categoría principal según clasificación experta</div>
+        <div class="donut-wrap" style="margin-top:8px">
+          <div class="donut-canvas-wrap">
+            <canvas id="chart-grupos" height="220"></canvas>
+          </div>
+          <div class="donut-legend" id="chart-grupos-legend"></div>
+        </div>
       </div>
       <div class="chart-card">
-        <div class="chart-card-title">Tipo de manufactura</div>
-        <div class="chart-card-sub">Forma en que se realiza la técnica reportada</div>
+        <div class="chart-card-title">Subcategoría de técnica (CAT-N-2)</div>
+        <div class="chart-card-sub">Registros agrupados por subcategoría dentro del esquema experto</div>
         <canvas id="chart-manufactura" height="260"></canvas>
       </div>
     </div>
@@ -682,9 +440,7 @@ nav {
     </div>
   </section>
 
-  <!-- ============================================================
-       05 TEÑIDO
-       ============================================================ -->
+  <!-- 05 TEÑIDO -->
   <section class="section-block" id="tenido">
     <div class="section-eyebrow">05 — Teñido</div>
     <h2 class="section-title">Prácticas de teñido</h2>
@@ -693,36 +449,14 @@ nav {
     <div class="two-col">
       <div class="chart-card">
         <div class="chart-card-title">Tipos de teñido registrados</div>
-        <div class="chart-card-sub">Distribución general de los métodos de teñido</div>
+        <div class="chart-card-sub">Distribución general de los métodos de teñido · calculado desde CSV</div>
         <div class="donut-wrap" style="margin-top:8px">
           <div class="donut-canvas-wrap">
             <canvas id="chart-tenido-donut" height="200"></canvas>
           </div>
-          <div class="donut-legend">
-            <div class="donut-legend-item">
-              <div class="donut-legend-dot" style="background:var(--verde)"></div>
-              <span class="donut-legend-name">Con plantas</span>
-              <span class="donut-legend-val">222</span>
-            </div>
-            <div class="donut-legend-item">
-              <div class="donut-legend-dot" style="background:var(--naranja)"></div>
-              <span class="donut-legend-name">Insectos / animales</span>
-              <span class="donut-legend-val">86</span>
-            </div>
-            <div class="donut-legend-item">
-              <div class="donut-legend-dot" style="background:var(--ocre)"></div>
-              <span class="donut-legend-name">Sales y minerales</span>
-              <span class="donut-legend-val">79</span>
-            </div>
-            <div class="donut-legend-item">
-              <div class="donut-legend-dot" style="background:var(--gris)"></div>
-              <span class="donut-legend-name">Con otro</span>
-              <span class="donut-legend-val">68</span>
-            </div>
-          </div>
+          <div class="donut-legend" id="chart-tenido-legend"></div>
         </div>
       </div>
-
       <div class="chart-card">
         <div class="chart-card-title">Frecuencia por tipo de teñido</div>
         <div class="chart-card-sub">Número de registros que reportan cada método</div>
@@ -731,16 +465,14 @@ nav {
     </div>
   </section>
 
-  <!-- ============================================================
-       06 TRANSMISIÓN
-       ============================================================ -->
+  <!-- 06 TRANSMISIÓN -->
   <section class="section-block" id="transmision">
     <div class="section-eyebrow">06 — Transmisión del conocimiento</div>
     <h2 class="section-title">¿Cómo se aprende y se enseña?</h2>
     <p class="section-lead">La transmisión de los saberes textiles ocurre principalmente dentro del <strong>núcleo familiar</strong>. La madre es la figura más frecuente en el proceso de aprendizaje, seguida de tías y abuelas, lo que evidencia el papel central de las mujeres como portadoras y transmisoras de este patrimonio.</p>
 
     <div class="chart-card-full">
-      <div class="chart-card-title">Fuentes de aprendizaje de la técnica</div>
+      <div class="chart-card-title">Fuentes de aprendizaje de la técnica · calculado desde CSV</div>
       <div class="chart-card-sub">¿De quién aprendió esta técnica? (respuesta múltiple posible)</div>
       <canvas id="chart-aprendizaje" height="260"></canvas>
     </div>
@@ -754,14 +486,436 @@ nav {
 
 <script>
 /* ============================================================
-   PROGRESO + SCROLL REVEAL
+   PALETA
+   ============================================================ */
+const MAGENTA  = '#B50552';
+const AZUL     = '#035A79';
+const NARANJA  = '#FB4801';
+const VERDE    = '#05B794';
+const OCRE     = '#FFA329';
+const CYAN     = '#00B2C0';
+const ROSA     = '#DE599B';
+const MORADO   = '#5B4FCF';
+const ARENA    = '#8C7A80';
+
+const CAT1_COLORS = {
+  'Tejido':               AZUL,
+  'Técnicas decorativas': MAGENTA,
+  'Acabados':             OCRE,
+  'Teñidos':              VERDE,
+};
+
+const CAT2_COLORS = {
+  'Tejidos':      CYAN,
+  'Anudados':     AZUL,
+  'Tapicería':    MORADO,
+  'Bordados':     MAGENTA,
+  'Aplicaciones': ROSA,
+  'Otras':        ARENA,
+  'Artesanales':  VERDE,
+};
+
+const CAT1_DESC = {
+  'Tejido':               'Técnicas que producen tela mediante el entrelazado de hilos. Incluye tejidos en telar, a mano y técnicas de anudado.',
+  'Técnicas decorativas': 'Métodos que aplican ornamentación sobre una tela base, como el bordado y las aplicaciones.',
+  'Acabados':             'Procesos que dan terminado o tratamiento final a la pieza textil ya elaborada.',
+  'Teñidos':              'Técnicas para añadir color a los textiles mediante tintes naturales o artificiales.',
+};
+
+const MULTI = [MAGENTA, AZUL, VERDE, OCRE, NARANJA, CYAN, ROSA, '#7F8C8D', '#9B59B6', ARENA];
+
+const rampMagenta = n => Array.from({length:n}, (_,i) => {
+  const t = i / Math.max(n-1,1);
+  return `rgb(${Math.round(0xDE + t*(0xB5-0xDE))},${Math.round(0x59 + t*(0x05-0x59))},${Math.round(0x9B + t*(0x52-0x9B))})`;
+});
+
+const baseOpts = (indexAxis='x') => ({
+  indexAxis, responsive: true,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { grid: { color: 'rgba(26,16,24,.06)' } },
+    y: { grid: { display: indexAxis==='y' ? false : true, color: 'rgba(26,16,24,.06)' } }
+  }
+});
+
+/* ============================================================
+   CSV PARSER
+   ============================================================ */
+function parseCSV(text) {
+  const lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+  if (lines.length < 2) return [];
+  const headers = parseCSVRow(lines[0]);
+  return lines.slice(1).filter(l => l.trim()).map(l => {
+    const vals = parseCSVRow(l);
+    const obj = {};
+    headers.forEach((h,i) => { obj[h] = vals[i] !== undefined ? vals[i] : ''; });
+    return obj;
+  });
+}
+
+function parseCSVRow(line) {
+  const result = []; let cur = ''; let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') { if (inQ && line[i+1]==='"') { cur+='"'; i++; } else { inQ=!inQ; } }
+    else if (ch === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
+    else { cur += ch; }
+  }
+  result.push(cur.trim());
+  return result;
+}
+
+function num(v) { const n = parseFloat(v); return isNaN(n) ? 0 : n; }
+
+/* ============================================================
+   CARGA Y PROCESO PRINCIPAL
+   ============================================================ */
+async function loadAndRender() {
+  // Detectar si estamos dentro de un iframe del atlas principal
+  // El CSV está siempre relativo al propio HTML
+  let csvPath = 'data_by_technique_id.csv';
+
+  try {
+    const res = await fetch(csvPath);
+    if (!res.ok) throw new Error('CSV no encontrado');
+    const text = await res.text();
+    const rows = parseCSV(text);
+    renderAll(rows);
+  } catch (e) {
+    document.getElementById('page-loading').innerHTML =
+      '<div style="color:#B50552;font-family:sans-serif;text-align:center;padding:40px">No se pudo cargar data_by_technique_id.csv.<br><small>Asegúrate de que el archivo esté en la misma carpeta.</small></div>';
+    console.error(e);
+  }
+}
+
+function renderAll(rows) {
+  Chart.defaults.color = '#8C7A80';
+  Chart.defaults.borderColor = 'rgba(26,16,24,.08)';
+  Chart.defaults.font.family = "'DM Sans', sans-serif";
+
+  /* ── 1. Construir árbol de clasificación CAT-N-1 → N-2 → N-3 ── */
+  const catTree = {}; // { cat1: { color, desc, subs: { cat2: { color, items: [{ tecnica, n_fichas, cat3, cat4 }] } } } }
+
+  rows.forEach(r => {
+    const c1 = (r['CAT-N-1'] || '').trim();
+    const c2 = (r['CAT-N-2'] || '').trim();
+    const c3 = (r['CAT-N-3'] || '').trim();
+    const nombre = (r['Tecnica'] || r['tecnica_norm'] || '').trim();
+    const fichas = num(r['n_fichas']);
+    if (!c1 || !nombre) return;
+
+    if (!catTree[c1]) catTree[c1] = { color: CAT1_COLORS[c1] || ARENA, desc: CAT1_DESC[c1] || '', subs: {}, total: 0 };
+    catTree[c1].total += fichas;
+
+    if (c2) {
+      if (!catTree[c1].subs[c2]) catTree[c1].subs[c2] = { color: CAT2_COLORS[c2] || catTree[c1].color, items: [], total: 0 };
+      catTree[c1].subs[c2].items.push({ tecnica: nombre, n_fichas: fichas, cat3: c3 });
+      catTree[c1].subs[c2].total += fichas;
+    }
+  });
+
+  /* ── 2. Renderizar tarjetas de categoría ── */
+  const totalTecnicas = rows.filter(r => (r['Tecnica']||r['tecnica_norm']||'').trim()).length;
+  document.getElementById('total-tecnicas').textContent = totalTecnicas;
+
+  const grid = document.getElementById('cat-tree-grid');
+  grid.innerHTML = Object.entries(catTree).map(([c1, node]) => {
+    const subsHTML = Object.entries(node.subs).map(([c2, sub]) => {
+      // Mostrar subcategorías de nivel 3 si existen
+      const lvl3 = [...new Set(sub.items.map(i => i.cat3).filter(Boolean))];
+      const subItems = lvl3.length > 0
+        ? lvl3.map(c3 => `<div class="tree-item tree-sub">${esc(c3)}</div>`).join('')
+        : '';
+      return `<div class="tree-item" style="font-weight:500;color:${sub.color}">
+        ${esc(c2)}
+        <span class="tree-item-count">${sub.total} reg.</span>
+      </div>${subItems}`;
+    }).join('');
+
+    return `<div class="tree-card">
+      <div class="tree-card-header">
+        <div class="tree-card-dot" style="background:${node.color}"></div>
+        <span class="tree-card-label">${esc(c1)}</span>
+        <span class="tree-card-count">${node.total} reg.</span>
+      </div>
+      <p class="tree-card-desc">${esc(node.desc)}</p>
+      ${subsHTML}
+    </div>`;
+  }).join('');
+
+  /* ── 3. Top técnicas (por n_fichas) ── */
+  const topRows = [...rows]
+    .filter(r => (r['Tecnica']||r['tecnica_norm']||'').trim())
+    .sort((a,b) => num(b.n_fichas) - num(a.n_fichas))
+    .slice(0, 20);
+
+  const topNames   = topRows.map(r => (r['Tecnica']||r['tecnica_norm']||'').trim());
+  const topFichas  = topRows.map(r => num(r.n_fichas));
+  const topColors  = topRows.map(r => CAT1_COLORS[(r['CAT-N-1']||'').trim()] || ARENA);
+
+  new Chart(document.getElementById('chart-top-tec'), {
+    type: 'bar',
+    data: { labels: topNames, datasets: [{ data: topFichas, backgroundColor: topColors, borderWidth: 0, borderRadius: 3 }] },
+    options: {
+      ...baseOpts('y'),
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const r = topRows[ctx.dataIndex];
+              const cat = [r['CAT-N-1'], r['CAT-N-2']].filter(Boolean).join(' › ');
+              return [`${ctx.parsed.x} registros`, cat];
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Lead dinámico
+  const topTec = topNames[0] || '';
+  const topTec2 = topNames[1] || '';
+  document.getElementById('tecnicas-lead').innerHTML =
+    `Se identificaron <strong>${totalTecnicas} técnicas distintas</strong> en todo el ejercicio. Las más reportadas son <strong>${esc(topTec)}</strong> y <strong>${esc(topTec2)}</strong>, presentes en múltiples estados y lenguas indígenas.`;
+
+  /* ── 4. Gráfica CAT-N-1 (dona) ── */
+  const cat1Entries = Object.entries(catTree).map(([c1, node]) => ({ label: c1, value: node.total, color: node.color }));
+
+  const legendHtml = cat1Entries.map(e =>
+    `<div class="donut-legend-item">
+      <div class="donut-legend-dot" style="background:${e.color}"></div>
+      <span class="donut-legend-name">${esc(e.label)}</span>
+      <span class="donut-legend-val">${e.value}</span>
+    </div>`
+  ).join('');
+  document.getElementById('chart-grupos-legend').innerHTML = legendHtml;
+
+  new Chart(document.getElementById('chart-grupos'), {
+    type: 'doughnut',
+    data: {
+      labels: cat1Entries.map(e => e.label),
+      datasets: [{ data: cat1Entries.map(e => e.value), backgroundColor: cat1Entries.map(e => e.color), borderWidth: 3, borderColor: '#FFF8F5' }]
+    },
+    options: { cutout: '55%', plugins: { legend: { display: false } } }
+  });
+
+  /* ── 5. Gráfica CAT-N-2 (barras) ── */
+  const cat2Map = {};
+  rows.forEach(r => {
+    const c2 = (r['CAT-N-2'] || '').trim();
+    if (!c2) return;
+    if (!cat2Map[c2]) cat2Map[c2] = 0;
+    cat2Map[c2] += num(r.n_fichas);
+  });
+  const cat2Sorted = Object.entries(cat2Map).sort((a,b) => b[1]-a[1]);
+
+  new Chart(document.getElementById('chart-manufactura'), {
+    type: 'bar',
+    data: {
+      labels: cat2Sorted.map(d => d[0]),
+      datasets: [{ data: cat2Sorted.map(d => d[1]), backgroundColor: cat2Sorted.map(d => CAT2_COLORS[d[0]] || ARENA), borderWidth: 0, borderRadius: 3 }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: ARENA, maxRotation: 35, font: { size: 11 } } },
+        y: { grid: { color: 'rgba(26,16,24,.06)' } }
+      }
+    }
+  });
+
+  /* ── 6. Teñido — desde CSV ── */
+  const tenPlant = rows.reduce((s,r) => s + num(r.n_tenido_plantas),   0);
+  const tenAnim  = rows.reduce((s,r) => s + num(r.n_tenido_animales),  0);
+  const tenMin   = rows.reduce((s,r) => s + num(r.n_tenido_minerales), 0);
+  const tenOtro  = rows.reduce((s,r) => s + num(r.n_tenido_otro),      0);
+  const tenData  = [{ label: 'Con plantas', v: tenPlant, color: VERDE }, { label: 'Insectos/animales', v: tenAnim, color: NARANJA }, { label: 'Sales y minerales', v: tenMin, color: OCRE }, { label: 'Con otro', v: tenOtro, color: ARENA }];
+
+  document.getElementById('chart-tenido-legend').innerHTML = tenData.map(d =>
+    `<div class="donut-legend-item">
+      <div class="donut-legend-dot" style="background:${d.color}"></div>
+      <span class="donut-legend-name">${d.label}</span>
+      <span class="donut-legend-val">${d.v}</span>
+    </div>`
+  ).join('');
+
+  new Chart(document.getElementById('chart-tenido-donut'), {
+    type: 'doughnut',
+    data: { labels: tenData.map(d => d.label), datasets: [{ data: tenData.map(d => d.v), backgroundColor: tenData.map(d => d.color), borderWidth: 3, borderColor: '#FFF8F5' }] },
+    options: { cutout: '65%', plugins: { legend: { display: false } } }
+  });
+
+  new Chart(document.getElementById('chart-tenido-bar'), {
+    type: 'bar',
+    data: { labels: tenData.map(d => d.label), datasets: [{ data: tenData.map(d => d.v), backgroundColor: tenData.map(d => d.color), borderWidth: 0, borderRadius: 4 }] },
+    options: { plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: 'rgba(26,16,24,.06)' } } } }
+  });
+
+  /* ── 7. Aprendizaje — desde CSV ── */
+  const aprFields = [
+    { label: 'Madre',      col: 'n_aprendio_madre' },
+    { label: 'Tía',        col: 'n_aprendio_tia' },
+    { label: 'Abuela',     col: 'n_aprendio_abuela' },
+    { label: 'Otra persona', col: 'n_aprendio_otro' },
+    { label: 'Padre',      col: 'n_aprendio_padre' },
+    { label: 'Instructor/a', col: 'n_aprendio_instructor' },
+    { label: 'Hermana',    col: 'n_aprendio_hermana' },
+    { label: 'Cuñada',     col: 'n_aprendio_cunada' },
+  ];
+  const aprTotals = aprFields.map(f => ({ label: f.label, v: rows.reduce((s,r) => s + num(r[f.col]), 0) }));
+  aprTotals.sort((a,b) => b.v - a.v);
+
+  new Chart(document.getElementById('chart-aprendizaje'), {
+    type: 'bar',
+    data: { labels: aprTotals.map(d => d.label), datasets: [{ data: aprTotals.map(d => d.v), backgroundColor: rampMagenta(aprTotals.length), borderWidth: 0, borderRadius: 3 }] },
+    options: { ...baseOpts('y') }
+  });
+
+  /* ── 8. Técnicas por estado — desde CSV ── */
+  const estadoMap = {};
+  rows.forEach(r => {
+    const nombre = (r['Tecnica']||r['tecnica_norm']||'').trim();
+    if (!nombre) return;
+    const estados = (r.estados||'').split(',').map(s=>s.trim()).filter(Boolean);
+    estados.forEach(e => {
+      if (!estadoMap[e]) estadoMap[e] = new Set();
+      estadoMap[e].add(nombre);
+    });
+  });
+  const estadoArr = Object.entries(estadoMap)
+    .map(([e,set]) => [e, set.size])
+    .sort((a,b) => b[1]-a[1])
+    .slice(0, 20);
+
+  new Chart(document.getElementById('chart-tec-estado'), {
+    type: 'bar',
+    data: { labels: estadoArr.map(d=>d[0]), datasets: [{ data: estadoArr.map(d=>d[1]), backgroundColor: rampMagenta(estadoArr.length), borderWidth: 0, borderRadius: 3 }] },
+    options: { ...baseOpts('y') }
+  });
+
+  /* ── 9. TABLA: técnica más frecuente por estado — desde CSV con CAT ── */
+  const estadoBest = {};
+  rows.forEach(r => {
+    const nombre  = (r['Tecnica']||r['tecnica_norm']||'').trim();
+    const cat1    = (r['CAT-N-1']||'').trim();
+    const fichas  = num(r.n_fichas);
+    if (!nombre) return;
+    const estados = (r.estados||'').split(',').map(s=>s.trim()).filter(Boolean);
+    estados.forEach(e => {
+      if (!estadoBest[e] || estadoBest[e].fichas < fichas) {
+        estadoBest[e] = { tecnica: nombre, fichas, cat1 };
+      }
+    });
+  });
+
+  window._tableData = Object.entries(estadoBest)
+    .sort((a,b) => a[0].localeCompare(b[0], 'es'))
+    .map(([e, d]) => [e, d.tecnica, d.cat1, d.fichas]);
+
+  renderTable(window._tableData);
+
+  /* ── 10. Municipios (estático — no disponible en technique_id) ── */
+  const munData = [['Larráinzar',20],['Hueyapan',20],['Venustiano Carranza',15],['Cuetzalan del Progreso',15],['Villa de Allende',14],['Paracho',11],['Chamula',11],['Xochistlahuaca',10],['Huautla de Jiménez',10],['Maní',9],['Zinacantán',9],['Tenango de Doria',8],['Ometepec',8],['S.B. Ayautla',8],['Aldama',7],['S.A. Castillo Velasco',7],['Teabo',6],['Atlequizayan',6],['Sol. Atzompa',6],['Bocoyna',6]];
+  new Chart(document.getElementById('chart-municipios'), {
+    type: 'bar',
+    data: { labels: munData.map(d=>d[0]), datasets: [{ data: munData.map(d=>d[1]), backgroundColor: AZUL, borderWidth: 0, borderRadius: 3 }] },
+    options: { plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: ARENA, maxRotation: 45, font: { size: 11 } } }, y: { grid: { color: 'rgba(26,16,24,.06)' } } } }
+  });
+
+  /* ── 11. Gráficas estáticas (participación, sede, lenguas) ── */
+  new Chart(document.getElementById('chart-sede'), {
+    type: 'bar',
+    data: { labels: ['CDMX', 'Mérida', 'Tijuana'], datasets: [{ data: [264,150,102], backgroundColor: [MAGENTA, ROSA, '#C8B8C0'], borderWidth: 0, borderRadius: 4 }] },
+    options: { ...baseOpts(), plugins: { legend: { display: false } } }
+  });
+  new Chart(document.getElementById('chart-genero'), {
+    type: 'doughnut',
+    data: { labels: ['Mujer','Hombre','No especificó'], datasets: [{ data: [516,118,1], backgroundColor: [MAGENTA, ROSA, ARENA], borderWidth: 3, borderColor: '#FFF8F5' }] },
+    options: { cutout: '68%', plugins: { legend: { display: false } } }
+  });
+  const partEstado = [['Oaxaca',115],['Chiapas',88],['Yucatán',42],['Michoacán',35],['Puebla',35],['Guerrero',30],['Veracruz',30],['México',23],['Hidalgo',15],['Chihuahua',14],['Tlaxcala',13],['Morelos',11],['Campeche',10],['Sonora',7],['Jalisco',7]];
+  new Chart(document.getElementById('chart-part-estado'), {
+    type: 'bar',
+    data: { labels: partEstado.map(d=>d[0]), datasets: [{ data: partEstado.map(d=>d[1]), backgroundColor: rampMagenta(partEstado.length), borderWidth: 0, borderRadius: 3 }] },
+    options: { ...baseOpts('y') }
+  });
+  const lenguaData = [['Náhuatl',86],['Tsotsil',71],['Maya Yucateco',66],['Otomí',27],['Purépecha',26],['Zapoteco',26],['Tseltal',23],['Amuzgo',20],['Mazateco',19],['Mixteco',15],['Huave',10],['Chinanteco',8]];
+  new Chart(document.getElementById('chart-lengua'), {
+    type: 'bar',
+    data: { labels: lenguaData.map(d=>d[0]), datasets: [{ data: lenguaData.map(d=>d[1]), backgroundColor: MAGENTA, borderWidth: 0, borderRadius: 3 }] },
+    options: { ...baseOpts() }
+  });
+
+  /* ── 12. Técnicas por lengua (estático) ── */
+  const topTecNames = topNames.slice(0,10);
+  const lenguaMatrix = {
+    'Náhuatl':      [22,12,7,0,0,0,1,4,1,1],
+    'Tsotsil':      [32,1,1,0,2,10,0,0,0,0],
+    'Maya Yucateco':[1,27,1,0,1,0,7,0,0,0],
+    'Otomí':        [4,4,3,0,0,0,0,3,1,0],
+    'Purépecha':    [11,5,0,2,0,1,0,0,2,0],
+    'Zapoteco':     [4,2,0,6,3,0,0,0,0,1],
+    'Tseltal':      [7,5,0,1,0,2,0,0,0,1],
+    'Amuzgo':       [13,1,0,0,0,1,0,0,0,0],
+    'Mazateco':     [0,3,5,0,0,0,0,0,0,5],
+    'Mixteco':      [6,1,0,1,3,1,0,0,0,0]
+  };
+  const lenguaLabels = Object.keys(lenguaMatrix);
+  new Chart(document.getElementById('chart-lengua-tec'), {
+    type: 'bar',
+    data: {
+      labels: lenguaLabels,
+      datasets: topTecNames.map((tec,i) => ({
+        label: tec, data: lenguaLabels.map(l => lenguaMatrix[l][i] || 0),
+        backgroundColor: MULTI[i], borderWidth: 1, borderColor: '#FFF8F5'
+      }))
+    },
+    options: {
+      scales: { x: { stacked:true, grid:{display:false}, ticks:{color:ARENA} }, y: { stacked:true, grid:{color:'rgba(26,16,24,.06)'} } },
+      plugins: { legend: { position:'bottom', labels:{ color:ARENA, font:{size:10}, padding:8 } } }
+    }
+  });
+
+  /* ── OCULTAR LOADING ── */
+  const overlay = document.getElementById('page-loading');
+  overlay.classList.add('hidden');
+  setTimeout(() => overlay.style.display = 'none', 450);
+}
+
+/* ── TABLA ── */
+function renderTable(data) {
+  document.getElementById('table-body').innerHTML = data.map(([e,t,cat1,n]) => {
+    const color = CAT1_COLORS[cat1] || ARENA;
+    return `<tr>
+      <td style="color:var(--tinta);font-weight:500">${esc(e)}</td>
+      <td><span class="tec-badge">${esc(t)}</span></td>
+      <td><span class="cat-badge" style="background:${color}">${esc(cat1||'—')}</span></td>
+      <td style="text-align:center"><span class="num-badge">${n}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterTable() {
+  const q = document.getElementById('table-search').value.toLowerCase();
+  renderTable((window._tableData||[]).filter(([e,t]) =>
+    e.toLowerCase().includes(q) || t.toLowerCase().includes(q)
+  ));
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ============================================================
+   SCROLL — progreso + spy
    ============================================================ */
 window.addEventListener('scroll', () => {
   const top = document.documentElement.scrollTop;
   const h = document.documentElement.scrollHeight - window.innerHeight;
   document.getElementById('progress-bar').style.width = (top / h * 100) + '%';
 
-  // Nav active tab
   const sections = ['metodologia','participacion','distribucion','tecnicas','tenido','transmision'];
   let current = sections[0];
   for (const id of sections) {
@@ -779,243 +933,9 @@ const observer = new IntersectionObserver(entries => {
 document.querySelectorAll('.section-block').forEach(s => observer.observe(s));
 
 /* ============================================================
-   CHART.JS DEFAULTS — paleta crema (fondo claro)
+   ARRANQUE
    ============================================================ */
-Chart.defaults.color = '#8C7A80';
-Chart.defaults.borderColor = 'rgba(26,16,24,.08)';
-Chart.defaults.font.family = "'DM Sans', sans-serif";
-
-const MAGENTA  = '#B50552';
-const AZUL     = '#035A79';
-const NARANJA  = '#FB4801';
-const VERDE    = '#05B794';
-const OCRE     = '#FFA329';
-const CYAN     = '#00B2C0';
-const ROSA     = '#DE599B';
-const ARENA    = '#8C7A80';
-
-// Rampa monocromática magenta
-const rampMagenta = n => Array.from({length:n}, (_,i) => {
-  const t = i / Math.max(n-1,1);
-  // claro → oscuro: #DE599B → #B50552
-  const r = Math.round(0xDE + t*(0xB5-0xDE));
-  const g = Math.round(0x59 + t*(0x05-0x59));
-  const b = Math.round(0x9B + t*(0x52-0x9B));
-  return `rgb(${r},${g},${b})`;
-});
-
-const MULTI = [MAGENTA, AZUL, VERDE, OCRE, NARANJA, CYAN, ROSA, '#7F8C8D', '#9B59B6', ARENA];
-
-const baseOpts = (indexAxis='x') => ({
-  indexAxis,
-  responsive: true,
-  plugins: { legend: { display: false } },
-  scales: {
-    x: { grid: { color: 'rgba(26,16,24,.06)' } },
-    y: { grid: { display: indexAxis==='y' ? false : true, color: 'rgba(26,16,24,.06)' } }
-  }
-});
-
-/* ── SEDE ── */
-new Chart(document.getElementById('chart-sede'), {
-  type: 'bar',
-  data: {
-    labels: ['CDMX', 'Mérida', 'Tijuana'],
-    datasets: [{ data: [264,150,102], backgroundColor:[MAGENTA, ROSA, '#C8B8C0'], borderWidth:0, borderRadius:4 }]
-  },
-  options: { ...baseOpts(), plugins:{ legend:{display:false} } }
-});
-
-/* ── GÉNERO ── */
-new Chart(document.getElementById('chart-genero'), {
-  type: 'doughnut',
-  data: {
-    labels: ['Mujer','Hombre','No especificó'],
-    datasets: [{ data:[516,118,1], backgroundColor:[MAGENTA, ROSA, ARENA], borderWidth:3, borderColor:'#FFF8F5' }]
-  },
-  options: { cutout:'68%', plugins:{ legend:{display:false} } }
-});
-
-/* ── PARTICIPANTES POR ESTADO ── */
-const partEstado = [['Oaxaca',115],['Chiapas',88],['Yucatán',42],['Michoacán',35],['Puebla',35],['Guerrero',30],['Veracruz',30],['México',23],['Hidalgo',15],['Chihuahua',14],['Tlaxcala',13],['Morelos',11],['Campeche',10],['Sonora',7],['Jalisco',7]];
-new Chart(document.getElementById('chart-part-estado'), {
-  type: 'bar',
-  data: {
-    labels: partEstado.map(d=>d[0]),
-    datasets: [{ data: partEstado.map(d=>d[1]), backgroundColor: rampMagenta(partEstado.length), borderWidth:0, borderRadius:3 }]
-  },
-  options: { ...baseOpts('y') }
-});
-
-/* ── LENGUA ── */
-const lenguaData = [['Náhuatl',86],['Tsotsil',71],['Maya Yucateco',66],['Otomí',27],['Purépecha',26],['Zapoteco',26],['Tseltal',23],['Amuzgo',20],['Mazateco',19],['Mixteco',15],['Huave',10],['Chinanteco',8]];
-new Chart(document.getElementById('chart-lengua'), {
-  type: 'bar',
-  data: {
-    labels: lenguaData.map(d=>d[0]),
-    datasets: [{ data: lenguaData.map(d=>d[1]), backgroundColor: MAGENTA, borderWidth:0, borderRadius:3 }]
-  },
-  options: { ...baseOpts() }
-});
-
-/* ── TEC POR ESTADO ── */
-const tecEstado = [['Oaxaca',43],['Chiapas',37],['Puebla',29],['México',19],['Yucatán',18],['Veracruz',17],['Tlaxcala',13],['Chihuahua',12],['Hidalgo',11],['Michoacán',11],['Guerrero',10],['Campeche',6],['Querétaro',5],['Morelos',4],['Sonora',4]];
-new Chart(document.getElementById('chart-tec-estado'), {
-  type: 'bar',
-  data: {
-    labels: tecEstado.map(d=>d[0]),
-    datasets: [{ data: tecEstado.map(d=>d[1]), backgroundColor: rampMagenta(tecEstado.length), borderWidth:0, borderRadius:3 }]
-  },
-  options: { ...baseOpts('y') }
-});
-
-/* ── MUNICIPIOS ── */
-const munData = [['Larráinzar',20],['Hueyapan',20],['Venustiano Carranza',15],['Cuetzalan del Progreso',15],['Villa de Allende',14],['Paracho',11],['Chamula',11],['Xochistlahuaca',10],['Huautla de Jiménez',10],['Maní',9],['Zinacantán',9],['Tenango de Doria',8],['Ometepec',8],['S.B. Ayautla',8],['Aldama',7],['S.A. Castillo Velasco',7],['Teabo',6],['Atlequizayan',6],['Sol. Atzompa',6],['Bocoyna',6]];
-new Chart(document.getElementById('chart-municipios'), {
-  type: 'bar',
-  data: {
-    labels: munData.map(d=>d[0]),
-    datasets: [{ data: munData.map(d=>d[1]), backgroundColor: AZUL, borderWidth:0, borderRadius:3 }]
-  },
-  options: {
-    plugins: { legend: {display:false} },
-    scales: {
-      x: { grid:{display:false}, ticks:{color:ARENA, maxRotation:45, font:{size:11}} },
-      y: { grid:{color:'rgba(26,16,24,.06)'} }
-    }
-  }
-});
-
-/* ── TABLA ── */
-const tableData = [
-  ['Aguascalientes','Deshilado',4],['Baja California','Trencilla',1],['Campeche','Punto de Cruz',8],
-  ['Chiapas','Telar de cintura',45],['Chihuahua','Bordado Rarámuri',2],['Ciudad de México','Telar de cintura',1],
-  ['Coahuila','Sarape Fino de Saltillo',2],['Colima','Punto de Cruz',1],['Durango','Punto de Cruz',3],
-  ['Guanajuato','Contabilidad y vuelta por hilo',2],['Guerrero','Telar de cintura',13],['Hidalgo','Telar de cintura',4],
-  ['Jalisco','Punto de Cruz',4],['Michoacán','Telar de cintura',15],['Morelos','Telar de cintura',7],
-  ['México','Bordado Mazahua',3],['Nayarit','Telar de cintura',1],['Oaxaca','Telar de cintura',33],
-  ['Puebla','Telar de cintura',12],['Querétaro','Punto de Cruz',3],['Quintana Roo','Punto de Cruz',2],
-  ['Sinaloa','Telar de cintura',1],['Sonora','Cadeneta o cadenilla',4],['Tabasco','Lomillo',2],
-  ['Tamaulipas','Punto de Cruz',1],['Tlaxcala','Telar de pedal',2],['Veracruz','Telar de cintura',12],
-  ['Yucatán','Punto de Cruz',18],['Zacatecas','Telar de pedal',2]
-];
-
-function renderTable(data) {
-  document.getElementById('table-body').innerHTML = data.map(([e,t,n]) => `
-    <tr>
-      <td style="color:var(--tinta);font-weight:500">${e}</td>
-      <td><span class="tec-badge">${t}</span></td>
-      <td style="text-align:center"><span class="num-badge">${n}</span></td>
-    </tr>`).join('');
-}
-function filterTable() {
-  const q = document.getElementById('table-search').value.toLowerCase();
-  renderTable(tableData.filter(([e,t]) => e.toLowerCase().includes(q) || t.toLowerCase().includes(q)));
-}
-renderTable(tableData);
-
-/* ── TOP TÉCNICAS ── */
-const topTec = [['Telar de cintura',146],['Punto de Cruz',89],['Hilván',27],['Telar de pedal',24],['Cadeneta o cadenilla',23],['Brocado',19],['Macizo',13],['Pepenado',13],['Deshilado',13],['Relleno',12],['Lomillo',10],['Pata de gallo',9],['Rejilla',7],['Bordado tradicional',7],['Rococó',6],['Gasa fina',6],['Contabilidad/vuelta',5],['Xmanikté',4],['Tafetán',4],['Bordado de chaquira',4]];
-new Chart(document.getElementById('chart-top-tec'), {
-  type: 'bar',
-  data: {
-    labels: topTec.map(d=>d[0]),
-    datasets: [{ data: topTec.map(d=>d[1]), backgroundColor: rampMagenta(topTec.length), borderWidth:0, borderRadius:3 }]
-  },
-  options: { ...baseOpts('y') }
-});
-
-/* ── GRUPOS ── */
-new Chart(document.getElementById('chart-grupos'), {
-  type: 'doughnut',
-  data: {
-    labels: ['Bordado a mano','Telar de cintura','Bordado a máquina','Tejido a mano','Telar de pedal','Telar de cajón'],
-    datasets: [{ data:[184,91,36,15,15,1], backgroundColor:[MAGENTA,AZUL,ROSA,CYAN,VERDE,ARENA], borderWidth:3, borderColor:'#FFF8F5' }]
-  },
-  options: { cutout:'52%', plugins:{ legend:{ position:'bottom', labels:{ color:ARENA, font:{size:11}, padding:10 } } } }
-});
-
-/* ── MANUFACTURA ── */
-const manData = [['A mano',370],['Telar cintura',232],['Máquina/pedal',56],['Mixta',40],['Tejido a mano',34],['Otra',26],['Telar pedal',25]];
-new Chart(document.getElementById('chart-manufactura'), {
-  type: 'bar',
-  data: {
-    labels: manData.map(d=>d[0]),
-    datasets: [{ data: manData.map(d=>d[1]), backgroundColor:[MAGENTA,AZUL,ROSA,OCRE,CYAN,ARENA,VERDE], borderWidth:0, borderRadius:3 }]
-  },
-  options: {
-    plugins:{legend:{display:false}},
-    scales:{
-      x:{grid:{display:false}, ticks:{color:ARENA, maxRotation:35, font:{size:11}}},
-      y:{grid:{color:'rgba(26,16,24,.06)'}}
-    }
-  }
-});
-
-/* ── TÉCNICAS POR LENGUA ── */
-const topTecNames = ['Telar de cintura','Punto de Cruz','Hilván','Telar de pedal','Cadeneta','Brocado','Macizo','Pepenado','Deshilado','Relleno'];
-const lenguaMatrix = {
-  'Náhuatl':      [22,12,7,0,0,0,1,4,1,1],
-  'Tsotsil':      [32,1,1,0,2,10,0,0,0,0],
-  'Maya Yucateco':[1,27,1,0,1,0,7,0,0,0],
-  'Otomí':        [4,4,3,0,0,0,0,3,1,0],
-  'Purépecha':    [11,5,0,2,0,1,0,0,2,0],
-  'Zapoteco':     [4,2,0,6,3,0,0,0,0,1],
-  'Tseltal':      [7,5,0,1,0,2,0,0,0,1],
-  'Amuzgo':       [13,1,0,0,0,1,0,0,0,0],
-  'Mazateco':     [0,3,5,0,0,0,0,0,0,5],
-  'Mixteco':      [6,1,0,1,3,1,0,0,0,0]
-};
-const lenguaLabels = Object.keys(lenguaMatrix);
-new Chart(document.getElementById('chart-lengua-tec'), {
-  type: 'bar',
-  data: {
-    labels: lenguaLabels,
-    datasets: topTecNames.map((tec,i) => ({
-      label: tec,
-      data: lenguaLabels.map(l => lenguaMatrix[l][i]),
-      backgroundColor: MULTI[i],
-      borderWidth: 1, borderColor: '#FFF8F5'
-    }))
-  },
-  options: {
-    scales: {
-      x: { stacked:true, grid:{display:false}, ticks:{color:ARENA} },
-      y: { stacked:true, grid:{color:'rgba(26,16,24,.06)'} }
-    },
-    plugins: { legend:{ position:'bottom', labels:{ color:ARENA, font:{size:10}, padding:8 } } }
-  }
-});
-
-/* ── TEÑIDO DONA ── */
-new Chart(document.getElementById('chart-tenido-donut'), {
-  type: 'doughnut',
-  data: {
-    labels: ['Con plantas','Insectos/animales','Sales y minerales','Con otro'],
-    datasets: [{ data:[222,86,79,68], backgroundColor:[VERDE,NARANJA,OCRE,ARENA], borderWidth:3, borderColor:'#FFF8F5' }]
-  },
-  options: { cutout:'65%', plugins:{legend:{display:false}} }
-});
-
-/* ── TEÑIDO BARRAS ── */
-new Chart(document.getElementById('chart-tenido-bar'), {
-  type: 'bar',
-  data: {
-    labels: ['Con plantas','Insectos/animales','Sales y minerales','Con otro'],
-    datasets: [{ data:[222,86,79,68], backgroundColor:[VERDE,NARANJA,OCRE,ARENA], borderWidth:0, borderRadius:4 }]
-  },
-  options: { plugins:{legend:{display:false}}, scales:{ x:{grid:{display:false}}, y:{grid:{color:'rgba(26,16,24,.06)'}} } }
-});
-
-/* ── APRENDIZAJE ── */
-new Chart(document.getElementById('chart-aprendizaje'), {
-  type: 'bar',
-  data: {
-    labels: ['Madre','Tía','Abuela','Otra persona','Padre','Instructora','Hermana','Cuñada'],
-    datasets: [{ data:[413,145,136,47,42,29,28,12], backgroundColor: rampMagenta(8), borderWidth:0, borderRadius:3 }]
-  },
-  options: { ...baseOpts('y') }
-});
+loadAndRender();
 </script>
 </body>
 </html>
