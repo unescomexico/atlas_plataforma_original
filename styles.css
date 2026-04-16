@@ -1184,7 +1184,7 @@ body {
   box-shadow: var(--shadow-lg); transition: background .18s, transform .12s;
 }
 .map-filter-toggle:hover { background: #2a2a2a; }
-.map-filter-toggle.active { background: var(--magenta); }
+.map-filter-toggle.active { background: var(--magenta); opacity: 0; pointer-events: none; }
 .map-filter-badge {
   color: var(--ocre); font-size: .7rem; line-height: 1;
 }

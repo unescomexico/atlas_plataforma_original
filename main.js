@@ -474,7 +474,8 @@ let geojsonLayer = null;
 let selectedStateName = null;
 
 function initMap() {
-  map = L.map('map', { zoomControl: true, scrollWheelZoom: true });
+  map = L.map('map', { zoomControl: false, scrollWheelZoom: true });
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
     attribution: '© OpenStreetMap, © CARTO', subdomains: 'abcd', maxZoom: 19
   }).addTo(map);
