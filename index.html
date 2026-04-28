@@ -18,6 +18,11 @@
 <!-- Chart.js (para el reporte) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 
+<!-- Exportación: html2pdf (PDF) y docx (Word) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
 <!-- App styles -->
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -39,17 +44,19 @@
      HEADER
 ════════════════════════════════════════ -->
 <header class="header">
-  <div class="header-weave"></div>
   <div class="header-inner">
     <div class="header-wordmark">
-      <h1>Atlas de <em>Técnicas</em> del Arte Textil</h1>
-      <p>Taller Participativo con artesanas y artesanos de México participantes en Original</p>
+      <h1>Atlas de <span class="word-highlight">Técnicas</span> del Arte Textil</h1>
+      <p>Ejercicio Participativo con artesanas y artesanos de México participantes en Original</p>
     </div>
     <div class="header-divider"></div>
     <div class="header-stats">
-      <div class="hstat"><div class="hstat-num">—</div><div class="hstat-lbl">Técnicas</div></div>
-      <div class="hstat"><div class="hstat-num">—</div><div class="hstat-lbl">Registros</div></div>
-      <div class="hstat"><div class="hstat-num">—</div><div class="hstat-lbl">Estados</div></div>
+      <div class="hstat" data-stat="registros"><div class="hstat-num">—</div><div class="hstat-lbl">Registros</div></div>
+      <div class="hstat" data-stat="estados"><div class="hstat-num">—</div><div class="hstat-lbl">Estados</div></div>
+      <div class="hstat" data-stat="tecnicas"><div class="hstat-num">—</div><div class="hstat-lbl">Técnicas</div></div>
+    </div>
+    <div class="header-logos" aria-label="Secretaría de Cultura · Original · UNESCO">
+      <img src="atlas_plataforma_logos.png" alt="Secretaría de Cultura · Original · UNESCO" />
     </div>
   </div>
 </header>
@@ -62,7 +69,7 @@
   <button class="nav-tab" data-tab="catalogo">Catálogo de técnicas</button>
   <button class="nav-tab" data-tab="red">Red de técnicas</button>
   <button class="nav-tab" data-tab="arbol">Clasificación</button>
-  <button class="nav-tab" data-tab="tenido">Teñido</button>
+  <button class="nav-tab" data-tab="reporte">Reporte</button>
   <button class="nav-tab nav-tab-contribuir" data-tab="contribuir">Contribuir</button>
   <button class="nav-tab nav-tab-info" onclick="openInfo()">Acerca del Atlas</button>
 </nav>
@@ -71,65 +78,66 @@
      VIEW: MAPA
 ════════════════════════════════════════ -->
 <div id="view-mapa" class="view active">
-  <div class="map-panel">
-    <!-- Botón flotante para abrir/cerrar filtros -->
-    <button class="map-filter-toggle" id="map-filter-toggle" onclick="toggleMapFilter()" title="Filtrar técnicas">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
-      <span>Filtrar</span>
-      <span class="map-filter-badge" id="map-filter-badge" style="display:none">●</span>
-    </button>
-
-    <!-- Panel lateral colapsable de filtros -->
-    <div class="map-filter-sidebar" id="map-filter-sidebar">
-      <div class="map-filter-panel">
-        <div class="map-filter-header">
-          <span class="map-filter-title">Filtrar técnicas</span>
-          <div style="display:flex;gap:6px;align-items:center">
-            <button class="map-filter-clear" id="map-filter-clear" onclick="clearMapFilter()">Limpiar</button>
-            <button class="map-filter-collapse" onclick="toggleMapFilter()" title="Cerrar">✕</button>
-          </div>
+  <!-- ━━━ Columna 1: Sidebar fijo de filtros ━━━ -->
+  <aside class="map-filter-sidebar" id="map-filter-sidebar">
+    <div class="map-filter-panel">
+      <div class="map-filter-header">
+        <span class="map-filter-title">Filtrar técnicas</span>
+        <button class="map-filter-clear" id="map-filter-clear" onclick="clearMapFilter()">Limpiar</button>
+      </div>
+      <div class="map-filter-levels" id="map-filter-levels">
+        <!-- Nivel 0: búsqueda libre -->
+        <div class="map-filter-level">
+          <div class="map-filter-level-label">Buscar</div>
+          <input class="map-filter-search" type="text" id="map-filter-search" placeholder="Técnica, categoría…" autocomplete="off">
+          <div class="map-filter-autocomplete" id="map-filter-autocomplete"></div>
         </div>
-        <div class="map-filter-levels" id="map-filter-levels">
-          <!-- Nivel 0: búsqueda libre -->
-          <div class="map-filter-level">
-            <div class="map-filter-level-label">Buscar</div>
-            <input class="map-filter-search" type="text" id="map-filter-search" placeholder="Técnica, categoría…" autocomplete="off">
-            <div class="map-filter-autocomplete" id="map-filter-autocomplete"></div>
-          </div>
-          <!-- Nivel 1: CAT-N-1 -->
-          <div class="map-filter-level">
-            <div class="map-filter-level-label">Categoría</div>
-            <div class="map-filter-chips" id="map-chips-cat1"></div>
-          </div>
-          <!-- Nivel 2: CAT-N-2 (condicional) -->
-          <div class="map-filter-level" id="map-level-cat2" style="display:none">
-            <div class="map-filter-level-label">Subcategoría</div>
-            <div class="map-filter-chips" id="map-chips-cat2"></div>
-          </div>
-          <!-- Nivel 3: CAT-N-3 (condicional) -->
-          <div class="map-filter-level" id="map-level-cat3" style="display:none">
-            <div class="map-filter-level-label">Tipo</div>
-            <div class="map-filter-chips" id="map-chips-cat3"></div>
-          </div>
-          <!-- Nivel 4: CAT-N-4 (condicional) -->
-          <div class="map-filter-level" id="map-level-cat4" style="display:none">
-            <div class="map-filter-level-label">Variante</div>
-            <div class="map-filter-chips" id="map-chips-cat4"></div>
-          </div>
-          <!-- Técnicas (resultado) -->
-          <div class="map-filter-level" id="map-level-tecs" style="display:none">
-            <div class="map-filter-level-label" id="map-tecs-label">Técnicas</div>
-            <div class="map-filter-chips" id="map-chips-tecs"></div>
-          </div>
+        <!-- Nivel 1: CAT-N-1 -->
+        <div class="map-filter-level">
+          <div class="map-filter-level-label">Categoría</div>
+          <div class="map-filter-chips" id="map-chips-cat1"></div>
         </div>
-        <!-- Resultado activo -->
-        <div class="map-filter-active" id="map-filter-active" style="display:none">
-          <span id="map-filter-active-text"></span>
+        <!-- Nivel 2: CAT-N-2 (condicional) -->
+        <div class="map-filter-level" id="map-level-cat2" style="display:none">
+          <div class="map-filter-level-label">Subcategoría</div>
+          <div class="map-filter-chips" id="map-chips-cat2"></div>
+        </div>
+        <!-- Nivel 3: CAT-N-3 (condicional) -->
+        <div class="map-filter-level" id="map-level-cat3" style="display:none">
+          <div class="map-filter-level-label">Tipo</div>
+          <div class="map-filter-chips" id="map-chips-cat3"></div>
+        </div>
+        <!-- Nivel 4: CAT-N-4 (condicional) -->
+        <div class="map-filter-level" id="map-level-cat4" style="display:none">
+          <div class="map-filter-level-label">Variante</div>
+          <div class="map-filter-chips" id="map-chips-cat4"></div>
+        </div>
+        <!-- Técnicas (resultado) -->
+        <div class="map-filter-level" id="map-level-tecs" style="display:none">
+          <div class="map-filter-level-label" id="map-tecs-label">Técnicas</div>
+          <div class="map-filter-chips" id="map-chips-tecs"></div>
         </div>
       </div>
+      <!-- Resultado activo -->
+      <div class="map-filter-active" id="map-filter-active" style="display:none">
+        <span id="map-filter-active-text"></span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ━━━ Columna 2: Mapa ━━━ -->
+  <div class="map-panel">
+    <div id="map"></div>
+
+    <!-- Toggle de capa Comunidades (centroides de municipios) -->
+    <div class="map-layer-toggle" id="map-layer-toggle">
+      <label class="map-layer-checkbox">
+        <input type="checkbox" id="comunidades-toggle">
+        <span class="map-layer-checkbox-track"></span>
+        <span class="map-layer-checkbox-label">Comunidades</span>
+      </label>
     </div>
 
-    <div id="map"></div>
     <div class="map-legend">
       <h4>Técnicas por estado</h4>
       <div class="legend-item"><div class="legend-dot" style="background:#A91E45"></div><span>40 o más</span></div>
@@ -139,15 +147,22 @@
     </div>
   </div>
 
+  <!-- ━━━ Columna 3: Panel lateral derecho (estados + técnicas) ━━━ -->
   <div class="side-panel">
     <div class="panel-header">
-      <div class="panel-title" id="panel-title">Selecciona un estado</div>
-      <div class="panel-subtitle" id="panel-subtitle">Haz clic en el mapa para explorar las técnicas de cada estado</div>
+      <div class="panel-title" id="panel-title">Estados de la República</div>
+      <div class="panel-subtitle" id="panel-subtitle">Selecciona un estado para ver sus técnicas</div>
     </div>
+    <!-- Lista de estados (siempre visible) -->
+    <div class="states-list-wrap">
+      <div class="states-list-label">Estados</div>
+      <div class="states-list" id="states-list"></div>
+    </div>
+    <!-- Técnicas del estado seleccionado -->
     <div class="panel-body" id="panel-body">
       <div class="welcome-state">
         <h3>Explora el mapa</h3>
-        <p>Cada estado está coloreado según el número de técnicas textiles documentadas. Haz clic para ver el detalle.</p>
+        <p>Cada estado está coloreado según el número de técnicas textiles documentadas. Selecciona uno arriba o haz clic en el mapa.</p>
       </div>
     </div>
   </div>
@@ -176,29 +191,43 @@
 ════════════════════════════════════════ -->
 <div id="view-red" class="view">
   <div class="network-view">
-    <div class="network-toolbar">
-      <div class="network-toolbar-left">
-        <h2>Red de técnicas</h2>
-        <div class="network-search-wrap">
-          <input class="network-search-input" id="network-search" type="text" placeholder="Buscar técnica…" autocomplete="off">
-          <div class="network-search-ac" id="network-search-ac"></div>
-        </div>
+    <!-- Panel flotante derecho: búsqueda + layer + subcategorías -->
+    <div class="network-side-panel" id="network-side-panel">
+      <!-- Búsqueda -->
+      <div class="network-search-wrap">
+        <input class="network-search-input" id="network-search" type="text" placeholder="Buscar técnica…" autocomplete="off">
+        <div class="network-search-ac" id="network-search-ac"></div>
       </div>
-      <div id="network-filters"></div>
+
+      <!-- Dropdown de layers -->
+      <div class="network-dropdown" id="network-layer-dropdown">
+        <button class="network-dropdown-trigger" id="network-dropdown-trigger" type="button" aria-expanded="false">
+          <span class="network-dropdown-label">
+            <span class="network-dropdown-label-key">Capa</span>
+            <span class="network-dropdown-label-value" id="network-dropdown-current">Clasificación</span>
+          </span>
+          <span class="network-dropdown-chevron">▾</span>
+        </button>
+        <div class="network-dropdown-menu" id="network-dropdown-menu" role="menu"></div>
+      </div>
+
+      <!-- Subcategorías del layer activo -->
+      <div class="network-sublayer-section">
+        <div class="network-sublayer-label" id="network-sublayer-label">Categorías</div>
+        <div class="network-sublayer-chips" id="network-sublayer-chips"></div>
+        <div class="network-legend-hint">Nodo mayor = más registros · <strong>Clic</strong> en grupo para resaltar · <strong>Arrastra</strong> nodos · <strong>Scroll</strong> para zoom</div>
+      </div>
     </div>
-    <div class="network-container">
-      <canvas id="network-canvas" style="height:580px"></canvas>
-      <div class="network-tooltip" id="network-tooltip"></div>
-      <div class="network-controls">
-        <button class="net-ctrl-btn" id="net-zoom-in" title="Acercar">+</button>
-        <button class="net-ctrl-btn" id="net-zoom-out" title="Alejar">−</button>
-        <button class="net-ctrl-btn" id="net-reset" title="Restablecer vista">↺</button>
-      </div>
-      <div class="network-legend">
-        <span class="network-legend-title">Categorías</span>
-        <div id="network-legend-items" style="display:flex;flex-wrap:wrap;gap:8px"></div>
-        <span class="network-legend-hint">Nodo mayor = más registros · <strong>Clic</strong> en grupo para resaltar · <strong>Arrastra</strong> nodos · <strong>Scroll</strong> para zoom</span>
-      </div>
+
+    <!-- Canvas a pantalla completa -->
+    <canvas id="network-canvas"></canvas>
+    <div class="network-tooltip" id="network-tooltip"></div>
+
+    <!-- Controles de zoom flotantes (lado izquierdo para no chocar con el panel) -->
+    <div class="network-controls">
+      <button class="net-ctrl-btn" id="net-zoom-in" title="Acercar">+</button>
+      <button class="net-ctrl-btn" id="net-zoom-out" title="Alejar">−</button>
+      <button class="net-ctrl-btn" id="net-reset" title="Restablecer vista">↺</button>
     </div>
   </div>
 </div>
@@ -258,18 +287,154 @@
 
 
 <!-- ═══════════════════════════════════════
-     VIEW: TEÑIDO
+     VIEW: REPORTE — Constructor de reportes personalizados
 ════════════════════════════════════════ -->
-<div id="view-tenido" class="view">
-  <div class="tenido-view">
-    <div class="tenido-header">
-      <h2>Técnicas y Teñido</h2>
-      <p>Explora qué tipo de teñido se aplica a cada técnica textil. Filtra por tipo de teñido para resaltar las técnicas que lo utilizan, o haz clic en cualquier técnica para ver su ficha.</p>
+<div id="view-reporte" class="view">
+  <div class="reporte-view">
+
+    <!-- Encabezado del wizard -->
+    <header class="reporte-header">
+      <h2>Reporte personalizado</h2>
+      <p>Configura un reporte con la información del Atlas que más te interese.
+        Elige los datos a incluir, las secciones del documento y descárgalo en PDF o Word.</p>
+    </header>
+
+    <!-- Stepper de 3 pasos -->
+    <ol class="reporte-stepper" id="reporte-stepper">
+      <li class="reporte-step active" data-step="1">
+        <span class="reporte-step-num">1</span>
+        <span class="reporte-step-label">Selección</span>
+        <span class="reporte-step-desc">¿Qué información incluir?</span>
+      </li>
+      <li class="reporte-step" data-step="2">
+        <span class="reporte-step-num">2</span>
+        <span class="reporte-step-label">Secciones</span>
+        <span class="reporte-step-desc">¿Qué partes del documento?</span>
+      </li>
+      <li class="reporte-step" data-step="3">
+        <span class="reporte-step-num">3</span>
+        <span class="reporte-step-label">Vista previa</span>
+        <span class="reporte-step-desc">Genera y descarga</span>
+      </li>
+    </ol>
+
+    <!-- Cuerpo del wizard: solo el panel del paso activo es visible -->
+    <div class="reporte-body">
+
+      <!-- ─── Paso 1: Selección ─── -->
+      <section class="reporte-panel active" data-panel="1">
+
+        <!-- Metadata del reporte -->
+        <div class="reporte-meta">
+          <div class="reporte-field">
+            <label for="reporte-titulo">Título del reporte</label>
+            <input type="text" id="reporte-titulo" placeholder="ej. Técnicas textiles de Oaxaca y Chiapas" maxlength="120">
+          </div>
+          <div class="reporte-field">
+            <label for="reporte-autor">Autor o institución</label>
+            <input type="text" id="reporte-autor" placeholder="ej. Dirección de Patrimonio Cultural" maxlength="120">
+          </div>
+        </div>
+
+        <!-- Presets de selección rápida -->
+        <div class="reporte-presets">
+          <span class="reporte-presets-label">Presets:</span>
+          <button class="reporte-preset" data-preset="all">Todas las técnicas</button>
+          <button class="reporte-preset" data-preset="oaxaca">Solo Oaxaca</button>
+          <button class="reporte-preset" data-preset="chiapas">Solo Chiapas</button>
+          <button class="reporte-preset" data-preset="bordados">Solo bordados</button>
+          <button class="reporte-preset" data-preset="tejidos">Solo tejidos</button>
+          <button class="reporte-preset" data-preset="top10">Top 10 con más registros</button>
+          <button class="reporte-preset reporte-preset-clear" data-preset="clear">Limpiar</button>
+        </div>
+
+        <!-- Tres bloques de filtros -->
+        <div class="reporte-filtros">
+
+          <!-- Filtro por categorías expertas -->
+          <div class="reporte-filter-block">
+            <div class="reporte-filter-head">
+              <h4>Por categoría</h4>
+              <span class="reporte-filter-hint">Categorías expertas</span>
+            </div>
+            <div class="reporte-chips" id="reporte-chips-cat"></div>
+          </div>
+
+          <!-- Filtro por estados -->
+          <div class="reporte-filter-block">
+            <div class="reporte-filter-head">
+              <h4>Por estados</h4>
+              <span class="reporte-filter-hint">Click para incluir</span>
+            </div>
+            <div class="reporte-chips" id="reporte-chips-estados"></div>
+          </div>
+
+          <!-- Filtro por técnicas específicas -->
+          <div class="reporte-filter-block">
+            <div class="reporte-filter-head">
+              <h4>Técnicas específicas</h4>
+              <span class="reporte-filter-hint">Búsqueda por nombre</span>
+            </div>
+            <div class="reporte-search-wrap">
+              <input type="text" id="reporte-search-tec" placeholder="Buscar y agregar técnica…" autocomplete="off">
+              <div class="reporte-search-ac" id="reporte-search-ac"></div>
+            </div>
+            <div class="reporte-chips" id="reporte-chips-tecs"></div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ─── Paso 2: Secciones ─── -->
+      <section class="reporte-panel" data-panel="2">
+        <div class="reporte-panel-intro">
+          <h3>¿Qué secciones incluir?</h3>
+          <p>Marca las partes que quieres en el documento final. Las que no apliquen a tu selección se omitirán automáticamente.</p>
+        </div>
+
+        <div class="reporte-secciones" id="reporte-secciones">
+          <!-- Cards de secciones inyectadas por JS -->
+        </div>
+
+        <div class="reporte-seccion-acciones">
+          <button class="reporte-btn-link" id="reporte-sec-all">Marcar todas</button>
+          <span class="reporte-sep">·</span>
+          <button class="reporte-btn-link" id="reporte-sec-none">Desmarcar todas</button>
+          <span class="reporte-sep">·</span>
+          <button class="reporte-btn-link" id="reporte-sec-default">Restaurar por defecto</button>
+        </div>
+      </section>
+
+      <!-- ─── Paso 3: Vista previa y descarga ─── -->
+      <section class="reporte-panel" data-panel="3">
+        <div class="reporte-paso3-toolbar">
+          <div class="reporte-paso3-info">
+            <h3 id="reporte-preview-title">Vista previa del reporte</h3>
+            <p id="reporte-preview-subtitle">Revisa el contenido antes de descargar</p>
+          </div>
+          <div class="reporte-paso3-actions">
+            <button class="reporte-btn reporte-btn-secondary" id="reporte-regenerate" title="Regenerar con la selección actual">↻ Regenerar</button>
+            <button class="reporte-btn reporte-btn-secondary" id="reporte-download-word">📄 Descargar Word</button>
+            <button class="reporte-btn reporte-btn-primary" id="reporte-download-pdf">⬇ Descargar PDF</button>
+          </div>
+        </div>
+        <div class="reporte-preview-frame" id="reporte-preview-frame">
+          <div class="reporte-preview-empty">
+            <p>Avanza al paso 3 para generar la vista previa.</p>
+          </div>
+        </div>
+      </section>
+
     </div>
-    <div class="tenido-filters" id="tenido-filters"></div>
-    <div class="tenido-body" id="tenido-body">
-      <!-- JS inyecta la matriz aquí -->
+
+    <!-- Botones de navegación entre pasos -->
+    <div class="reporte-nav">
+      <button class="reporte-btn reporte-btn-secondary" id="reporte-prev" disabled>← Anterior</button>
+      <span class="reporte-progress" id="reporte-progress">Paso 1 de 3</span>
+      <button class="reporte-btn reporte-btn-primary" id="reporte-next">Siguiente →</button>
     </div>
+
   </div>
 </div>
 
@@ -346,13 +511,6 @@ function closeKobo(e) {
   document.getElementById('kobo-overlay').classList.remove('open');
   document.getElementById('kobo-iframe').src = '';
   document.body.style.overflow = '';
-}
-
-function toggleMapFilter() {
-  const sidebar = document.getElementById('map-filter-sidebar');
-  const toggle  = document.getElementById('map-filter-toggle');
-  const open    = sidebar.classList.toggle('open');
-  toggle.classList.toggle('active', open);
 }
 
 function openInfo() {

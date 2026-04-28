@@ -202,12 +202,12 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 1000; display: flex
     <p class="section-lead">Ranking de estados con mayor diversidad de técnicas distintas reportadas. <strong id="top3-estados">—</strong> concentran la mayor riqueza técnica registrada en este ejercicio.</p>
     <div class="chart-card-full">
       <div class="chart-card-title">Técnicas distintas por estado</div>
-      <div class="chart-card-sub">Número de técnicas únicas registradas en cada entidad federativa — calculado desde el CSV</div>
+      <div class="chart-card-sub">Número de técnicas únicas registradas en cada entidad federativa</div>
       <canvas id="chart-tec-estado" height="320"></canvas>
     </div>
     <div class="chart-card-full">
       <div class="chart-card-title">Municipios con mayor número de registros</div>
-      <div class="chart-card-sub">Top 20 municipios con más fichas levantadas — calculado desde el CSV</div>
+      <div class="chart-card-sub">Top 20 municipios con más fichas levantadas</div>
       <canvas id="chart-municipios" height="320"></canvas>
     </div>
     <div class="chart-card-full" style="margin-top:2rem">
@@ -237,7 +237,7 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 1000; display: flex
     </div>
     <div class="two-col">
       <div class="chart-card">
-        <div class="chart-card-title">Categoría de técnica (CAT-N-1)</div>
+        <div class="chart-card-title">Categoría de técnica</div>
         <div class="chart-card-sub">Distribución de registros por categoría principal según clasificación experta</div>
         <div class="donut-wrap" style="margin-top:8px">
           <div class="donut-canvas-wrap"><canvas id="chart-grupos" height="220"></canvas></div>
@@ -245,14 +245,14 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 1000; display: flex
         </div>
       </div>
       <div class="chart-card">
-        <div class="chart-card-title">Subcategoría de técnica (CAT-N-2)</div>
+        <div class="chart-card-title">Subcategoría de técnica</div>
         <div class="chart-card-sub">Registros agrupados por subcategoría dentro del esquema experto</div>
         <canvas id="chart-manufactura" height="260"></canvas>
       </div>
     </div>
     <div class="chart-card-full">
       <div class="chart-card-title">Distribución de técnicas por lengua indígena</div>
-      <div class="chart-card-sub">Top 10 técnicas entre las 10 lenguas con más registros (barras apiladas) — calculado desde ambos CSV</div>
+      <div class="chart-card-sub">Top 10 técnicas entre las 10 lenguas con más registros (barras apiladas)</div>
       <canvas id="chart-lengua-tec" height="360"></canvas>
     </div>
   </section>
@@ -265,7 +265,7 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 1000; display: flex
     <div class="two-col">
       <div class="chart-card">
         <div class="chart-card-title">Tipos de teñido registrados</div>
-        <div class="chart-card-sub">Distribución general de los métodos de teñido · calculado desde CSV</div>
+        <div class="chart-card-sub">Distribución general de los métodos de teñido</div>
         <div class="donut-wrap" style="margin-top:8px">
           <div class="donut-canvas-wrap"><canvas id="chart-tenido-donut" height="200"></canvas></div>
           <div class="donut-legend" id="chart-tenido-legend"></div>
@@ -285,7 +285,7 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 1000; display: flex
     <h2 class="section-title">¿Cómo se aprende y se enseña?</h2>
     <p class="section-lead">La transmisión de los saberes textiles ocurre principalmente dentro del <strong>núcleo familiar</strong>. La madre es la figura más frecuente en el proceso de aprendizaje, seguida de tías y abuelas, lo que evidencia el papel central de las mujeres como portadoras y transmisoras de este patrimonio.</p>
     <div class="chart-card-full">
-      <div class="chart-card-title">Fuentes de aprendizaje de la técnica · calculado desde CSV</div>
+      <div class="chart-card-title">Fuentes de aprendizaje de la técnica</div>
       <div class="chart-card-sub">¿De quién aprendió esta técnica? (respuesta múltiple posible)</div>
       <canvas id="chart-aprendizaje" height="260"></canvas>
     </div>
@@ -373,15 +373,15 @@ async function loadAndRender() {
       fetch('data_by_technique_id.csv'),
       fetch('data_by_record_id.csv'),
     ]);
-    if (!resTec.ok) throw new Error('No se encontró data_by_technique_id.csv');
-    if (!resRec.ok) throw new Error('No se encontró data_by_record_id.csv');
+    if (!resTec.ok) throw new Error('No se pudieron cargar los datos del Atlas');
+    if (!resRec.ok) throw new Error('No se pudieron cargar los datos del Atlas');
     const [textTec, textRec] = await Promise.all([resTec.text(), resRec.text()]);
     renderAll(parseCSV(textTec), parseCSV(textRec));
   } catch(e) {
     document.getElementById('page-loading').innerHTML =
       `<div style="color:#B50552;font-family:sans-serif;text-align:center;padding:40px">
         Error al cargar los datos.<br><small>${esc(e.message)}</small><br>
-        <small style="opacity:.6">Asegúrate de que los CSV estén en la misma carpeta que este HTML.</small>
+        <small style="opacity:.6">No se pudieron cargar los datos del Atlas. Recarga la página o intenta más tarde.</small>
       </div>`;
   }
 }
@@ -390,6 +390,18 @@ function renderAll(rowsTec, rowsRec) {
   Chart.defaults.color = '#8C7A80';
   Chart.defaults.borderColor = 'rgba(26,16,24,.08)';
   Chart.defaults.font.family = "'DM Sans', sans-serif";
+
+  // ─────────────────────────────────────────────────────────────────
+  // FILTRO GLOBAL DE LA PLATAFORMA: solo técnicas con MÁS DE 1 registro.
+  // (Mismo criterio aplicado en main.js / buildAtlasFromCSV.)
+  // Filtramos rowsTec por n_fichas > 1, y rowsRec se restringe a los
+  // registros cuya técnica pasó el filtro, para que TODAS las gráficas
+  // y conteos del reporte interno operen sobre el mismo universo
+  // que el resto del Atlas.
+  // ─────────────────────────────────────────────────────────────────
+  rowsTec = rowsTec.filter(r => num(r['n_fichas']) > 1);
+  const tecnicasValidas = new Set(rowsTec.map(r => (r['Tecnica'] || r['tecnica_norm'] || '').trim()));
+  rowsRec = rowsRec.filter(r => tecnicasValidas.has((r['Tecnica'] || '').trim()));
 
   /* ══════════════════════════
      01 — CLASIFICACIÓN

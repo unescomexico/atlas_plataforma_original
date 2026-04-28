@@ -72,6 +72,7 @@ function getMapColor(count) {
 let ATLAS = null;        // { tecnicas: [], estados: {} }
 let tecnicasMap = {};
 let estadosTecnicas = {};
+let municipiosTecnicas = {}; // "Estado||Municipio" -> [tecnicas]
 
 // ────────────────────────────────────────────────
 // CSV PARSER (sin dependencias)
@@ -162,6 +163,7 @@ function buildAtlasFromCSV(techRows, recordRows, imgRows) {
 
   // ── 3. Construir cada técnica ─────────────────────
   const estadosMap = {};
+  const municipiosMap = {}; // "Estado||Municipio" -> Set<tecnica>
 
   const tecnicas = techRows.map(row => {
     const nombre  = (row['Tecnica'] || row['tecnica_norm'] || '').trim();
@@ -297,6 +299,17 @@ function buildAtlasFromCSV(techRows, recordRows, imgRows) {
       estadosMap[est].push(nombre);
     });
 
+    // Acumular para el mapa de municipios — clave "Estado||Municipio"
+    // (necesario porque hay nombres de municipio que se repiten entre estados)
+    records.forEach(r => {
+      const est = (r['Estado'] || '').trim();
+      const mun = (r['Municipio'] || '').trim();
+      if (!est || !mun || mun === 'NA') return;
+      const key = `${est}||${mun}`;
+      if (!municipiosMap[key]) municipiosMap[key] = new Set();
+      municipiosMap[key].add(nombre);
+    });
+
     return {
       tecnica: nombre,
       grupo, estados, lenguas, municipios, temporalidad,
@@ -311,9 +324,48 @@ function buildAtlasFromCSV(techRows, recordRows, imgRows) {
       historia, significados,
       cat1, cat2, cat3, cat4,
     };
-  }).filter(t => t.tecnica);
+  })
+  .filter(t => t.tecnica)
+  // ─────────────────────────────────────────────────────────────────
+  // FILTRO GLOBAL DE LA PLATAFORMA: Solo técnicas con MÁS DE 1 registro.
+  // Excluye técnicas reportadas por una sola persona, que se consideran
+  // poco representativas para mostrar como parte del Atlas público.
+  // Este filtro se aplica una sola vez aquí; todas las vistas (mapa,
+  // catálogo, red, clasificación, reporte, "Acerca del Atlas") operan
+  // sobre el subset resultante sin saberlo.
+  // ─────────────────────────────────────────────────────────────────
+  .filter(t => (t.n_fichas || 0) > 1);
 
-  return { tecnicas, estados: estadosMap };
+  // Set con los nombres de técnicas que pasaron el filtro
+  const tecnicasValidas = new Set(tecnicas.map(t => t.tecnica));
+
+  // Re-derivar estadosMap y municipiosMap SOLO con técnicas válidas
+  // (los originales se construyeron antes del filtro y tienen huérfanos)
+  const estadosMapFiltrado = {};
+  Object.keys(estadosMap).forEach(estado => {
+    const ts = estadosMap[estado].filter(t => tecnicasValidas.has(t));
+    if (ts.length > 0) estadosMapFiltrado[estado] = ts;
+  });
+
+  const municipiosMapFiltrado = {};
+  Object.entries(municipiosMap).forEach(([key, set]) => {
+    const ts = [...set].filter(t => tecnicasValidas.has(t));
+    if (ts.length > 0) municipiosMapFiltrado[key] = ts.sort();
+  });
+
+  // Records crudos: solo los que pertenecen a técnicas válidas. Esto
+  // garantiza que cualquier cálculo que vaya por records (reporte,
+  // gráficas de "Acerca del Atlas") respete el filtro global.
+  const recordsFiltrados = recordRows.filter(r =>
+    tecnicasValidas.has((r['Tecnica'] || '').trim())
+  );
+
+  return {
+    tecnicas,
+    estados: estadosMapFiltrado,
+    municipios: municipiosMapFiltrado,
+    records: recordsFiltrados,
+  };
 }
 
 function num(v) {
@@ -350,6 +402,7 @@ async function loadCSVs() {
     ATLAS = buildAtlasFromCSV(techRows, recordRows, imgRows);
     tecnicasMap     = {};
     estadosTecnicas = ATLAS.estados;
+    municipiosTecnicas = ATLAS.municipios || {};
     ATLAS.tecnicas.forEach(t => { tecnicasMap[t.tecnica] = t; });
 
     // Update header stats
@@ -357,9 +410,9 @@ async function loadCSVs() {
     const nTecnicas = ATLAS.tecnicas.length;
     const nRegistros = ATLAS.tecnicas.reduce((s, t) => s + t.n_fichas, 0);
 
-    document.querySelectorAll('.hstat-num')[0].textContent = nTecnicas;
-    document.querySelectorAll('.hstat-num')[1].textContent = Math.round(nRegistros);
-    document.querySelectorAll('.hstat-num')[2].textContent = nEstados;
+    document.querySelector('.hstat[data-stat="registros"] .hstat-num').textContent = Math.round(nRegistros);
+    document.querySelector('.hstat[data-stat="estados"] .hstat-num').textContent = nEstados;
+    document.querySelector('.hstat[data-stat="tecnicas"] .hstat-num').textContent = nTecnicas;
 
     // Hide loading
     overlay.classList.add('hidden');
@@ -369,6 +422,13 @@ async function loadCSVs() {
     initMap();
     // Init map filter panel (needs ATLAS)
     initMapFilter();
+    // Bind toggle de capa Comunidades (centroides)
+    const comunidadesToggle = document.getElementById('comunidades-toggle');
+    if (comunidadesToggle) {
+      comunidadesToggle.addEventListener('change', e => {
+        toggleComunidadesLayer(e.target.checked);
+      });
+    }
 
   } catch (err) {
     console.error('Error cargando CSV:', err);
@@ -376,8 +436,7 @@ async function loadCSVs() {
     overlay.querySelector('.loading-msg').style.display = 'none';
     errBanner.classList.add('visible');
     errBanner.querySelector('p').textContent =
-      'No se encontraron los archivos data_by_technique_id.csv y data_by_record_id.csv en la carpeta del proyecto. ' +
-      'Verifica que ambos archivos estén en la misma carpeta que index.html.';
+      'No se pudieron cargar los datos del Atlas. Por favor recarga la página o intenta de nuevo más tarde.';
   }
 }
 
@@ -431,12 +490,96 @@ function getTecnicasForEstado(name) {
 }
 
 // ────────────────────────────────────────────────
+// MUNICIPIOS — funciones simétricas a las de estados
+// La clave de lookup es "Estado||Municipio" (necesario porque hay nombres
+// de municipio que se repiten entre estados, ej. "Hidalgo" en varios).
+// ────────────────────────────────────────────────
+function municipioKey(estado, municipio) { return `${estado}||${municipio}`; }
+
+function countForMunicipio(estado, municipio) {
+  // Tolerante a variaciones en la grafía del estado
+  const target = normalizeEstado(estado);
+  for (const [key, tecs] of Object.entries(municipiosTecnicas)) {
+    const [est, mun] = key.split('||');
+    if (mun === municipio && normalizeEstado(est) === target) return tecs.length;
+  }
+  return 0;
+}
+
+function getTecnicasForMunicipio(estado, municipio) {
+  const target = normalizeEstado(estado);
+  for (const [key, tecs] of Object.entries(municipiosTecnicas)) {
+    const [est, mun] = key.split('||');
+    if (mun === municipio && normalizeEstado(est) === target) return tecs;
+  }
+  return [];
+}
+
+function countForMunicipioFiltered(estado, municipio) {
+  const tecs = getTecnicasForMunicipio(estado, municipio);
+  return mapFilteredTecnicas ? tecs.filter(t => mapFilteredTecnicas.has(t)).length : tecs.length;
+}
+
+// ────────────────────────────────────────────────
+// LISTA DE ESTADOS (panel derecho, siempre visible)
+// ────────────────────────────────────────────────
+let _statesListCache = null; // Array de nombres de estado tomados del geojson
+
+// Busca el layer Leaflet de un estado por nombre (usado al hacer clic en un item)
+function findLayerByStateName(name) {
+  if (!geojsonLayer) return null;
+  let found = null;
+  geojsonLayer.eachLayer(l => {
+    const lname = l.feature?.properties?.name || l.feature?.properties?.NAME_1 || '';
+    if (normalizeEstado(lname) === normalizeEstado(name)) found = l;
+  });
+  return found;
+}
+
+// Construye / actualiza la lista de estados en el panel derecho.
+// Se llama: (a) una vez cuando el geojson termina de cargar,
+// (b) cada vez que cambia el estado seleccionado o el filtro activo.
+function renderStatesList() {
+  const wrap = document.getElementById('states-list');
+  if (!wrap || !geojsonLayer) return;
+
+  // Cache de nombres en orden alfabético la primera vez
+  if (!_statesListCache) {
+    const names = [];
+    geojsonLayer.eachLayer(l => {
+      const n = l.feature?.properties?.name || l.feature?.properties?.NAME_1 || '';
+      if (n) names.push(n);
+    });
+    _statesListCache = names.sort((a, b) => a.localeCompare(b, 'es'));
+  }
+
+  wrap.innerHTML = '';
+  _statesListCache.forEach(name => {
+    const count = mapFilteredTecnicas ? countForEstadoFiltered(name) : countForEstado(name);
+    const isActive = selectedStateName && normalizeEstado(selectedStateName) === normalizeEstado(name);
+    const isDisabled = count === 0;
+    const btn = document.createElement('button');
+    btn.className = 'state-item' + (isActive ? ' active' : '') + (isDisabled ? ' disabled' : '');
+    btn.innerHTML = `<span>${esc(name)}</span><span class="state-count">${count}</span>`;
+    btn.addEventListener('click', () => {
+      const layer = findLayerByStateName(name);
+      if (layer) {
+        onStateClick(name, layer, layer.feature);
+        try { map.fitBounds(layer.getBounds(), { padding: [20, 20], maxZoom: 7 }); } catch (e) {}
+      }
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+// ────────────────────────────────────────────────
 // TABS
 // ────────────────────────────────────────────────
 let currentTab = 'mapa';
 let networkInitialized = false;
 let catalogInitialized = false;
 let arbolInitialized = false;
+let reporteInitialized = false;
 
 document.querySelectorAll('.nav-tab').forEach(tab => {
   tab.addEventListener('click', () => {
@@ -456,10 +599,8 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
       networkInitialized = true; initNetwork();
     } else if (id === 'arbol' && !arbolInitialized) {
       arbolInitialized = true; initArbol();
-    } else if (id === 'tenido') {
-      initTenidoView();
-    } else if (id === 'tenido') {
-      initTenidoView();
+    } else if (id === 'reporte' && !reporteInitialized) {
+      reporteInitialized = true; initReporteView();
     }
     if (id !== 'red' && _animFrame) { cancelAnimationFrame(_animFrame); _animFrame = null; }
     if (id === 'red' && networkInitialized && !_animFrame) { _simAlpha = 0.05; (function loop(){drawNetwork(); _animFrame=requestAnimationFrame(loop);})(); }
@@ -473,11 +614,31 @@ let map = null;
 let geojsonLayer = null;
 let selectedStateName = null;
 
+// ── Capa de comunidades (centroides de municipios) ──
+let municipiosLayer = null;
+let municipiosLoaded = false;       // true cuando el geojson terminó de cargar
+let comunidadesVisible = false;     // si la capa está visible en el mapa
+let selectedMunicipioKey = null;    // "Estado||Municipio" del seleccionado, o null
+
 function initMap() {
-  map = L.map('map', { zoomControl: false, scrollWheelZoom: true });
+  // Bounds aproximados de México con un poco de aire para que el viewport
+  // pueda enmarcar el país completo sin permitir que el usuario se aleje al
+  // resto de América. minZoom evita el zoom-out excesivo; maxBounds + viscosity
+  // hacen que el mapa "regrese" si el usuario intenta arrastrar fuera.
+  const MX_BOUNDS = L.latLngBounds([13.5, -120.0], [33.5, -84.5]);
+
+  map = L.map('map', {
+    zoomControl: false,
+    scrollWheelZoom: true,
+    minZoom: 5,
+    maxBounds: MX_BOUNDS,
+    maxBoundsViscosity: 1.0, // 1.0 = el mapa rebota al borde, no se sale
+  });
   L.control.zoom({ position: 'bottomright' }).addTo(map);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-    attribution: '© OpenStreetMap, © CARTO', subdomains: 'abcd', maxZoom: 19
+  L.tileLayer('https://www.unesco.org/tiles/clearmap/{z}/{x}/{y}.png', {
+    attribution: '© UNESCO',
+    maxZoom: 19,
+    minZoom: 5,
   }).addTo(map);
   map.fitBounds([[14.5, -118.4], [32.7, -86.7]]);
 
@@ -519,6 +680,8 @@ function initMap() {
           });
         }
       }).addTo(map);
+      // Construir la lista de estados en el panel derecho una vez que el geojson está cargado
+      renderStatesList();
     })
     .catch(() => {
       document.getElementById('panel-subtitle').textContent = 'Mapa no disponible sin conexión.';
@@ -535,6 +698,140 @@ function highlightStyle(feature) {
   const name  = feature.properties.name || feature.properties.NAME_1 || '';
   const count = countForEstado(name);
   return { fillColor: getMapColor(count), weight: 2.5, color: COLORS.negro, fillOpacity: 0.92 };
+}
+
+// ────────────────────────────────────────────────
+// CAPA DE COMUNIDADES (centroides de municipios)
+// Se dibujan como puntos circulares uniformes en magenta.
+// Es una capa adicional que se enciende/apaga independientemente
+// de la capa de estados (ambas pueden estar visibles a la vez).
+// ────────────────────────────────────────────────
+const COMUNIDAD_STYLE = {
+  radius: 4,
+  fillColor: '#B50552',     // magenta del Atlas
+  color: '#FFFFFF',         // contorno blanco para legibilidad
+  weight: 1.2,
+  fillOpacity: 0.85,
+};
+
+const COMUNIDAD_STYLE_HOVER = {
+  radius: 6,
+  fillColor: '#B50552',
+  color: '#1A1018',
+  weight: 2,
+  fillOpacity: 1,
+};
+
+const COMUNIDAD_STYLE_SELECTED = {
+  radius: 7,
+  fillColor: '#FB4801',     // naranja para diferenciar la selección
+  color: '#1A1018',
+  weight: 2.5,
+  fillOpacity: 1,
+};
+
+function onMunicipioClick(estado, municipio, layer) {
+  selectedMunicipioKey = municipioKey(estado, municipio);
+  selectedStateName = estado;
+
+  // Reset estilos de todas las comunidades y resaltar la seleccionada
+  if (municipiosLayer) {
+    municipiosLayer.eachLayer(l => l.setStyle(COMUNIDAD_STYLE));
+  }
+  layer.setStyle(COMUNIDAD_STYLE_SELECTED);
+
+  let tecnicas = getTecnicasForMunicipio(estado, municipio);
+  if (mapFilteredTecnicas) tecnicas = tecnicas.filter(t => mapFilteredTecnicas.has(t));
+
+  document.getElementById('panel-title').textContent = municipio;
+  document.getElementById('panel-subtitle').textContent =
+    tecnicas.length > 0
+      ? `${estado} · ${tecnicas.length} técnica${tecnicas.length !== 1 ? 's' : ''} identificada${tecnicas.length !== 1 ? 's' : ''}`
+      : `${estado} · sin técnicas que coincidan con el filtro`;
+  renderSidePanel(tecnicas);
+}
+
+// Carga lazy del geojson de centroides. Solo se invoca la primera vez que
+// el usuario activa la capa de comunidades.
+async function loadMunicipiosLayer() {
+  if (municipiosLoaded) return municipiosLayer;
+  const res = await fetch('mexico_municipios_centroids.geojson');
+  if (!res.ok) throw new Error('No se pudo cargar el archivo de comunidades');
+  const data = await res.json();
+
+  // Filtrar features: SOLO las comunidades con datos.
+  const conDatos = new Set();
+  for (const key of Object.keys(municipiosTecnicas)) {
+    const [est, mun] = key.split('||');
+    conDatos.add(`${normalizeEstado(est)}||${mun.toLowerCase()}`);
+  }
+
+  const featuresFiltradas = data.features.filter(f => {
+    const est = f.properties.estado_nombre || '';
+    const mun = f.properties.NOMGEO || '';
+    return conDatos.has(`${normalizeEstado(est)}||${mun.toLowerCase()}`);
+  });
+
+  municipiosLayer = L.geoJSON(
+    { type: 'FeatureCollection', features: featuresFiltradas },
+    {
+      pointToLayer: (feat, latlng) => L.circleMarker(latlng, COMUNIDAD_STYLE),
+      onEachFeature: (feat, layer) => {
+        const est = feat.properties.estado_nombre || '';
+        const mun = feat.properties.NOMGEO || '';
+
+        // Tooltip simple: solo el nombre de la comunidad
+        layer.bindTooltip(esc(mun), {
+          className: 'leaflet-tooltip-atlas',
+          direction: 'top',
+          offset: [0, -6],
+          sticky: false,
+        });
+
+        layer.on({
+          mouseover: e => {
+            const k = municipioKey(est, mun);
+            if (k !== selectedMunicipioKey) e.target.setStyle(COMUNIDAD_STYLE_HOVER);
+          },
+          mouseout: e => {
+            const k = municipioKey(est, mun);
+            if (k !== selectedMunicipioKey) e.target.setStyle(COMUNIDAD_STYLE);
+          },
+          click: () => onMunicipioClick(est, mun, layer),
+        });
+      },
+    }
+  );
+
+  municipiosLoaded = true;
+  return municipiosLayer;
+}
+
+// Activa o desactiva la capa de comunidades (carga lazy la primera vez)
+async function toggleComunidadesLayer(visible) {
+  const checkbox = document.getElementById('comunidades-toggle');
+  const wrap = checkbox?.closest('.map-layer-checkbox');
+
+  if (visible && !municipiosLoaded) {
+    wrap?.classList.add('loading');
+    try { await loadMunicipiosLayer(); }
+    catch (e) {
+      console.error(e);
+      wrap?.classList.remove('loading');
+      if (checkbox) checkbox.checked = false;
+      return;
+    }
+    wrap?.classList.remove('loading');
+  }
+
+  if (visible) {
+    if (municipiosLayer && !map.hasLayer(municipiosLayer)) municipiosLayer.addTo(map);
+    comunidadesVisible = true;
+  } else {
+    if (municipiosLayer && map.hasLayer(municipiosLayer)) map.removeLayer(municipiosLayer);
+    comunidadesVisible = false;
+    selectedMunicipioKey = null;
+  }
 }
 
 function onStateClick(name, layer, feat) {
@@ -559,6 +856,7 @@ function onStateClick(name, layer, feat) {
       ? `${tecnicas.length} técnica${tecnicas.length !== 1 ? 's' : ''} identificada${tecnicas.length !== 1 ? 's' : ''}`
       : 'Sin técnicas que coincidan con el filtro';
   renderSidePanel(tecnicas);
+  renderStatesList(); // refresca el item activo de la lista
 }
 
 function renderSidePanel(tecnicas) {
@@ -781,10 +1079,9 @@ function rebuildMapFilterCascade() {
       btn.dataset.val = t.tecnica;
       btn.textContent = t.tecnica;
       btn.style.setProperty('--chip-color', getCatColor(t));
+      // Click en una técnica del sidebar → abre la ficha (igual que en el panel derecho)
       btn.addEventListener('click', () => {
-        mapFilterState.tecnica = mapFilterState.tecnica === t.tecnica ? null : t.tecnica;
-        rebuildMapFilterCascade();
-        applyMapFilter();
+        openFicha(t.tecnica);
       });
       chipsT.appendChild(btn);
     });
@@ -816,19 +1113,15 @@ function applyMapFilter() {
   if (!hasFilter) {
     mapFilteredTecnicas = null;
     if (activeEl) activeEl.style.display = 'none';
-    const badge = document.getElementById('map-filter-badge');
-    if (badge) badge.style.display = 'none';
   } else {
     mapFilteredTecnicas = new Set(filtered.map(t => t.tecnica));
     const parts = [cat1, cat2, cat3, cat4, tecnica].filter(Boolean);
     const label = parts.join(' › ');
     if (activeText) activeText.textContent = `${label} · ${filtered.length} técnica${filtered.length!==1?'s':''}`;
     if (activeEl) activeEl.style.display = '';
-    const badge = document.getElementById('map-filter-badge');
-    if (badge) badge.style.display = '';
   }
 
-  // Repaint map
+  // Repaint estados
   if (geojsonLayer) {
     geojsonLayer.eachLayer(l => {
       const name = l.feature?.properties?.name || l.feature?.properties?.NAME_1 || '';
@@ -842,12 +1135,20 @@ function applyMapFilter() {
       }
     });
   }
+  // La capa de comunidades es de simbología uniforme, no se recolorea por filtro.
+  // Solo limpiamos la selección visual.
+  if (municipiosLayer) {
+    municipiosLayer.eachLayer(l => l.setStyle(COMUNIDAD_STYLE));
+  }
   // Reset panel
-  document.getElementById('panel-title').textContent = 'Selecciona un estado';
+  selectedStateName = null;
+  selectedMunicipioKey = null;
+  document.getElementById('panel-title').textContent = 'Estados de la República';
   document.getElementById('panel-subtitle').textContent = hasFilter
     ? `Mostrando ${filtered.length} técnica${filtered.length!==1?'s':''} filtrada${filtered.length!==1?'s':''}`
-    : 'Haz clic en el mapa para explorar las técnicas de cada estado';
-  document.getElementById('panel-body').innerHTML = `<div class="welcome-state"><h3>${hasFilter ? 'Filtro activo' : 'Explora el mapa'}</h3><p>${hasFilter ? 'Los estados coloreados tienen técnicas que coinciden con el filtro.' : 'Cada estado está coloreado según el número de técnicas documentadas.'}</p></div>`;
+    : 'Selecciona un estado para ver sus técnicas';
+  document.getElementById('panel-body').innerHTML = `<div class="welcome-state"><h3>${hasFilter ? 'Filtro activo' : 'Explora el mapa'}</h3><p>${hasFilter ? 'Los estados coloreados tienen técnicas que coinciden con el filtro. Selecciona un estado de la lista o del mapa.' : 'Cada estado está coloreado según el número de técnicas documentadas.'}</p></div>`;
+  renderStatesList(); // refresca conteos según filtro activo
 }
 
 function countForEstadoFiltered(name) {
@@ -1292,18 +1593,168 @@ let networkCanvas, networkCtx;
 let transform = { x: 0, y: 0, k: 1 };
 let hoveredNode = null;
 let highlightedNode = null;
-let activeNetworkFilter = 'all';
 let dragNode = null;
 let isPanning = false;
 let panStart = null;
 
-const NET_FILTERS = [
-  { id: 'all',         label: 'Todas' },
-  { id: 'Tejido',      label: 'Tejido' },
-  { id: 'decorativas', label: 'Técnicas decorativas' },
-  { id: 'Acabados',    label: 'Acabados' },
-  { id: 'Teñidos',     label: 'Teñidos' },
+// ════════════════════════════════════════════════
+// LAYERS — distintas formas de conectar las técnicas
+// ════════════════════════════════════════════════
+// Cada layer define:
+//   - getHubs(t)      → array de strings con los hubs a los que conecta esa técnica
+//   - color(hub)      → color del hub (y de los nodos-técnica cuando ese layer está activo)
+//   - subOrder(hubs)  → orden visual de los hubs en el panel de subcategorías
+// Una técnica puede conectar a varios hubs (excepto en Clasificación, que es jerárquica).
+
+const LANG_PALETTE = ['#035A79','#B50552','#FB4801','#05B794','#C8932A','#0EB0E2','#E07AAA','#7B4F9D','#3A8E5C','#D14B2A','#1E6B8E','#A03864','#C76A1F','#2A8C7E'];
+const STATE_PALETTE = ['#B50552','#035A79','#FB4801','#05B794','#C8932A'];
+const APRENDIZAJE_HUBS = [
+  { key: 'madre',      label: 'Madre',       color: '#B50552' },
+  { key: 'abuela',     label: 'Abuela',      color: '#7B4F9D' },
+  { key: 'tia',        label: 'Tía',         color: '#E07AAA' },
+  { key: 'hermana',    label: 'Hermana',     color: '#FB4801' },
+  { key: 'cunada',     label: 'Cuñada',      color: '#C76A1F' },
+  { key: 'padre',      label: 'Padre',       color: '#035A79' },
+  { key: 'instructor', label: 'Instructor/a',color: '#05B794' },
 ];
+const ENSENANZA_HUBS = [
+  { key: 'hijas',       label: 'Hijas',         color: '#B50552' },
+  { key: 'hijos',       label: 'Hijos',         color: '#035A79' },
+  { key: 'nietos',      label: 'Nietos',        color: '#7B4F9D' },
+  { key: 'sobrinos',    label: 'Sobrinos',      color: '#FB4801' },
+  { key: 'pareja',      label: 'Pareja',        color: '#05B794' },
+  { key: 'estudiantes', label: 'Estudiantes',   color: '#C8932A' },
+];
+const TENIDO_HUBS = [
+  { key: 'Plantas',           label: 'Plantas',          color: '#05B794' },
+  { key: 'Minerales',         label: 'Minerales',        color: '#C8932A' },
+  { key: 'Animales/Insectos', label: 'Animales/Insectos',color: '#B50552' },
+];
+
+// Cache para colores asignados por hub (lenguas y estados — generados al vuelo)
+let _layerColorCache = { lenguas: {}, estados: {} };
+
+function colorForLengua(lengua) {
+  if (_layerColorCache.lenguas[lengua]) return _layerColorCache.lenguas[lengua];
+  const idx = Object.keys(_layerColorCache.lenguas).length;
+  const c = LANG_PALETTE[idx % LANG_PALETTE.length];
+  _layerColorCache.lenguas[lengua] = c;
+  return c;
+}
+function colorForEstado(estado) {
+  if (_layerColorCache.estados[estado]) return _layerColorCache.estados[estado];
+  const idx = Object.keys(_layerColorCache.estados).length;
+  const c = STATE_PALETTE[idx % STATE_PALETTE.length];
+  _layerColorCache.estados[estado] = c;
+  return c;
+}
+
+const NET_LAYERS = [
+  {
+    id: 'clasificacion', label: 'Clasificación', icon: '◆',
+    description: 'Categorías expertas',
+    getHubs: t => [t.cat2 || t.cat1 || 'Sin clasificar'],
+    hubColor: hubLabel => CAT2_COLOR[hubLabel] || COLORS.arena,
+    nodeColor: t => getCatColor(t),
+    listHubs: () => {
+      const set = new Set();
+      ATLAS.tecnicas.forEach(t => set.add(t.cat2 || t.cat1 || 'Sin clasificar'));
+      return [...set].sort();
+    },
+  },
+  {
+    id: 'lenguas', label: 'Lenguas indígenas', icon: '✦',
+    description: 'Lenguas en que se nombra y enseña la técnica',
+    getHubs: t => (t.lenguas || []).filter(l => l && l.toLowerCase() !== 'español'),
+    hubColor: hubLabel => colorForLengua(hubLabel),
+    nodeColor: t => {
+      const langs = (t.lenguas || []).filter(l => l && l.toLowerCase() !== 'español');
+      return langs.length ? colorForLengua(langs[0]) : COLORS.arena;
+    },
+    listHubs: () => {
+      const counts = {};
+      ATLAS.tecnicas.forEach(t => {
+        (t.lenguas || []).forEach(l => {
+          if (!l || l.toLowerCase() === 'español') return;
+          counts[l] = (counts[l] || 0) + 1;
+        });
+      });
+      return Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+    },
+  },
+  {
+    id: 'tenidos', label: 'Teñidos', icon: '◉',
+    description: 'Tipo de tinte utilizado',
+    getHubs: t => t.tenido_tipos || [],
+    hubColor: hubLabel => (TENIDO_HUBS.find(h => h.key === hubLabel) || {}).color || COLORS.arena,
+    nodeColor: t => {
+      const hub = (t.tenido_tipos || [])[0];
+      return hub ? ((TENIDO_HUBS.find(h => h.key === hub) || {}).color || COLORS.arena) : COLORS.arena;
+    },
+    listHubs: () => TENIDO_HUBS.map(h => h.key),
+  },
+  {
+    id: 'estados', label: 'Estados', icon: '⬢',
+    description: 'Distribución geográfica',
+    getHubs: t => t.estados || [],
+    hubColor: hubLabel => colorForEstado(hubLabel),
+    nodeColor: t => {
+      const e = (t.estados || [])[0];
+      return e ? colorForEstado(e) : COLORS.arena;
+    },
+    listHubs: () => {
+      const counts = {};
+      ATLAS.tecnicas.forEach(t => (t.estados || []).forEach(e => { counts[e] = (counts[e] || 0) + 1; }));
+      return Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+    },
+  },
+  {
+    id: 'aprendizaje', label: 'Aprendizaje', icon: '↺',
+    description: 'De quién aprendió la técnica',
+    getHubs: t => {
+      const hubs = [];
+      APRENDIZAJE_HUBS.forEach(h => {
+        if ((t.aprendizaje && t.aprendizaje[h.key]) > 0) hubs.push(h.label);
+      });
+      return hubs;
+    },
+    hubColor: hubLabel => (APRENDIZAJE_HUBS.find(h => h.label === hubLabel) || {}).color || COLORS.arena,
+    nodeColor: t => {
+      // Color del hub principal (el de mayor conteo)
+      let best = null, bestN = 0;
+      APRENDIZAJE_HUBS.forEach(h => {
+        const n = (t.aprendizaje && t.aprendizaje[h.key]) || 0;
+        if (n > bestN) { bestN = n; best = h; }
+      });
+      return best ? best.color : COLORS.arena;
+    },
+    listHubs: () => APRENDIZAJE_HUBS.map(h => h.label),
+  },
+  {
+    id: 'ensenanza', label: 'Enseñanza', icon: '↻',
+    description: 'A quién le enseña la técnica',
+    getHubs: t => {
+      const hubs = [];
+      ENSENANZA_HUBS.forEach(h => {
+        if ((t.ensenanza && t.ensenanza[h.key]) > 0) hubs.push(h.label);
+      });
+      return hubs;
+    },
+    hubColor: hubLabel => (ENSENANZA_HUBS.find(h => h.label === hubLabel) || {}).color || COLORS.arena,
+    nodeColor: t => {
+      let best = null, bestN = 0;
+      ENSENANZA_HUBS.forEach(h => {
+        const n = (t.ensenanza && t.ensenanza[h.key]) || 0;
+        if (n > bestN) { bestN = n; best = h; }
+      });
+      return best ? best.color : COLORS.arena;
+    },
+    listHubs: () => ENSENANZA_HUBS.map(h => h.label),
+  },
+];
+
+let activeLayerId = 'clasificacion';
+function getActiveLayer() { return NET_LAYERS.find(l => l.id === activeLayerId) || NET_LAYERS[0]; }
 
 function initNetwork() {
   networkCanvas = document.getElementById('network-canvas');
@@ -1313,72 +1764,77 @@ function initNetwork() {
   buildNetworkData();
   startSimulation();
   bindNetworkEvents();
-  renderNetworkFilters();
-  renderNetworkLegend();
+  renderLayerDropdown();
+  renderSublayerChips();
   initNetworkSearch();
 }
 
 function resizeCanvas() {
-  const rect = networkCanvas.parentElement.getBoundingClientRect();
+  const parent = networkCanvas.parentElement;
+  const rect = parent.getBoundingClientRect();
   networkCanvas.width  = rect.width || 900;
-  networkCanvas.height = parseInt(networkCanvas.style.height || 580);
+  networkCanvas.height = rect.height || 600;
   if (networkNodes.length) drawNetwork();
 }
 
 function buildNetworkData() {
+  const layer = getActiveLayer();
   const tecnicas = ATLAS.tecnicas;
-  // Use CAT-N-2 as hub nodes (more granular than cat1, fewer than individual tecnicas)
-  const hubs = [...new Set(tecnicas.map(t => t.cat1 + '||' + (t.cat2 || '')).filter(Boolean))];
+
+  // 1) Reunir todos los hubs únicos que aparecen en este layer
+  const hubSet = new Set();
+  tecnicas.forEach(t => layer.getHubs(t).forEach(h => h && hubSet.add(h)));
+  const hubs = [...hubSet];
+
+  // 2) Calcular tamaño de cada hub según número de técnicas conectadas
+  const hubCount = {};
+  tecnicas.forEach(t => layer.getHubs(t).forEach(h => { if (h) hubCount[h] = (hubCount[h] || 0) + 1; }));
+
   networkNodes = [];
 
-  hubs.forEach(hubKey => {
-    const [c1, c2] = hubKey.split('||');
-    const label = c2 || c1;
-    const color = CAT2_COLOR[c2] || CAT1_COLOR[c1] || COLORS.arena;
+  // Nodos de hub
+  hubs.forEach(hub => {
+    const count = hubCount[hub] || 1;
     networkNodes.push({
-      id: `hub:${hubKey}`, label, type: 'grupo', cat1: c1, cat2: c2, r: 22,
-      color,
-      x: Math.random() * 600 + 100, y: Math.random() * 400 + 80, vx: 0, vy: 0, fx: null, fy: null,
+      id: `hub:${hub}`, label: hub, type: 'grupo', hubKey: hub,
+      r: Math.max(16, Math.min(32, 14 + Math.sqrt(count) * 2)),
+      color: layer.hubColor(hub),
+      x: Math.random() * 600 + 100, y: Math.random() * 400 + 80,
+      vx: 0, vy: 0, fx: null, fy: null,
     });
   });
 
+  // Nodos de técnica — guardamos lista de hubs conectados para usarla en forces y links
   tecnicas.forEach(t => {
-    const color = getCatColor(t);
+    const myHubs = layer.getHubs(t).filter(Boolean);
     networkNodes.push({
-      id: t.tecnica, label: t.tecnica, type: 'tecnica', grupo: t.cat1, cat1: t.cat1, cat2: t.cat2,
-      estados: t.estados, n_fichas: t.n_fichas,
-      cat3: t.cat3, cat4: t.cat4,
+      id: t.tecnica, label: t.tecnica, type: 'tecnica',
+      cat1: t.cat1, cat2: t.cat2, cat3: t.cat3, cat4: t.cat4,
+      grupo: t.cat1, estados: t.estados, lenguas: t.lenguas,
+      n_fichas: t.n_fichas,
+      hubs: myHubs,
       r: Math.max(6, Math.min(16, 5 + t.n_fichas * 0.7)),
-      color,
-      x: Math.random() * 700 + 50, y: Math.random() * 500 + 40, vx: 0, vy: 0, fx: null, fy: null,
+      color: layer.nodeColor(t),
+      x: Math.random() * 700 + 50, y: Math.random() * 500 + 40,
+      vx: 0, vy: 0, fx: null, fy: null,
     });
   });
 
+  // 3) Construir links — una arista por (técnica, hub)
   networkLinks = [];
-  tecnicas.forEach(t => {
-    const hubKey = t.cat1 + '||' + (t.cat2 || '');
-    networkLinks.push({ source: `hub:${hubKey}`, target: t.tecnica, strength: 0.6 });
+  networkNodes.filter(n => n.type === 'tecnica').forEach(n => {
+    n.hubs.forEach(h => {
+      networkLinks.push({ source: `hub:${h}`, target: n.id, strength: 0.6 });
+    });
   });
 }
 
-function getVisibleNodes() {
-  if (activeNetworkFilter === 'all') return networkNodes;
-  return networkNodes.filter(n => {
-    if (n.type === 'grupo') return networkNodes.some(m => m.type === 'tecnica' && m.grupo === n.label && matchesFilter(m));
-    return matchesFilter(n);
-  });
-}
-
-function matchesFilter(n) {
-  if (activeNetworkFilter === 'all') return true;
-  const c1 = (n.cat1 || '');
-  switch (activeNetworkFilter) {
-    case 'Tejido':      return c1 === 'Tejido';
-    case 'decorativas': return c1 === 'Técnicas decorativas';
-    case 'Acabados':    return c1 === 'Acabados';
-    case 'Teñidos':     return c1 === 'Teñidos';
-    default: return true;
-  }
+// Cuando hay un hub destacado, las técnicas resaltadas son las que tienen ese hub en su lista.
+function nodeMatchesHighlight(n, hi) {
+  if (!hi) return false;
+  if (n.id === hi.id) return true;
+  if (hi.type === 'grupo' && n.type === 'tecnica' && (n.hubs || []).includes(hi.hubKey)) return true;
+  return false;
 }
 
 let _simAlpha = 0;
@@ -1388,35 +1844,44 @@ function startSimulation() {
   const W = networkCanvas.width, H = networkCanvas.height;
   const grupos = networkNodes.filter(n => n.type === 'grupo');
 
-  // Place hub nodes in a circle — fixed so tecnicas cluster around them
+  // Distribuir hubs en círculo, fijos
   grupos.forEach((g, i) => {
     const angle = (i / grupos.length) * Math.PI * 2 - Math.PI / 2;
-    const rx = Math.min(W, H) * 0.28;
-    const ry = Math.min(W, H) * 0.24;
+    const rx = Math.min(W, H) * 0.32;
+    const ry = Math.min(W, H) * 0.30;
     g.x = W / 2 + Math.cos(angle) * rx;
     g.y = H / 2 + Math.sin(angle) * ry;
     g.fx = g.x; g.fy = g.y;
   });
 
-  // Spread tecnicas near their hub
+  // Posicionar técnicas cerca del centroide de sus hubs
   networkNodes.filter(n => n.type === 'tecnica').forEach(n => {
-    const hubKey = `hub:${n.cat1}||${n.cat2 || ''}`;
-    const hub = networkNodes.find(h => h.id === hubKey);
-    const angle = Math.random() * Math.PI * 2;
-    const dist  = 30 + Math.random() * 80;
-    if (hub) { n.x = hub.x + Math.cos(angle) * dist; n.y = hub.y + Math.sin(angle) * dist; }
-    else { n.x = W / 2 + (Math.random() - .5) * 300; n.y = H / 2 + (Math.random() - .5) * 250; }
+    if (n.hubs.length === 0) {
+      n.x = W / 2 + (Math.random() - .5) * 200;
+      n.y = H / 2 + (Math.random() - .5) * 160;
+    } else {
+      let cx = 0, cy = 0, found = 0;
+      n.hubs.forEach(h => {
+        const hub = networkNodes.find(nn => nn.id === `hub:${h}`);
+        if (hub) { cx += hub.x; cy += hub.y; found++; }
+      });
+      if (found) {
+        cx /= found; cy /= found;
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 30 + Math.random() * 60;
+        n.x = cx + Math.cos(angle) * dist;
+        n.y = cy + Math.sin(angle) * dist;
+      } else {
+        n.x = W / 2; n.y = H / 2;
+      }
+    }
     n.vx = 0; n.vy = 0;
   });
 
-  // Warm-up: 150 silent iters
+  // Calentamiento silencioso
   _simAlpha = 1;
   for (let i = 0; i < 150; i++) { _simAlpha *= 0.97; applyForces(_simAlpha); }
 
-  // Release hubs after warm-up (optional drift)
-  // grupos.forEach(g => { g.fx = null; g.fy = null; });
-
-  // Start live animation loop
   if (_animFrame) cancelAnimationFrame(_animFrame);
   _simAlpha = 0.25;
   function loop() {
@@ -1431,19 +1896,18 @@ function startSimulation() {
 }
 
 function applyForces(alpha) {
-  const visible = new Set(getVisibleNodes().map(n => n.id));
-  const nodes   = networkNodes.filter(n => visible.has(n.id));
   const W = networkCanvas.width, H = networkCanvas.height;
+  const tecs = networkNodes.filter(n => n.type === 'tecnica');
 
-  // Repulsion — only between same-cluster nodes to avoid overcrowding globally
-  for (let i = 0; i < nodes.length; i++) {
-    for (let j = i + 1; j < nodes.length; j++) {
-      const a = nodes[i], b = nodes[j];
-      if (a.type === 'grupo' || b.type === 'grupo') continue; // hubs handle themselves via spring
-      if (a.cat2 !== b.cat2) continue; // only repel within same cluster
+  // Repulsión — solo entre técnicas que comparten al menos un hub (evita repulsión global cara)
+  for (let i = 0; i < tecs.length; i++) {
+    for (let j = i + 1; j < tecs.length; j++) {
+      const a = tecs[i], b = tecs[j];
+      const sharesHub = a.hubs.some(h => b.hubs.includes(h));
+      if (!sharesHub) continue;
       let dx = b.x - a.x || 0.01, dy = b.y - a.y || 0.01;
       const dist2 = dx * dx + dy * dy;
-      const dist  = Math.sqrt(dist2) || 0.01;
+      const dist = Math.sqrt(dist2) || 0.01;
       const ideal = a.r + b.r + 18;
       if (dist < ideal * 4) {
         const force = (alpha * 45) / dist2;
@@ -1453,31 +1917,26 @@ function applyForces(alpha) {
     }
   }
 
-  // Spring links — strong pull toward hub
+  // Atracción a hubs vía links (resorte)
   networkLinks.forEach(link => {
     const s = networkNodes.find(n => n.id === link.source);
     const t = networkNodes.find(n => n.id === link.target);
-    if (!s || !t || !visible.has(s.id) || !visible.has(t.id)) return;
+    if (!s || !t) return;
     const dx = t.x - s.x, dy = t.y - s.y;
     const dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
-    // Preferred distance scales with how many nodes in cluster
-    const preferred = 55 + t.r * 1.5;
-    const force = (dist - preferred) * 0.032 * alpha;
+    const preferred = 70 + t.r * 1.5;
+    // Si la técnica conecta a múltiples hubs, debilitamos la fuerza para que se quede en el centroide
+    const linkScale = 1 / Math.max(1, t.hubs.length);
+    const force = (dist - preferred) * 0.025 * alpha * linkScale;
     const fx = (dx / dist) * force, fy = (dy / dist) * force;
     if (s.fx === null || s.fx === undefined) { s.vx += fx; s.vy += fy; }
     t.vx -= fx * 0.5; t.vy -= fy * 0.5;
   });
 
-  nodes.forEach(n => {
+  // Integración + clamp a la pantalla
+  networkNodes.forEach(n => {
     if (n.fx !== null && n.fx !== undefined) { n.x = n.fx; n.vx = 0; return; }
     if (n.fy !== null && n.fy !== undefined) { n.y = n.fy; n.vy = 0; return; }
-    // Light gravity to hub rather than canvas center
-    const hubKey = `hub:${n.cat1}||${n.cat2 || ''}`;
-    const hub = networkNodes.find(h => h.id === hubKey);
-    if (hub) {
-      n.vx += (hub.x - n.x) * 0.004 * alpha;
-      n.vy += (hub.y - n.y) * 0.004 * alpha;
-    }
     n.vx *= 0.72; n.vy *= 0.72;
     n.x += n.vx; n.y += n.vy;
     n.x = Math.max(n.r + 10, Math.min(W - n.r - 10, n.x));
@@ -1488,24 +1947,24 @@ function applyForces(alpha) {
 function drawNetwork() {
   const canvas = networkCanvas, ctx = networkCtx;
   const W = canvas.width, H = canvas.height;
-  const visible = new Set(getVisibleNodes().map(n => n.id));
 
   ctx.save();
   ctx.clearRect(0, 0, W, H);
-  // Subtle warm background
   ctx.fillStyle = '#FDFAF8';
   ctx.fillRect(0, 0, W, H);
   ctx.translate(transform.x, transform.y);
   ctx.scale(transform.k, transform.k);
 
-  // Draw links
+  // Aristas
   networkLinks.forEach(link => {
     const s = networkNodes.find(n => n.id === link.source);
     const t = networkNodes.find(n => n.id === link.target);
-    if (!s || !t || !visible.has(s.id) || !visible.has(t.id)) return;
+    if (!s || !t) return;
     const isHovLink = hoveredNode && (hoveredNode.id === s.id || hoveredNode.id === t.id);
-    const isHiLink  = highlightedNode && (highlightedNode.id === s.id || highlightedNode.id === t.id
-      || (highlightedNode.type === 'grupo' && t.cat2 === highlightedNode.cat2));
+    const isHiLink  = highlightedNode && (
+      highlightedNode.id === s.id || highlightedNode.id === t.id
+      || (highlightedNode.type === 'grupo' && t.type === 'tecnica' && (t.hubs || []).includes(highlightedNode.hubKey))
+    );
     ctx.beginPath();
     ctx.moveTo(s.x, s.y); ctx.lineTo(t.x, t.y);
     if (isHovLink) {
@@ -1518,22 +1977,19 @@ function drawNetwork() {
     ctx.stroke();
   });
 
-  // Sort: tecnicas behind grupos
-  const nodes = networkNodes.filter(n => visible.has(n.id));
-  nodes.sort((a,b) => {
+  // Nodos: técnicas detrás, hubs delante
+  const sorted = [...networkNodes].sort((a, b) => {
     if (a.type === 'grupo' && b.type !== 'grupo') return 1;
     if (b.type === 'grupo' && a.type !== 'grupo') return -1;
     return 0;
   });
 
-  nodes.forEach(n => {
-    const isHov = hoveredNode     && hoveredNode.id     === n.id;
-    const isHi  = highlightedNode && (highlightedNode.id === n.id
-      || (highlightedNode.type === 'grupo' && n.cat2 === highlightedNode.cat2 && n.type === 'tecnica'));
+  sorted.forEach(n => {
+    const isHov = hoveredNode && hoveredNode.id === n.id;
+    const isHi  = nodeMatchesHighlight(n, highlightedNode);
     const dimmed = (highlightedNode || hoveredNode) && !isHi && !isHov;
     const r = n.r * (isHov || isHi ? 1.3 : 1);
 
-    // Glow for hub nodes always, for tecnica on hover/highlight
     if (n.type === 'grupo' || isHov || isHi) {
       ctx.shadowColor = n.color;
       ctx.shadowBlur = n.type === 'grupo' ? 18 : 10;
@@ -1543,22 +1999,19 @@ function drawNetwork() {
     ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
 
     if (n.type === 'grupo') {
-      // Hub: solid fill + white ring
       ctx.fillStyle = dimmed ? (n.color + '55') : n.color;
       ctx.fill();
       ctx.shadowBlur = 0;
       ctx.strokeStyle = dimmed ? 'rgba(255,255,255,.2)' : 'rgba(255,255,255,.85)';
       ctx.lineWidth = 2.5; ctx.stroke();
     } else {
-      // Tecnica: filled circle
       ctx.fillStyle = dimmed ? (n.color + '30') : (isHov || isHi ? n.color : n.color + 'cc');
       ctx.fill();
       ctx.shadowBlur = 0;
     }
 
-    // Labels
+    // Etiquetas
     if (n.type === 'grupo') {
-      // Hub label always visible — pill background
       const label = n.label;
       ctx.font = `700 10.5px "DM Sans", sans-serif`;
       const tw = ctx.measureText(label).width;
@@ -1589,9 +2042,8 @@ function drawNetwork() {
 function getNodeAtPoint(mx, my) {
   const x = (mx - transform.x) / transform.k;
   const y = (my - transform.y) / transform.k;
-  const visible = new Set(getVisibleNodes().map(n => n.id));
   let best = null, bestDist = Infinity;
-  networkNodes.filter(n => visible.has(n.id)).forEach(n => {
+  networkNodes.forEach(n => {
     const d = Math.sqrt((n.x - x) ** 2 + (n.y - y) ** 2);
     if (d < n.r + 6 && d < bestDist) { bestDist = d; best = n; }
   });
@@ -1599,7 +2051,7 @@ function getNodeAtPoint(mx, my) {
 }
 
 function bindNetworkEvents() {
-  const canvas  = networkCanvas;
+  const canvas = networkCanvas;
   const tooltip = document.getElementById('network-tooltip');
 
   canvas.addEventListener('mousemove', e => {
@@ -1610,7 +2062,6 @@ function bindNetworkEvents() {
       transform.x += mx - panStart.x; transform.y += my - panStart.y;
       panStart = { x: mx, y: my }; drawNetwork(); return;
     }
-
     if (dragNode) {
       dragNode.x = (mx - transform.x) / transform.k;
       dragNode.y = (my - transform.y) / transform.k;
@@ -1623,19 +2074,23 @@ function bindNetworkEvents() {
     canvas.style.cursor = node ? 'pointer' : 'grab';
 
     if (node) {
+      const layer = getActiveLayer();
       if (node.type === 'tecnica') {
         const catBreadcrumb = [node.cat1, node.cat2].filter(Boolean).join(' › ');
-        tooltip.innerHTML = `<strong>${esc(node.label)}</strong><br>
+        const hubsLine = node.hubs && node.hubs.length
+          ? `<span style="font-size:.7rem;opacity:.65">${esc(layer.label)}: ${esc(node.hubs.slice(0, 3).join(', '))}${node.hubs.length > 3 ? '…' : ''}</span><br>`
+          : '';
+        tooltip.innerHTML = `<strong>${esc(node.label)}</strong>
           <span style="font-size:.72rem;opacity:.7">${esc(catBreadcrumb)}</span><br>
-          ${node.n_fichas} registro${node.n_fichas !== 1 ? 's' : ''} · ${(node.estados || []).slice(0, 2).join(', ')}`;
+          ${hubsLine}${node.n_fichas} registro${node.n_fichas !== 1 ? 's' : ''}`;
       } else {
-        const count = networkNodes.filter(n => n.type === 'tecnica' && n.cat2 === node.cat2).length;
-        tooltip.innerHTML = `<strong>${esc(node.label)}</strong><br>
-          <span style="font-size:.72rem;opacity:.7">${esc(node.cat1||'')}</span><br>
+        const count = networkNodes.filter(n => n.type === 'tecnica' && (n.hubs || []).includes(node.hubKey)).length;
+        tooltip.innerHTML = `<strong>${esc(node.label)}</strong>
+          <span style="font-size:.72rem;opacity:.7">${esc(layer.label)}</span><br>
           ${count} técnica${count !== 1 ? 's' : ''}`;
       }
       tooltip.style.left = (mx + 14) + 'px';
-      tooltip.style.top  = (my - 10) + 'px';
+      tooltip.style.top = (my - 10) + 'px';
       tooltip.classList.add('visible');
     } else {
       tooltip.classList.remove('visible');
@@ -1658,7 +2113,11 @@ function bindNetworkEvents() {
     if (!isPanning || (Math.abs(mx - (panStart?.x || 0)) < 5)) {
       const node = getNodeAtPoint(mx, my);
       if (node && node.type === 'tecnica') openFicha(node.id);
-      else if (node && node.type === 'grupo') { highlightedNode = highlightedNode?.id === node.id ? null : node; drawNetwork(); }
+      else if (node && node.type === 'grupo') {
+        highlightedNode = highlightedNode?.id === node.id ? null : node;
+        renderSublayerChips(); // refresca el highlight del chip activo
+        drawNetwork();
+      }
     }
     dragNode = null; isPanning = false; panStart = null;
   });
@@ -1673,7 +2132,7 @@ function bindNetworkEvents() {
     const rect = canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left, my = e.clientY - rect.top;
     const delta = e.deltaY > 0 ? 0.88 : 1.14;
-    const newK  = Math.max(0.3, Math.min(3, transform.k * delta));
+    const newK = Math.max(0.3, Math.min(3, transform.k * delta));
     transform.x = mx - (mx - transform.x) * (newK / transform.k);
     transform.y = my - (my - transform.y) * (newK / transform.k);
     transform.k = newK; drawNetwork();
@@ -1684,37 +2143,105 @@ function bindNetworkEvents() {
   document.getElementById('net-reset').addEventListener('click',    () => { transform = { x: 0, y: 0, k: 1 }; drawNetwork(); });
 }
 
-function renderNetworkFilters() {
-  const wrap = document.getElementById('network-filters');
-  wrap.innerHTML = NET_FILTERS.map(f =>
-    `<button class="filter-btn ${f.id === 'all' ? 'active' : ''}" data-netfilter="${f.id}">${f.label}</button>`
-  ).join('');
-  wrap.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      wrap.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeNetworkFilter = btn.dataset.netfilter;
-      highlightedNode = null; drawNetwork();
-    });
-  });
-}
+function renderLayerDropdown() {
+  const trigger = document.getElementById('network-dropdown-trigger');
+  const menu = document.getElementById('network-dropdown-menu');
+  const currentLabel = document.getElementById('network-dropdown-current');
+  const dropdown = document.getElementById('network-layer-dropdown');
+  if (!trigger || !menu || !currentLabel || !dropdown) return;
 
-function renderNetworkLegend() {
-  const wrap = document.getElementById('network-legend-items');
-  wrap.innerHTML = Object.entries(CAT1_COLOR).map(([cat1, color]) =>
-    `<div class="net-legend-item" data-cat1="${cat1}">
-      <div class="net-legend-dot" style="background:${color}"></div>${cat1}</div>`
-  ).join('');
-  wrap.querySelectorAll('.net-legend-item').forEach(item => {
+  const active = getActiveLayer();
+  currentLabel.textContent = active.label;
+
+  menu.innerHTML = '';
+  NET_LAYERS.forEach(layer => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'network-dropdown-item' + (layer.id === activeLayerId ? ' active' : '');
+    item.dataset.layerId = layer.id;
+    item.innerHTML = `
+      <span class="network-dropdown-item-text">
+        <span class="network-dropdown-item-label">${esc(layer.label)}</span>
+        <span class="network-dropdown-item-desc">${esc(layer.description || '')}</span>
+      </span>`;
     item.addEventListener('click', () => {
-      const cat1 = item.dataset.cat1;
-      // highlight all hub nodes of this cat1
-      const hubNode = networkNodes.find(n => n.type === 'grupo' && n.cat1 === cat1);
-      if (hubNode) {
-        highlightedNode = highlightedNode?.id === hubNode.id ? null : hubNode;
-        item.classList.toggle('filtered', !!highlightedNode); drawNetwork();
+      dropdown.classList.remove('open');
+      trigger.setAttribute('aria-expanded', 'false');
+      switchLayer(layer.id);
+    });
+    menu.appendChild(item);
+  });
+
+  // Toggle (solo bindear una vez)
+  if (!trigger.dataset.bound) {
+    trigger.dataset.bound = '1';
+    trigger.addEventListener('click', e => {
+      e.stopPropagation();
+      const isOpen = dropdown.classList.toggle('open');
+      trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+    document.addEventListener('click', e => {
+      if (!dropdown.contains(e.target)) {
+        dropdown.classList.remove('open');
+        trigger.setAttribute('aria-expanded', 'false');
       }
     });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        dropdown.classList.remove('open');
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+}
+
+function switchLayer(layerId) {
+  if (layerId === activeLayerId) return;
+  activeLayerId = layerId;
+  highlightedNode = null;
+  hoveredNode = null;
+  transform = { x: 0, y: 0, k: 1 };
+  buildNetworkData();
+  startSimulation();
+  renderLayerDropdown();
+  renderSublayerChips();
+}
+
+function renderSublayerChips() {
+  const layer = getActiveLayer();
+  const wrap = document.getElementById('network-sublayer-chips');
+  const labelEl = document.getElementById('network-sublayer-label');
+  if (!wrap || !labelEl) return;
+
+  labelEl.textContent = layer.label;
+  wrap.innerHTML = '';
+
+  const hubs = layer.listHubs();
+  hubs.forEach(hub => {
+    const color = layer.hubColor(hub);
+    const chip = document.createElement('button');
+    chip.className = 'network-sublayer-chip';
+    chip.style.setProperty('--chip-color', color);
+    if (highlightedNode && highlightedNode.type === 'grupo' && highlightedNode.hubKey === hub) {
+      chip.classList.add('active');
+    }
+    chip.innerHTML = `<span class="network-sublayer-chip-dot"></span>${esc(hub)}`;
+    chip.addEventListener('click', () => {
+      const hubNode = networkNodes.find(n => n.type === 'grupo' && n.hubKey === hub);
+      if (!hubNode) return;
+      // Toggle: si ya estaba resaltado, quitamos; si no, lo activamos y centramos vista
+      if (highlightedNode && highlightedNode.id === hubNode.id) {
+        highlightedNode = null;
+      } else {
+        highlightedNode = hubNode;
+        const W = networkCanvas.width, H = networkCanvas.height;
+        transform.x = W / 2 - hubNode.x * transform.k;
+        transform.y = H / 2 - hubNode.y * transform.k;
+      }
+      renderSublayerChips();
+      drawNetwork();
+    });
+    wrap.appendChild(chip);
   });
 }
 
@@ -1731,7 +2258,7 @@ function highlightNetworkNode(tecnicaNombre) {
 
 function initNetworkSearch() {
   const input = document.getElementById('network-search');
-  const ac    = document.getElementById('network-search-ac');
+  const ac = document.getElementById('network-search-ac');
   if (!input || !ac) return;
 
   input.addEventListener('input', function() {
@@ -1753,9 +2280,6 @@ function initNetworkSearch() {
         input.value = t.tecnica;
         ac.style.display = 'none';
         highlightNetworkNode(t.tecnica);
-        // also open ficha on double intent: just highlight
-        const node = networkNodes.find(n => n.id === t.tecnica);
-        if (node) { highlightedNode = node; drawNetwork(); }
       });
       ac.appendChild(item);
     });
@@ -1983,7 +2507,7 @@ const REPORT_HTML = `<nav class="report-internal-nav" id="report-internal-nav">
         <canvas id="r-chart-grupos" height="260"></canvas>
       </div>
       <div class="chart-card">
-        <div class="chart-card-title">Subcategoría (CAT-N-2)</div>
+        <div class="chart-card-title">Subcategoría experta</div>
         <div class="chart-card-sub">Número de registros por subcategoría dentro del esquema de clasificación experto</div>
         <canvas id="r-chart-manufactura" height="260"></canvas>
       </div>
@@ -2548,130 +3072,1372 @@ function initArbol() {
 // ────────────────────────────────────────────────
 
 // ────────────────────────────────────────────────
-// SECCIÓN TEÑIDO — visualización técnica × tipo teñido
+// SECCIÓN REPORTE — Constructor de reportes personalizados
+// Wizard de 3 pasos: (1) selección, (2) secciones, (3) vista previa.
 // ────────────────────────────────────────────────
-let tenidoInitialized = false;
+let reporteCurrentStep = 1;
 
-const TENIDO_TYPES = [
-  { key: 'n_tenido_plantas',   label: 'Con plantas',       color: '#05B794' },
-  { key: 'n_tenido_animales',  label: 'Insectos/animales', color: '#FB4801' },
-  { key: 'n_tenido_minerales', label: 'Sales y minerales', color: '#FFA329' },
-  { key: 'n_tenido_otro',      label: 'Otro',              color: '#8C7A80' },
+// Estado de la selección. Cada filtro funciona como un set; si los tres
+// están vacíos, el reporte incluye TODAS las técnicas del Atlas.
+const reporteState = {
+  titulo: '',
+  autor: '',
+  cat1: new Set(),       // CAT-N-1 (categorías madre)
+  cat2: new Set(),       // CAT-N-2 (subcategorías)
+  estados: new Set(),    // Nombres de estado
+  tecnicas: new Set(),   // Nombres exactos de técnica
+  secciones: new Set(),  // IDs de secciones incluidas (ver REPORTE_SECCIONES)
+};
+
+// Definición de las 8 secciones del documento.
+// Cada una declara si aplica al subset filtrado (predicado `applies`).
+const REPORTE_SECCIONES = [
+  {
+    id: 'resumen', label: 'Resumen ejecutivo',
+    desc: 'Cifras totales y datos clave de tu selección.',
+    icon: '◆', defaultOn: true,
+    applies: subset => subset.tecnicas.length > 0,
+  },
+  {
+    id: 'geografico', label: 'Distribución geográfica',
+    desc: 'Mapa coloreado y tabla de técnicas por estado.',
+    icon: '⬢', defaultOn: true,
+    applies: subset => subset.estados.length > 0,
+  },
+  {
+    id: 'catalogo', label: 'Catálogo de técnicas',
+    desc: 'Ficha resumida de cada técnica con foto principal.',
+    icon: '◉', defaultOn: true,
+    applies: subset => subset.tecnicas.length > 0,
+  },
+  {
+    id: 'categorias', label: 'Categorías expertas',
+    desc: 'Distribución por categoría y subcategoría experta con gráfica de barras.',
+    icon: '▦', defaultOn: true,
+    applies: subset => subset.tecnicas.length > 1,
+  },
+  {
+    id: 'lenguas', label: 'Lenguas indígenas',
+    desc: 'Lenguas en que se nombra y enseña cada técnica.',
+    icon: '✦', defaultOn: true,
+    applies: subset => (subset.records || []).some(r => {
+      const l = (r['Lengua'] || '').trim().toLowerCase();
+      return l && l !== 'español' && l !== 'na';
+    }),
+  },
+  {
+    id: 'transmision', label: 'Aprendizaje y enseñanza',
+    desc: 'De quién aprendieron y a quién enseñan los artesanos.',
+    icon: '↺', defaultOn: true,
+    applies: subset => (subset.records || []).length > 0,
+  },
+  {
+    id: 'tenidos', label: 'Teñidos',
+    desc: 'Tipos de tinte (plantas, minerales, animales) por técnica.',
+    icon: '◐', defaultOn: true,
+    applies: subset => (subset.records || []).some(r =>
+      parseInt(r['Plantas'] || 0, 10) > 0 ||
+      parseInt(r['Minerales'] || 0, 10) > 0 ||
+      parseInt(r['Animales'] || 0, 10) > 0
+    ),
+  },
+  {
+    id: 'testimonios', label: 'Testimonios cualitativos',
+    desc: 'Historia y significados narrados por los artesanos.',
+    icon: '❝', defaultOn: false,
+    applies: subset => subset.tecnicas.some(t =>
+      (t.historia && t.historia.length > 30) ||
+      (t.significados && t.significados.some(s => s && s.length > 20))
+    ),
+  },
 ];
 
-let activeTenidoFilter = null;
-
-function initTenidoView() {
-  if (tenidoInitialized) return;
-  tenidoInitialized = true;
+function initReporteView() {
   if (!ATLAS) return;
 
-  // Build filter buttons
-  const filtersEl = document.getElementById('tenido-filters');
-  filtersEl.innerHTML = '';
-  TENIDO_TYPES.forEach(tipo => {
-    const btn = document.createElement('button');
-    btn.className = 'tenido-filter-btn';
-    btn.dataset.key = tipo.key;
-    btn.style.setProperty('--tc', tipo.color);
-    btn.innerHTML = `<span class="tenido-filter-dot" style="background:${tipo.color}"></span>${tipo.label}`;
-    btn.addEventListener('click', () => {
-      activeTenidoFilter = activeTenidoFilter === tipo.key ? null : tipo.key;
-      document.querySelectorAll('.tenido-filter-btn').forEach(b =>
-        b.classList.toggle('active', b.dataset.key === activeTenidoFilter)
-      );
-      renderTenidoMatrix();
-    });
-    filtersEl.appendChild(btn);
+  // Inicializar secciones con sus defaults
+  REPORTE_SECCIONES.forEach(s => {
+    if (s.defaultOn) reporteState.secciones.add(s.id);
   });
 
-  renderTenidoMatrix();
+  // Botones de navegación
+  document.getElementById('reporte-prev')?.addEventListener('click', () => goToStep(reporteCurrentStep - 1));
+  document.getElementById('reporte-next')?.addEventListener('click', () => {
+    if (reporteCurrentStep < 3) goToStep(reporteCurrentStep + 1);
+    else generarReporte();
+  });
+
+  // Click en pasos del stepper
+  document.querySelectorAll('.reporte-step').forEach(step => {
+    step.addEventListener('click', () => {
+      const target = parseInt(step.dataset.step, 10);
+      if (target && target !== reporteCurrentStep) goToStep(target);
+    });
+  });
+
+  // Inicializar cada paso
+  initReportePaso1();
+  initReportePaso2();
+  bindReportePaso3();
+  goToStep(1);
 }
 
-function renderTenidoMatrix() {
-  if (!ATLAS) return;
+function goToStep(n) {
+  if (n < 1 || n > 3) return;
+  reporteCurrentStep = n;
 
-  // Get tecnicas that have at least one tenido type
-  let tecnicas = ATLAS.tecnicas.filter(t =>
-    TENIDO_TYPES.some(tipo => t.tenido && t.tenido[tipo.key.replace('n_tenido_','')] > 0)
-  );
-
-  if (activeTenidoFilter) {
-    const fieldKey = activeTenidoFilter.replace('n_tenido_', '');
-    tecnicas = tecnicas.filter(t => t.tenido && t.tenido[fieldKey] > 0);
-  }
-
-  tecnicas = tecnicas.sort((a,b) => {
-    if (a.cat1 !== b.cat1) return (a.cat1 || '').localeCompare(b.cat1 || '');
-    if (a.cat2 !== b.cat2) return (a.cat2 || '').localeCompare(b.cat2 || '');
-    return a.tecnica.localeCompare(b.tecnica);
+  document.querySelectorAll('.reporte-step').forEach(s => {
+    const sn = parseInt(s.dataset.step, 10);
+    s.classList.toggle('active', sn === n);
+    s.classList.toggle('done', sn < n);
   });
 
-  const body = document.getElementById('tenido-body');
-  if (!tecnicas.length) {
-    body.innerHTML = '<div style="padding:40px;text-align:center;color:var(--arena)">Sin datos de teñido disponibles.</div>';
+  document.querySelectorAll('.reporte-panel').forEach(p => {
+    p.classList.toggle('active', parseInt(p.dataset.panel, 10) === n);
+  });
+
+  const prevBtn = document.getElementById('reporte-prev');
+  const nextBtn = document.getElementById('reporte-next');
+  const progress = document.getElementById('reporte-progress');
+  if (prevBtn) prevBtn.disabled = (n === 1);
+  if (nextBtn) {
+    if (n === 3) { nextBtn.style.display = 'none'; }
+    else { nextBtn.style.display = ''; nextBtn.textContent = 'Siguiente →'; }
+  }
+  if (progress) progress.textContent = `Paso ${n} de 3`;
+
+  // Al entrar al Paso 3, generar la vista previa automáticamente
+  if (n === 3) {
+    setTimeout(() => generarReporte(), 50);
+  }
+}
+
+// ─────────────────────────────────────────────
+// PASO 1 — Selección
+// ─────────────────────────────────────────────
+
+function initReportePaso1() {
+  // Inputs de metadata
+  const tituloEl = document.getElementById('reporte-titulo');
+  const autorEl = document.getElementById('reporte-autor');
+  if (tituloEl) tituloEl.addEventListener('input', e => { reporteState.titulo = e.target.value; });
+  if (autorEl)  autorEl.addEventListener('input',  e => { reporteState.autor  = e.target.value; });
+
+  // Renderizar chips de categorías
+  renderReporteChipsCategorias();
+  // Renderizar chips de estados
+  renderReporteChipsEstados();
+  // Inicializar buscador de técnicas
+  initReporteBuscadorTecnicas();
+  // Bind presets
+  document.querySelectorAll('.reporte-preset').forEach(btn => {
+    btn.addEventListener('click', () => aplicarPreset(btn.dataset.preset));
+  });
+
+  actualizarContador();
+}
+
+function renderReporteChipsCategorias() {
+  const wrap = document.getElementById('reporte-chips-cat');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  // CAT-N-1 con sus CAT-N-2 anidadas
+  const cat1Map = {};
+  ATLAS.tecnicas.forEach(t => {
+    const c1 = t.cat1 || 'Sin clasificar';
+    const c2 = t.cat2 || '';
+    if (!cat1Map[c1]) cat1Map[c1] = new Set();
+    if (c2) cat1Map[c1].add(c2);
+  });
+
+  Object.keys(cat1Map).sort().forEach(c1 => {
+    const color = CAT1_COLOR[c1] || COLORS.arena;
+    // Chip CAT-N-1
+    const chip1 = document.createElement('button');
+    chip1.className = 'reporte-chip reporte-chip-cat1';
+    chip1.style.setProperty('--chip-color', color);
+    if (reporteState.cat1.has(c1)) chip1.classList.add('active');
+    chip1.innerHTML = `<span class="reporte-chip-dot"></span>${esc(c1)}`;
+    chip1.addEventListener('click', () => {
+      if (reporteState.cat1.has(c1)) reporteState.cat1.delete(c1);
+      else reporteState.cat1.add(c1);
+      renderReporteChipsCategorias();
+      actualizarContador();
+    });
+    wrap.appendChild(chip1);
+
+    // Chips CAT-N-2 hijas
+    [...cat1Map[c1]].sort().forEach(c2 => {
+      const chip2 = document.createElement('button');
+      chip2.className = 'reporte-chip reporte-chip-cat2';
+      chip2.style.setProperty('--chip-color', color);
+      if (reporteState.cat2.has(c2)) chip2.classList.add('active');
+      chip2.innerHTML = `<span class="reporte-chip-arrow">↳</span>${esc(c2)}`;
+      chip2.addEventListener('click', () => {
+        if (reporteState.cat2.has(c2)) reporteState.cat2.delete(c2);
+        else reporteState.cat2.add(c2);
+        renderReporteChipsCategorias();
+        actualizarContador();
+      });
+      wrap.appendChild(chip2);
+    });
+  });
+}
+
+function renderReporteChipsEstados() {
+  const wrap = document.getElementById('reporte-chips-estados');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  const estados = Object.keys(estadosTecnicas).sort((a, b) => a.localeCompare(b, 'es'));
+  estados.forEach(est => {
+    const count = estadosTecnicas[est].length;
+    const chip = document.createElement('button');
+    chip.className = 'reporte-chip reporte-chip-estado';
+    if (reporteState.estados.has(est)) chip.classList.add('active');
+    chip.innerHTML = `<span>${esc(est)}</span><span class="reporte-chip-count">${count}</span>`;
+    chip.addEventListener('click', () => {
+      if (reporteState.estados.has(est)) reporteState.estados.delete(est);
+      else reporteState.estados.add(est);
+      renderReporteChipsEstados();
+      actualizarContador();
+    });
+    wrap.appendChild(chip);
+  });
+}
+
+function initReporteBuscadorTecnicas() {
+  const input = document.getElementById('reporte-search-tec');
+  const ac = document.getElementById('reporte-search-ac');
+  const chipsWrap = document.getElementById('reporte-chips-tecs');
+  if (!input || !ac || !chipsWrap) return;
+
+  function renderTecnicasSeleccionadas() {
+    chipsWrap.innerHTML = '';
+    [...reporteState.tecnicas].sort().forEach(nombre => {
+      const t = ATLAS.tecnicas.find(x => x.tecnica === nombre);
+      const color = t ? getCatColor(t) : COLORS.arena;
+      const chip = document.createElement('button');
+      chip.className = 'reporte-chip reporte-chip-tec active';
+      chip.style.setProperty('--chip-color', color);
+      chip.innerHTML = `<span class="reporte-chip-dot"></span>${esc(nombre)}<span class="reporte-chip-x">×</span>`;
+      chip.addEventListener('click', () => {
+        reporteState.tecnicas.delete(nombre);
+        renderTecnicasSeleccionadas();
+        actualizarContador();
+      });
+      chipsWrap.appendChild(chip);
+    });
+  }
+
+  input.addEventListener('input', () => {
+    const q = input.value.toLowerCase().trim();
+    ac.innerHTML = ''; ac.style.display = 'none';
+    if (q.length < 2) return;
+    const matches = ATLAS.tecnicas
+      .filter(t => t.tecnica.toLowerCase().includes(q) && !reporteState.tecnicas.has(t.tecnica))
+      .slice(0, 10);
+    if (!matches.length) return;
+    matches.forEach(t => {
+      const item = document.createElement('div');
+      item.className = 'reporte-ac-item';
+      const color = getCatColor(t);
+      item.innerHTML = `<span class="reporte-ac-dot" style="background:${color}"></span>
+        <span class="reporte-ac-name">${esc(t.tecnica)}</span>
+        <span class="reporte-ac-cat">${esc(t.cat1 || '')}</span>`;
+      item.addEventListener('click', () => {
+        reporteState.tecnicas.add(t.tecnica);
+        input.value = '';
+        ac.style.display = 'none';
+        renderTecnicasSeleccionadas();
+        actualizarContador();
+      });
+      ac.appendChild(item);
+    });
+    ac.style.display = 'block';
+  });
+
+  document.addEventListener('click', e => {
+    if (!input.contains(e.target) && !ac.contains(e.target)) ac.style.display = 'none';
+  });
+
+  renderTecnicasSeleccionadas();
+}
+
+function aplicarPreset(preset) {
+  // Reset
+  reporteState.cat1.clear();
+  reporteState.cat2.clear();
+  reporteState.estados.clear();
+  reporteState.tecnicas.clear();
+
+  switch (preset) {
+    case 'all':
+      // Sin filtros = todas las técnicas
+      break;
+    case 'oaxaca':
+      reporteState.estados.add('Oaxaca');
+      break;
+    case 'chiapas':
+      reporteState.estados.add('Chiapas');
+      break;
+    case 'bordados':
+      reporteState.cat2.add('Bordados');
+      break;
+    case 'tejidos':
+      reporteState.cat2.add('Tejidos');
+      break;
+    case 'top10':
+      // 10 técnicas con más fichas
+      const top = [...ATLAS.tecnicas].sort((a, b) => b.n_fichas - a.n_fichas).slice(0, 10);
+      top.forEach(t => reporteState.tecnicas.add(t.tecnica));
+      break;
+    case 'clear':
+      // ya está limpio
+      break;
+  }
+
+  renderReporteChipsCategorias();
+  renderReporteChipsEstados();
+  document.getElementById('reporte-search-tec').dispatchEvent(new Event('input'));
+  // Refrescar chips de técnicas seleccionadas (reusa lógica)
+  initReporteBuscadorTecnicas();
+  actualizarContador();
+}
+
+// Calcula el subset de técnicas que cumple TODOS los filtros activos.
+// CRUCIAL: también devuelve `records` filtrado, que es la fuente de verdad
+// para todas las secciones cuantitativas del reporte (aprendizaje, teñido,
+// enseñanza, etc.). Los conteos pre-agregados de `t.aprendizaje`, `t.tenido`
+// etc. son sobre TODOS los registros nacionales — no respetan el filtro
+// de estado, así que NO se deben usar para el reporte filtrado.
+function obtenerSubset() {
+  const tieneFiltroCat = reporteState.cat1.size > 0 || reporteState.cat2.size > 0;
+  const tieneFiltroEst = reporteState.estados.size > 0;
+  const tieneFiltroTec = reporteState.tecnicas.size > 0;
+
+  let tecs = ATLAS.tecnicas;
+
+  if (tieneFiltroCat) {
+    tecs = tecs.filter(t => {
+      const okCat1 = reporteState.cat1.size === 0 || reporteState.cat1.has(t.cat1);
+      const okCat2 = reporteState.cat2.size === 0 || reporteState.cat2.has(t.cat2);
+      return okCat1 && okCat2;
+    });
+  }
+
+  if (tieneFiltroEst) {
+    const setEst = new Set([...reporteState.estados].map(e => normalizeEstado(e)));
+    tecs = tecs.filter(t => (t.estados || []).some(e => setEst.has(normalizeEstado(e))));
+  }
+
+  if (tieneFiltroTec) {
+    tecs = tecs.filter(t => reporteState.tecnicas.has(t.tecnica));
+  }
+
+  // Set de nombres de técnica que pasaron el filtro
+  const tecsSet = new Set(tecs.map(t => t.tecnica));
+
+  // Filtrar records crudos: deben pertenecer a una técnica del subset Y,
+  // si el usuario filtró estados, el record debe ser de uno de esos estados
+  let records = (ATLAS.records || []).filter(r => tecsSet.has((r['Tecnica'] || '').trim()));
+
+  if (tieneFiltroEst) {
+    const setEst = new Set([...reporteState.estados].map(e => normalizeEstado(e)));
+    records = records.filter(r => setEst.has(normalizeEstado((r['Estado'] || '').trim())));
+  }
+
+  // Estados que aparecen en el subset (derivados de los records filtrados, no de t.estados,
+  // para que respete también el filtro de estado del usuario)
+  const estSet = new Set();
+  records.forEach(r => {
+    const e = (r['Estado'] || '').trim();
+    if (e) estSet.add(e);
+  });
+
+  return {
+    tecnicas: tecs,
+    records,
+    estados: [...estSet],
+    totalRegistros: records.length,
+  };
+}
+
+// El contador del paso 1 fue eliminado a pedido del usuario.
+// Se conserva la función vacía para no romper las llamadas existentes.
+function actualizarContador() { /* no-op */ }
+
+// ─────────────────────────────────────────────
+// PASO 2 — Secciones del reporte
+// ─────────────────────────────────────────────
+
+function initReportePaso2() {
+  const wrap = document.getElementById('reporte-secciones');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  REPORTE_SECCIONES.forEach(sec => {
+    const card = document.createElement('label');
+    card.className = 'reporte-seccion-card';
+    card.dataset.seccionId = sec.id;
+    card.innerHTML = `
+      <input type="checkbox" data-section="${sec.id}" ${reporteState.secciones.has(sec.id) ? 'checked' : ''}>
+      <div class="reporte-seccion-icon">${sec.icon}</div>
+      <div class="reporte-seccion-text">
+        <div class="reporte-seccion-label">${esc(sec.label)}</div>
+        <div class="reporte-seccion-desc">${esc(sec.desc)}</div>
+      </div>
+      <span class="reporte-seccion-check">✓</span>
+    `;
+    const cb = card.querySelector('input');
+    cb.addEventListener('change', () => {
+      if (cb.checked) reporteState.secciones.add(sec.id);
+      else reporteState.secciones.delete(sec.id);
+      card.classList.toggle('selected', cb.checked);
+    });
+    if (cb.checked) card.classList.add('selected');
+    wrap.appendChild(card);
+  });
+
+  document.getElementById('reporte-sec-all')?.addEventListener('click', () => {
+    REPORTE_SECCIONES.forEach(s => reporteState.secciones.add(s.id));
+    initReportePaso2();
+  });
+  document.getElementById('reporte-sec-none')?.addEventListener('click', () => {
+    reporteState.secciones.clear();
+    initReportePaso2();
+  });
+  document.getElementById('reporte-sec-default')?.addEventListener('click', () => {
+    reporteState.secciones.clear();
+    REPORTE_SECCIONES.forEach(s => { if (s.defaultOn) reporteState.secciones.add(s.id); });
+    initReportePaso2();
+  });
+}
+
+// ─────────────────────────────────────────────
+// PASO 3 — Generación del reporte
+// ─────────────────────────────────────────────
+
+let _reporteChartsInstances = []; // para destruir Charts viejos al regenerar
+let _reporteLastSubset = null;     // cache para regenerar y exportar
+
+// Punto de entrada: se llama al pasar al Paso 3 o al hacer clic en Regenerar
+function generarReporte() {
+  const subset = obtenerSubset();
+  if (subset.tecnicas.length === 0) {
+    alert('Tu selección no incluye ninguna técnica. Vuelve al Paso 1 y ajusta los filtros.');
+    goToStep(1);
     return;
   }
 
-  // Build matrix HTML
-  const activeTypes = activeTenidoFilter
-    ? TENIDO_TYPES.filter(t => t.key === activeTenidoFilter)
-    : TENIDO_TYPES;
+  if (reporteState.secciones.size === 0) {
+    alert('No has marcado ninguna sección. Vuelve al Paso 2 y selecciona al menos una.');
+    goToStep(2);
+    return;
+  }
 
-  const colCount = activeTypes.length + 1; // row-head + type columns
-  let html = `<div class="tenido-matrix" style="grid-template-columns: minmax(190px,260px) repeat(${activeTypes.length}, minmax(72px,110px))">`;
+  // Confirmación si el reporte va a ser muy grande
+  if (subset.tecnicas.length > 80 && reporteState.secciones.has('catalogo')) {
+    if (!confirm(
+      `Tu selección tiene ${subset.tecnicas.length} técnicas y la sección "Catálogo" está activa, ` +
+      `lo que puede generar un PDF de 80+ páginas. ¿Quieres continuar?`
+    )) return;
+  }
 
-  // Header row
-  html += '<div class="tenido-matrix-row tenido-matrix-header">';
-  html += '<div class="tenido-matrix-cell tenido-matrix-corner"></div>';
-  activeTypes.forEach(tipo => {
-    html += `<div class="tenido-matrix-cell tenido-matrix-col-head" title="${tipo.label}">
-      <div class="tenido-col-dot" style="background:${tipo.color}"></div>
-      <span class="tenido-col-label">${tipo.label.replace('Con ','').replace('/animales','')}</span>
-    </div>`;
+  _reporteLastSubset = subset;
+
+  // Limpiar charts previos
+  _reporteChartsInstances.forEach(c => { try { c.destroy(); } catch(e){} });
+  _reporteChartsInstances = [];
+
+  const frame = document.getElementById('reporte-preview-frame');
+  if (!frame) return;
+
+  // Generar el HTML del reporte y mostrarlo
+  const html = construirReporteHTML(subset);
+  frame.innerHTML = html;
+
+  // Renderizar charts (después de inyectar el DOM)
+  setTimeout(() => renderizarChartsReporte(subset), 50);
+
+  // Actualizar título de la vista previa
+  const titulo = reporteState.titulo.trim() || 'Reporte del Atlas Textil';
+  document.getElementById('reporte-preview-title').textContent = titulo;
+  document.getElementById('reporte-preview-subtitle').textContent =
+    `${subset.tecnicas.length} técnicas · ${subset.estados.length} estados · ${subset.totalRegistros} registros`;
+}
+
+// ─────────────────────────────────────────────
+// HTML del reporte
+// ─────────────────────────────────────────────
+
+function construirReporteHTML(subset) {
+  const titulo = reporteState.titulo.trim() || 'Reporte del Atlas Textil';
+  const autor = reporteState.autor.trim() || '';
+  const fecha = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  // Resumen automático de filtros aplicados (subtítulo)
+  const filtrosResumen = construirResumenFiltros();
+
+  let html = `<div class="rep-doc">`;
+
+  // ─── Portada ───
+  html += construirPortada(titulo, autor, fecha, filtrosResumen, subset);
+
+  // ─── Secciones ─── (en orden definido)
+  REPORTE_SECCIONES.forEach(sec => {
+    if (!reporteState.secciones.has(sec.id)) return;
+    if (!sec.applies(subset)) return;
+    html += construirSeccion(sec.id, subset);
   });
-  html += '</div>';
 
-  // Group rows by cat1
+  // ─── Pie ───
+  html += `
+    <footer class="rep-footer">
+      <div class="rep-footer-line"></div>
+      <p>Generado el ${esc(fecha)} a partir del Atlas Nacional de Técnicas del Arte Textil.<br>
+      Encuentro Nacional de Arte Textil "Original" · Secretaría de Cultura · UNESCO México.</p>
+    </footer>
+  `;
+
+  html += `</div>`;
+  return html;
+}
+
+function construirResumenFiltros() {
+  const partes = [];
+  if (reporteState.cat1.size) partes.push([...reporteState.cat1].join(', '));
+  if (reporteState.cat2.size) partes.push([...reporteState.cat2].join(', '));
+  if (reporteState.estados.size) partes.push(`Estados: ${[...reporteState.estados].slice(0, 4).join(', ')}${reporteState.estados.size > 4 ? `… (+${reporteState.estados.size - 4})` : ''}`);
+  if (reporteState.tecnicas.size) partes.push(`${reporteState.tecnicas.size} técnica${reporteState.tecnicas.size !== 1 ? 's' : ''} específica${reporteState.tecnicas.size !== 1 ? 's' : ''}`);
+  return partes.length ? partes.join(' · ') : 'Atlas completo';
+}
+
+function construirPortada(titulo, autor, fecha, filtrosResumen, subset) {
+  return `
+    <section class="rep-cover">
+      <div class="rep-cover-logos">
+        <img src="atlas_plataforma_logos.png" alt="Logos institucionales" />
+      </div>
+      <div class="rep-cover-eyebrow">Atlas Nacional de Técnicas del Arte Textil</div>
+      <h1 class="rep-cover-title">${esc(titulo)}</h1>
+      <div class="rep-cover-subtitle">${esc(filtrosResumen)}</div>
+      <div class="rep-cover-stats">
+        <div class="rep-stat">
+          <div class="rep-stat-num">${subset.tecnicas.length}</div>
+          <div class="rep-stat-lbl">Técnicas</div>
+        </div>
+        <div class="rep-stat">
+          <div class="rep-stat-num">${subset.estados.length}</div>
+          <div class="rep-stat-lbl">Estados</div>
+        </div>
+        <div class="rep-stat">
+          <div class="rep-stat-num">${subset.totalRegistros}</div>
+          <div class="rep-stat-lbl">Registros</div>
+        </div>
+      </div>
+      <div class="rep-cover-meta">
+        ${autor ? `<div><span>Elaborado por</span>${esc(autor)}</div>` : ''}
+        <div><span>Fecha</span>${esc(fecha)}</div>
+      </div>
+    </section>
+  `;
+}
+
+function construirSeccion(id, subset) {
+  switch (id) {
+    case 'resumen':      return construirResumenEjecutivo(subset);
+    case 'geografico':   return construirDistribucionGeografica(subset);
+    case 'catalogo':     return construirCatalogoTecnicas(subset);
+    case 'categorias':   return construirCategoriasExpertas(subset);
+    case 'lenguas':      return construirLenguasIndigenas(subset);
+    case 'transmision':  return construirTransmision(subset);
+    case 'tenidos':      return construirTenidos(subset);
+    case 'testimonios':  return construirTestimonios(subset);
+    default: return '';
+  }
+}
+
+// ─── Secciones individuales ───
+
+function construirResumenEjecutivo(subset) {
+  const tecs = subset.tecnicas;
+  const promFichas = (subset.totalRegistros / tecs.length).toFixed(1);
+
+  // Técnica con más registros DENTRO DEL SUBSET (no la nacional)
+  const cuentaPorTec = {};
+  subset.records.forEach(r => {
+    const k = (r['Tecnica'] || '').trim();
+    cuentaPorTec[k] = (cuentaPorTec[k] || 0) + 1;
+  });
+  const topTec = Object.entries(cuentaPorTec).sort((a, b) => b[1] - a[1])[0];
+
+  const cat1Counts = {};
+  tecs.forEach(t => { const c = t.cat1 || 'Sin clasificar'; cat1Counts[c] = (cat1Counts[c] || 0) + 1; });
+  const topCat1 = Object.entries(cat1Counts).sort((a, b) => b[1] - a[1])[0];
+
+  // Lenguas presentes en los records filtrados (no en las técnicas nacionales)
+  const lenguasSet = new Set();
+  subset.records.forEach(r => {
+    const l = (r['Lengua'] || '').trim();
+    if (l && l.toLowerCase() !== 'español' && l.toLowerCase() !== 'na') lenguasSet.add(l);
+  });
+
+  return `
+    <section class="rep-section rep-section-resumen">
+      <header class="rep-section-head">
+        <span class="rep-section-num">01</span>
+        <h2>Resumen ejecutivo</h2>
+      </header>
+      <p class="rep-lead">Este reporte abarca <strong>${tecs.length} técnicas textiles</strong> documentadas
+        en <strong>${subset.estados.length} estados</strong> de la República Mexicana, con un total de
+        <strong>${subset.totalRegistros} registros</strong> levantados durante el Encuentro Nacional de Arte Textil "Original".</p>
+
+      <div class="rep-stat-grid">
+        <div class="rep-stat-card">
+          <div class="rep-stat-card-num">${promFichas}</div>
+          <div class="rep-stat-card-lbl">Registros promedio<br>por técnica</div>
+        </div>
+        <div class="rep-stat-card">
+          <div class="rep-stat-card-num">${topCat1 ? topCat1[1] : 0}</div>
+          <div class="rep-stat-card-lbl">Técnicas en<br>${topCat1 ? esc(topCat1[0]) : 'la categoría principal'}</div>
+        </div>
+        <div class="rep-stat-card">
+          <div class="rep-stat-card-num">${lenguasSet.size}</div>
+          <div class="rep-stat-card-lbl">Lenguas indígenas<br>asociadas</div>
+        </div>
+        <div class="rep-stat-card">
+          <div class="rep-stat-card-num">${topTec ? topTec[1] : 0}</div>
+          <div class="rep-stat-card-lbl">Registros de la técnica<br>más documentada${topTec ? `<br><em>${esc(topTec[0])}</em>` : ''}</div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function construirDistribucionGeografica(subset) {
+  // Contar registros por estado, y técnicas únicas por estado, desde el subset filtrado
+  const cuentaRegPorEstado = {};
+  const tecsPorEstado = {};
+  subset.records.forEach(r => {
+    const est = (r['Estado'] || '').trim();
+    const tec = (r['Tecnica'] || '').trim();
+    if (!est) return;
+    cuentaRegPorEstado[est] = (cuentaRegPorEstado[est] || 0) + 1;
+    if (!tecsPorEstado[est]) tecsPorEstado[est] = new Set();
+    tecsPorEstado[est].add(tec);
+  });
+
+  const filas = Object.keys(cuentaRegPorEstado)
+    .map(est => ({
+      estado: est,
+      tecnicas: tecsPorEstado[est].size,
+      registros: cuentaRegPorEstado[est],
+      pct: ((tecsPorEstado[est].size / subset.tecnicas.length) * 100).toFixed(1),
+    }))
+    .sort((a, b) => b.tecnicas - a.tecnicas);
+
+  let tablaHtml = `<table class="rep-table"><thead><tr>
+    <th>Estado</th><th>Técnicas</th><th>Registros</th><th>% del subset</th></tr></thead><tbody>`;
+  filas.forEach(f => {
+    tablaHtml += `<tr>
+      <td>${esc(f.estado)}</td>
+      <td class="num">${f.tecnicas}</td>
+      <td class="num">${f.registros}</td>
+      <td class="num"><div class="rep-bar-cell"><div class="rep-bar-fill" style="width:${f.pct}%"></div><span>${f.pct}%</span></div></td>
+    </tr>`;
+  });
+  tablaHtml += `</tbody></table>`;
+
+  return `
+    <section class="rep-section">
+      <header class="rep-section-head">
+        <span class="rep-section-num">02</span>
+        <h2>Distribución geográfica</h2>
+      </header>
+      <p class="rep-prose">Las técnicas seleccionadas se documentaron en <strong>${filas.length}
+        ${filas.length === 1 ? 'estado' : 'estados'}</strong> de la República.
+        ${filas[0] ? `${esc(filas[0].estado)} concentra la mayor diversidad con ${filas[0].tecnicas}
+        técnicas y ${filas[0].registros} registros.` : ''}</p>
+      ${tablaHtml}
+    </section>
+  `;
+}
+
+function construirCatalogoTecnicas(subset) {
+  // Pre-calcular conteos por técnica desde records filtrados
+  const recordsPorTec = {};
+  subset.records.forEach(r => {
+    const t = (r['Tecnica'] || '').trim();
+    if (!recordsPorTec[t]) recordsPorTec[t] = [];
+    recordsPorTec[t].push(r);
+  });
+
+  const ordenadas = [...subset.tecnicas].sort((a, b) => {
+    if (a.cat1 !== b.cat1) return (a.cat1 || '').localeCompare(b.cat1 || '');
+    if (a.cat2 !== b.cat2) return (a.cat2 || '').localeCompare(b.cat2 || '');
+    return a.tecnica.localeCompare(b.tecnica, 'es');
+  });
+
+  let html = `<section class="rep-section">
+    <header class="rep-section-head">
+      <span class="rep-section-num">03</span>
+      <h2>Catálogo de técnicas</h2>
+    </header>
+    <p class="rep-prose">Ficha resumida de cada técnica incluida en este reporte.</p>
+    <div class="rep-cards">`;
+
   let lastCat1 = null;
-  tecnicas.forEach(t => {
+  ordenadas.forEach(t => {
     if (t.cat1 !== lastCat1) {
       lastCat1 = t.cat1;
       const color = CAT1_COLOR[t.cat1] || COLORS.arena;
-      // span all columns — need explicit cell count
-      const emptyColsHtml = activeTypes.map(() => '<div class="tenido-matrix-cell"></div>').join('');
-      html += `<div class="tenido-matrix-row">
-        <div class="tenido-matrix-cell tenido-cat-label" style="color:${color}; font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; padding: 10px 10px 4px; background:var(--bg-page); border-bottom:none">${esc(t.cat1)}</div>
-        ${emptyColsHtml}
-      </div>`;
+      html += `</div><div class="rep-cat-divider" style="border-color:${color};color:${color}">${esc(t.cat1 || 'Sin clasificar')}</div><div class="rep-cards">`;
     }
 
-    html += `<div class="tenido-matrix-row" data-tecnica="${esc(t.tecnica)}">`;
-    const catColor = getCatColor(t);
-    html += `<div class="tenido-matrix-cell tenido-matrix-row-head">
-      <span class="tenido-row-dot" style="background:${catColor}"></span>
-      <button class="tenido-tec-btn" onclick="openFicha('${escJs(t.tecnica)}')">${esc(t.tecnica)}</button>
-    </div>`;
+    const breadcrumb = [t.cat2, t.cat3, t.cat4].filter(Boolean).join(' › ');
+    const recs = recordsPorTec[t.tecnica] || [];
+    const nRegs = recs.length;
 
-    activeTypes.forEach(tipo => {
-      const fieldKey = tipo.key.replace('n_tenido_', '');
-      const val = (t.tenido && t.tenido[fieldKey]) || 0;
-      const intensity = val > 0 ? Math.min(1, 0.25 + val / 10) : 0;
-      if (val > 0) {
-        html += `<div class="tenido-matrix-cell tenido-matrix-val tenido-matrix-val-on"
-          style="--tc:${tipo.color};--intensity:${intensity}"
-          title="${t.tecnica} · ${tipo.label}: ${val}">
-          <span class="tenido-val-num">${val}</span>
-        </div>`;
-      } else {
-        html += `<div class="tenido-matrix-cell tenido-matrix-val tenido-matrix-val-off"></div>`;
-      }
+    // Estados, lenguas y materiales DEL SUBSET filtrado, no globales
+    const estSet = new Set(); recs.forEach(r => { const e = (r['Estado'] || '').trim(); if (e) estSet.add(e); });
+    const lenSet = new Set(); recs.forEach(r => {
+      const l = (r['Lengua'] || '').trim();
+      if (l && l.toLowerCase() !== 'español' && l.toLowerCase() !== 'na') lenSet.add(l);
     });
-    html += '</div>';
+    const matSet = new Set(); recs.forEach(r => {
+      (r['Materiales'] || '').split(/[,;]/).forEach(m => {
+        const v = m.trim().toLowerCase();
+        if (v && v !== 'na' && v.length < 40) matSet.add(v);
+      });
+    });
+
+    const estadosTxt = [...estSet].slice(0, 3).join(', ') + (estSet.size > 3 ? `, +${estSet.size - 3}` : '');
+    const lenguasTxt = [...lenSet].slice(0, 3).join(', ');
+    const materialesTxt = [...matSet].slice(0, 6).join(', ');
+
+    html += `<div class="rep-card">
+      <div class="rep-card-body">
+        <div class="rep-card-breadcrumb">${esc(breadcrumb)}</div>
+        <h3 class="rep-card-title">${esc(t.tecnica)}</h3>
+        <div class="rep-card-meta">
+          <span><strong>${nRegs}</strong> registro${nRegs !== 1 ? 's' : ''}</span>
+          ${estadosTxt ? `<span>${esc(estadosTxt)}</span>` : ''}
+        </div>
+        ${lenguasTxt ? `<div class="rep-card-tag rep-card-tag-lengua">Lenguas: ${esc(lenguasTxt)}</div>` : ''}
+        ${materialesTxt ? `<div class="rep-card-tag rep-card-tag-mat">Materiales: ${esc(materialesTxt.slice(0, 100))}${materialesTxt.length > 100 ? '…' : ''}</div>` : ''}
+      </div>
+    </div>`;
   });
 
-  html += '</div>';
-  body.innerHTML = html;
+  html += `</div></section>`;
+  return html;
+}
+
+function construirCategoriasExpertas(subset) {
+  const cat1Counts = {};
+  const cat2Counts = {};
+  subset.tecnicas.forEach(t => {
+    if (t.cat1) cat1Counts[t.cat1] = (cat1Counts[t.cat1] || 0) + 1;
+    if (t.cat2) cat2Counts[t.cat2] = (cat2Counts[t.cat2] || 0) + 1;
+  });
+
+  return `
+    <section class="rep-section">
+      <header class="rep-section-head">
+        <span class="rep-section-num">04</span>
+        <h2>Categorías expertas</h2>
+      </header>
+      <p class="rep-prose">Distribución de técnicas según la clasificación experta del Atlas.</p>
+      <div class="rep-charts-grid">
+        <div class="rep-chart-wrap">
+          <h4>Por categoría madre</h4>
+          <div class="rep-chart-canvas-wrap"><canvas data-rep-chart="cat1"></canvas></div>
+        </div>
+        <div class="rep-chart-wrap">
+          <h4>Por subcategoría</h4>
+          <div class="rep-chart-canvas-wrap"><canvas data-rep-chart="cat2"></canvas></div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function construirLenguasIndigenas(subset) {
+  // Conteo de menciones por lengua en los records filtrados, y técnicas únicas por lengua
+  const tecsPorLengua = {};
+  subset.records.forEach(r => {
+    const l = (r['Lengua'] || '').trim();
+    const t = (r['Tecnica'] || '').trim();
+    if (!l || l.toLowerCase() === 'español' || l.toLowerCase() === 'na') return;
+    if (!tecsPorLengua[l]) tecsPorLengua[l] = new Set();
+    tecsPorLengua[l].add(t);
+  });
+
+  const totalLenguas = Object.keys(tecsPorLengua).length;
+
+  return `
+    <section class="rep-section">
+      <header class="rep-section-head">
+        <span class="rep-section-num">05</span>
+        <h2>Lenguas indígenas</h2>
+      </header>
+      <p class="rep-prose">Las técnicas de este reporte se nombran y enseñan en <strong>${totalLenguas}
+        lengua${totalLenguas !== 1 ? 's' : ''} indígena${totalLenguas !== 1 ? 's' : ''}</strong>,
+        además del español. La gráfica muestra cuántas técnicas se asocian a cada una.</p>
+      <div class="rep-chart-canvas-wrap rep-chart-tall"><canvas data-rep-chart="lenguas"></canvas></div>
+    </section>
+  `;
+}
+
+function construirTransmision(subset) {
+  // Conteos desde records filtrados (cada record es una persona/familia)
+  const aprende = { madre: 0, abuela: 0, tia: 0, hermana: 0, cunada: 0, padre: 0, instructor: 0 };
+  const ensena  = { hijas: 0, hijos: 0, nietos: 0, sobrinos: 0, pareja: 0, estudiantes: 0 };
+  const recordCols = {
+    aprende: { madre: 'Madre', abuela: 'Abuela', tia: 'Tia', hermana: 'Hermana',
+               cunada: 'Cunada', padre: 'Padre', instructor: 'Instructora' },
+    ensena:  { hijas: 'Hijas', hijos: 'Hijos', nietos: 'Nietos', sobrinos: 'Sobrinos',
+               pareja: 'Pareja', estudiantes: 'Estudiantes' },
+  };
+
+  subset.records.forEach(r => {
+    Object.entries(recordCols.aprende).forEach(([k, col]) => {
+      if (parseInt(r[col] || 0, 10) > 0) aprende[k]++;
+    });
+    Object.entries(recordCols.ensena).forEach(([k, col]) => {
+      if (parseInt(r[col] || 0, 10) > 0) ensena[k]++;
+    });
+  });
+
+  const topAprende = Object.entries(aprende).sort((a, b) => b[1] - a[1])[0];
+  const topEnsena  = Object.entries(ensena).sort((a, b) => b[1] - a[1])[0];
+
+  const labelAprende = { madre: 'la madre', abuela: 'la abuela', tia: 'una tía', hermana: 'una hermana', cunada: 'una cuñada', padre: 'el padre', instructor: 'un instructor o instructora' };
+  const labelEnsena = { hijas: 'hijas', hijos: 'hijos', nietos: 'nietos', sobrinos: 'sobrinos', pareja: 'pareja', estudiantes: 'estudiantes' };
+
+  return `
+    <section class="rep-section">
+      <header class="rep-section-head">
+        <span class="rep-section-num">06</span>
+        <h2>Aprendizaje y enseñanza</h2>
+      </header>
+      <p class="rep-prose">La transmisión de las técnicas en este reporte sigue patrones eminentemente
+        familiares y matrilineales.
+        ${topAprende && topAprende[1] > 0 ? `La fuente principal de aprendizaje declarada es <strong>${labelAprende[topAprende[0]]}</strong> (${topAprende[1]} menciones),` : ''}
+        ${topEnsena && topEnsena[1] > 0 ? `y la enseñanza se dirige principalmente a <strong>${labelEnsena[topEnsena[0]]}</strong> (${topEnsena[1]} menciones).` : ''}</p>
+      <div class="rep-charts-grid">
+        <div class="rep-chart-wrap">
+          <h4>De quién aprendieron</h4>
+          <div class="rep-chart-canvas-wrap"><canvas data-rep-chart="aprende"></canvas></div>
+        </div>
+        <div class="rep-chart-wrap">
+          <h4>A quién enseñan</h4>
+          <div class="rep-chart-canvas-wrap"><canvas data-rep-chart="ensena"></canvas></div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function construirTenidos(subset) {
+  // Cuenta de records que reportan cada tipo de tinte (no técnicas, registros)
+  const counts = { Plantas: 0, Minerales: 0, 'Animales/Insectos': 0 };
+  const tecsConTenido = new Set();
+
+  subset.records.forEach(r => {
+    const tec = (r['Tecnica'] || '').trim();
+    let tieneAlguno = false;
+    if (parseInt(r['Plantas'] || 0, 10) > 0)   { counts.Plantas++; tieneAlguno = true; }
+    if (parseInt(r['Minerales'] || 0, 10) > 0) { counts.Minerales++; tieneAlguno = true; }
+    if (parseInt(r['Animales'] || 0, 10) > 0)  { counts['Animales/Insectos']++; tieneAlguno = true; }
+    if (tieneAlguno) tecsConTenido.add(tec);
+  });
+
+  const totalRecConTenido = counts.Plantas + counts.Minerales + counts['Animales/Insectos'];
+
+  let html = `<section class="rep-section">
+    <header class="rep-section-head">
+      <span class="rep-section-num">07</span>
+      <h2>Teñidos</h2>
+    </header>
+    <p class="rep-prose"><strong>${tecsConTenido.size}</strong> de las ${subset.tecnicas.length} técnicas
+      reportan algún tipo de teñido en los registros de este subset. La distribución de menciones por origen del tinte es:</p>
+    <table class="rep-table"><thead><tr><th>Tipo de tinte</th><th>Menciones</th><th>% del subset con teñido</th></tr></thead><tbody>`;
+
+  Object.entries(counts).forEach(([tipo, n]) => {
+    const pct = totalRecConTenido ? ((n / totalRecConTenido) * 100).toFixed(1) : '0.0';
+    html += `<tr>
+      <td>${esc(tipo)}</td>
+      <td class="num">${n}</td>
+      <td class="num"><div class="rep-bar-cell"><div class="rep-bar-fill" style="width:${pct}%"></div><span>${pct}%</span></div></td>
+    </tr>`;
+  });
+  html += `</tbody></table></section>`;
+  return html;
+}
+
+function construirTestimonios(subset) {
+  // Recogemos historia y significados como testimonios cualitativos
+  const testimonios = [];
+  subset.tecnicas.forEach(t => {
+    if (t.historia && t.historia.length > 30) {
+      testimonios.push({ tecnica: t.tecnica, texto: t.historia, tipo: 'Historia' });
+    }
+    if (t.significados && t.significados.length) {
+      t.significados.slice(0, 1).forEach(s => {
+        if (s && s.length > 20) testimonios.push({ tecnica: t.tecnica, texto: s, tipo: 'Significado' });
+      });
+    }
+  });
+
+  if (testimonios.length === 0) {
+    return `<section class="rep-section">
+      <header class="rep-section-head">
+        <span class="rep-section-num">08</span>
+        <h2>Testimonios</h2>
+      </header>
+      <p class="rep-prose">No hay testimonios cualitativos disponibles para esta selección.</p>
+    </section>`;
+  }
+
+  // Limitar a 30 para no saturar el documento
+  const seleccion = testimonios.slice(0, 30);
+
+  let html = `<section class="rep-section">
+    <header class="rep-section-head">
+      <span class="rep-section-num">08</span>
+      <h2>Testimonios</h2>
+    </header>
+    <p class="rep-prose">Citas de los artesanos y artesanas participantes
+      ${testimonios.length > 30 ? `(muestra de ${seleccion.length} de ${testimonios.length})` : ''}.</p>
+    <div class="rep-testimonios">`;
+
+  seleccion.forEach(t => {
+    const txt = t.texto.length > 280 ? t.texto.slice(0, 277) + '…' : t.texto;
+    html += `<blockquote class="rep-testim">
+      <p>${esc(txt)}</p>
+      <cite>${esc(t.tecnica)}${t.tipo ? ` · ${t.tipo}` : ''}</cite>
+    </blockquote>`;
+  });
+
+  html += `</div></section>`;
+  return html;
+}
+
+// ─────────────────────────────────────────────
+// Charts (se renderizan después de inyectar el HTML)
+// ─────────────────────────────────────────────
+
+function renderizarChartsReporte(subset) {
+  const palette = ['#B50552', '#035A79', '#FB4801', '#05B794', '#C8932A', '#0EB0E2', '#7B4F9D', '#E07AAA'];
+
+  // CAT-N-1
+  const cv1 = document.querySelector('canvas[data-rep-chart="cat1"]');
+  if (cv1) {
+    const counts = {};
+    subset.tecnicas.forEach(t => { if (t.cat1) counts[t.cat1] = (counts[t.cat1] || 0) + 1; });
+    const labels = Object.keys(counts);
+    const data = labels.map(l => counts[l]);
+    const colors = labels.map(l => CAT1_COLOR[l] || palette[0]);
+    _reporteChartsInstances.push(new Chart(cv1, {
+      type: 'bar',
+      data: { labels, datasets: [{ data, backgroundColor: colors, borderRadius: 4 }] },
+      options: chartOptsBar(),
+    }));
+  }
+
+  // CAT-N-2
+  const cv2 = document.querySelector('canvas[data-rep-chart="cat2"]');
+  if (cv2) {
+    const counts = {};
+    subset.tecnicas.forEach(t => { if (t.cat2) counts[t.cat2] = (counts[t.cat2] || 0) + 1; });
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    const labels = sorted.map(s => s[0]);
+    const data = sorted.map(s => s[1]);
+    _reporteChartsInstances.push(new Chart(cv2, {
+      type: 'bar',
+      data: { labels, datasets: [{ data, backgroundColor: palette, borderRadius: 4 }] },
+      options: chartOptsBar(),
+    }));
+  }
+
+  // Lenguas — desde records filtrados, contando técnicas únicas por lengua
+  const cvL = document.querySelector('canvas[data-rep-chart="lenguas"]');
+  if (cvL) {
+    const tecsPorLengua = {};
+    subset.records.forEach(r => {
+      const l = (r['Lengua'] || '').trim();
+      const t = (r['Tecnica'] || '').trim();
+      if (!l || l.toLowerCase() === 'español' || l.toLowerCase() === 'na') return;
+      if (!tecsPorLengua[l]) tecsPorLengua[l] = new Set();
+      tecsPorLengua[l].add(t);
+    });
+    const sorted = Object.entries(tecsPorLengua)
+      .map(([l, s]) => [l, s.size])
+      .sort((a, b) => b[1] - a[1]);
+    const labels = sorted.map(s => s[0]);
+    const data = sorted.map(s => s[1]);
+    _reporteChartsInstances.push(new Chart(cvL, {
+      type: 'bar',
+      data: { labels, datasets: [{ data, backgroundColor: '#035A79', borderRadius: 4 }] },
+      options: chartOptsBar({ indexAxis: 'y' }),
+    }));
+  }
+
+  // Aprendizaje — desde records filtrados
+  const cvA = document.querySelector('canvas[data-rep-chart="aprende"]');
+  if (cvA) {
+    const cols = { Madre: 'Madre', Abuela: 'Abuela', Tía: 'Tia', Hermana: 'Hermana',
+                   Cuñada: 'Cunada', Padre: 'Padre', 'Instructor/a': 'Instructora' };
+    const acc = {}; Object.keys(cols).forEach(k => acc[k] = 0);
+    subset.records.forEach(r => {
+      Object.entries(cols).forEach(([etiqueta, col]) => {
+        if (parseInt(r[col] || 0, 10) > 0) acc[etiqueta]++;
+      });
+    });
+    const labels = Object.keys(acc);
+    const data = labels.map(l => acc[l]);
+    _reporteChartsInstances.push(new Chart(cvA, {
+      type: 'bar',
+      data: { labels, datasets: [{ data, backgroundColor: '#B50552', borderRadius: 4 }] },
+      options: chartOptsBar(),
+    }));
+  }
+
+  // Enseñanza — desde records filtrados
+  const cvE = document.querySelector('canvas[data-rep-chart="ensena"]');
+  if (cvE) {
+    const cols = { Hijas: 'Hijas', Hijos: 'Hijos', Nietos: 'Nietos',
+                   Sobrinos: 'Sobrinos', Pareja: 'Pareja', Estudiantes: 'Estudiantes' };
+    const acc = {}; Object.keys(cols).forEach(k => acc[k] = 0);
+    subset.records.forEach(r => {
+      Object.entries(cols).forEach(([etiqueta, col]) => {
+        if (parseInt(r[col] || 0, 10) > 0) acc[etiqueta]++;
+      });
+    });
+    const labels = Object.keys(acc);
+    const data = labels.map(l => acc[l]);
+    _reporteChartsInstances.push(new Chart(cvE, {
+      type: 'bar',
+      data: { labels, datasets: [{ data, backgroundColor: '#05B794', borderRadius: 4 }] },
+      options: chartOptsBar(),
+    }));
+  }
+}
+
+function chartOptsBar(extra = {}) {
+  return {
+    responsive: true, maintainAspectRatio: false,
+    animation: { duration: 600 },
+    plugins: {
+      legend: { display: false },
+      tooltip: { backgroundColor: '#1A1018', padding: 8, titleFont: { weight: 'bold' } },
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 10, family: 'DM Sans' } } },
+      y: { grid: { color: 'rgba(0,0,0,.05)' }, ticks: { font: { size: 10, family: 'DM Sans' } } },
+    },
+    ...extra,
+  };
+}
+
+// ─────────────────────────────────────────────
+// EXPORTACIÓN — PDF y Word
+// ─────────────────────────────────────────────
+
+function descargarReportePDF() {
+  if (!_reporteLastSubset) {
+    alert('Primero genera la vista previa.'); return;
+  }
+  const elemento = document.getElementById('reporte-preview-frame');
+  if (!elemento) return;
+
+  const titulo = (reporteState.titulo.trim() || 'reporte_atlas_textil').replace(/\s+/g, '_').replace(/[^\w-]/g, '');
+  const filename = `${titulo}_${new Date().toISOString().slice(0, 10)}.pdf`;
+
+  const btn = document.getElementById('reporte-download-pdf');
+  const originalText = btn.textContent;
+  btn.textContent = '⏳ Generando…';
+  btn.disabled = true;
+
+  const opt = {
+    margin: [12, 12, 14, 12],
+    filename,
+    image: { type: 'jpeg', quality: 0.92 },
+    html2canvas: { scale: 2, useCORS: true, logging: false, letterRendering: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'], avoid: '.rep-card, .rep-testim, .rep-chart-wrap, table' },
+  };
+
+  html2pdf().set(opt).from(elemento.querySelector('.rep-doc')).save()
+    .then(() => { btn.textContent = originalText; btn.disabled = false; })
+    .catch(err => {
+      console.error(err);
+      alert('Error generando el PDF: ' + err.message);
+      btn.textContent = originalText; btn.disabled = false;
+    });
+}
+
+function descargarReporteWord() {
+  if (!_reporteLastSubset) { alert('Primero genera la vista previa.'); return; }
+  if (!window.docx) { alert('La librería de Word no está disponible.'); return; }
+
+  const btn = document.getElementById('reporte-download-word');
+  const originalText = btn.textContent;
+  btn.textContent = '⏳ Generando…';
+  btn.disabled = true;
+
+  try {
+    const subset = _reporteLastSubset;
+    const titulo = reporteState.titulo.trim() || 'Reporte del Atlas Textil';
+    const autor = reporteState.autor.trim();
+    const fecha = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, Table, TableRow, TableCell, WidthType, BorderStyle } = docx;
+
+    const children = [];
+
+    // Portada
+    children.push(new Paragraph({
+      text: 'Atlas Nacional de Técnicas del Arte Textil',
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 1200, after: 400 },
+    }));
+    children.push(new Paragraph({
+      text: titulo,
+      heading: HeadingLevel.TITLE,
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 300 },
+    }));
+    children.push(new Paragraph({
+      text: construirResumenFiltros(),
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 600 },
+    }));
+    children.push(new Paragraph({
+      children: [
+        new TextRun({ text: `${subset.tecnicas.length} técnicas · `, bold: true }),
+        new TextRun({ text: `${subset.estados.length} estados · `, bold: true }),
+        new TextRun({ text: `${subset.totalRegistros} registros`, bold: true }),
+      ],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 600 },
+    }));
+    if (autor) children.push(new Paragraph({ text: `Elaborado por: ${autor}`, alignment: AlignmentType.CENTER, spacing: { after: 100 } }));
+    children.push(new Paragraph({ text: `Fecha: ${fecha}`, alignment: AlignmentType.CENTER, spacing: { after: 1200 } }));
+
+    // Secciones
+    REPORTE_SECCIONES.forEach((sec, idx) => {
+      if (!reporteState.secciones.has(sec.id)) return;
+      if (!sec.applies(subset)) return;
+
+      children.push(new Paragraph({
+        text: `${String(idx + 1).padStart(2, '0')} · ${sec.label}`,
+        heading: HeadingLevel.HEADING_1,
+        spacing: { before: 400, after: 200 },
+      }));
+
+      // Contenido específico por sección (versión texto plano)
+      añadirSeccionWord(children, sec.id, subset, { Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, BorderStyle, AlignmentType });
+    });
+
+    // Pie
+    children.push(new Paragraph({
+      text: `Generado el ${fecha} a partir del Atlas Nacional de Técnicas del Arte Textil. Encuentro Nacional de Arte Textil "Original" · Secretaría de Cultura · UNESCO México.`,
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 800 },
+    }));
+
+    const doc = new Document({
+      sections: [{ children }],
+      styles: {
+        default: { document: { run: { font: 'Calibri', size: 22 } } },
+      },
+    });
+
+    Packer.toBlob(doc).then(blob => {
+      const filename = `${titulo.replace(/\s+/g, '_').replace(/[^\w-]/g, '')}_${new Date().toISOString().slice(0, 10)}.docx`;
+      saveAs(blob, filename);
+      btn.textContent = originalText; btn.disabled = false;
+    });
+  } catch (err) {
+    console.error(err);
+    alert('Error generando Word: ' + err.message);
+    btn.textContent = originalText; btn.disabled = false;
+  }
+}
+
+function añadirSeccionWord(children, id, subset, dx) {
+  const { Paragraph, TextRun, Table, TableRow, TableCell, WidthType, BorderStyle, AlignmentType } = dx;
+
+  const noBorder = { style: BorderStyle.SINGLE, size: 4, color: 'DDDDDD' };
+  const tableBorders = { top: noBorder, bottom: noBorder, left: noBorder, right: noBorder, insideHorizontal: noBorder, insideVertical: noBorder };
+
+  if (id === 'resumen') {
+    const promFichas = (subset.totalRegistros / subset.tecnicas.length).toFixed(1);
+    children.push(new Paragraph({
+      text: `Este reporte abarca ${subset.tecnicas.length} técnicas textiles documentadas en ${subset.estados.length} estados de la República Mexicana, con un total de ${subset.totalRegistros} registros. El promedio es de ${promFichas} registros por técnica.`,
+      spacing: { after: 200 },
+    }));
+  }
+
+  if (id === 'geografico') {
+    const cuentaRegPorEstado = {};
+    const tecsPorEstado = {};
+    subset.records.forEach(r => {
+      const e = (r['Estado'] || '').trim();
+      const t = (r['Tecnica'] || '').trim();
+      if (!e) return;
+      cuentaRegPorEstado[e] = (cuentaRegPorEstado[e] || 0) + 1;
+      if (!tecsPorEstado[e]) tecsPorEstado[e] = new Set();
+      tecsPorEstado[e].add(t);
+    });
+    const filas = Object.keys(cuentaRegPorEstado)
+      .map(e => [e, tecsPorEstado[e].size, cuentaRegPorEstado[e]])
+      .sort((a, b) => b[1] - a[1]);
+    const rows = [
+      new TableRow({ children: ['Estado', 'Técnicas', 'Registros'].map(t =>
+        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: t, bold: true })] })] })
+      ) }),
+      ...filas.map(([est, n, regs]) => new TableRow({ children: [
+        new TableCell({ children: [new Paragraph(est)] }),
+        new TableCell({ children: [new Paragraph(String(n))] }),
+        new TableCell({ children: [new Paragraph(String(regs))] }),
+      ]})),
+    ];
+    children.push(new Table({ rows, width: { size: 100, type: WidthType.PERCENTAGE }, borders: tableBorders }));
+    children.push(new Paragraph({ text: '', spacing: { after: 200 } }));
+  }
+
+  if (id === 'catalogo') {
+    // Pre-agrupar records por técnica
+    const recsPorTec = {};
+    subset.records.forEach(r => {
+      const k = (r['Tecnica'] || '').trim();
+      if (!recsPorTec[k]) recsPorTec[k] = [];
+      recsPorTec[k].push(r);
+    });
+
+    const ordenadas = [...subset.tecnicas].sort((a, b) => (a.cat1 || '').localeCompare(b.cat1 || '') || a.tecnica.localeCompare(b.tecnica, 'es'));
+    let lastCat1 = null;
+    ordenadas.forEach(t => {
+      if (t.cat1 !== lastCat1) {
+        lastCat1 = t.cat1;
+        children.push(new Paragraph({
+          children: [new TextRun({ text: (t.cat1 || 'Sin clasificar').toUpperCase(), bold: true, color: 'B50552' })],
+          spacing: { before: 240, after: 80 },
+        }));
+      }
+      const breadcrumb = [t.cat2, t.cat3, t.cat4].filter(Boolean).join(' › ');
+      children.push(new Paragraph({
+        children: [new TextRun({ text: t.tecnica, bold: true, size: 24 })],
+        spacing: { before: 120, after: 40 },
+      }));
+      if (breadcrumb) children.push(new Paragraph({ children: [new TextRun({ text: breadcrumb, italics: true, color: '888888', size: 18 })] }));
+
+      // Datos del subset filtrado (no globales)
+      const recs = recsPorTec[t.tecnica] || [];
+      const estSet = new Set(); recs.forEach(r => { const e = (r['Estado'] || '').trim(); if (e) estSet.add(e); });
+      const lenSet = new Set(); recs.forEach(r => {
+        const l = (r['Lengua'] || '').trim();
+        if (l && l.toLowerCase() !== 'español' && l.toLowerCase() !== 'na') lenSet.add(l);
+      });
+
+      const meta = [];
+      meta.push(`${recs.length} registro${recs.length !== 1 ? 's' : ''}`);
+      if (estSet.size) meta.push([...estSet].slice(0, 4).join(', ') + (estSet.size > 4 ? '…' : ''));
+      if (lenSet.size) meta.push(`Lenguas: ${[...lenSet].slice(0, 3).join(', ')}`);
+      meta.forEach(m => children.push(new Paragraph({ children: [new TextRun({ text: m, size: 20 })], spacing: { after: 40 } })));
+    });
+  }
+
+  if (id === 'categorias') {
+    const cuenta = {};
+    subset.tecnicas.forEach(t => { if (t.cat1) cuenta[t.cat1] = (cuenta[t.cat1] || 0) + 1; });
+    Object.entries(cuenta).sort((a, b) => b[1] - a[1]).forEach(([cat, n]) => {
+      children.push(new Paragraph({ text: `• ${cat}: ${n} técnica${n !== 1 ? 's' : ''}`, spacing: { after: 60 } }));
+    });
+  }
+
+  if (id === 'lenguas') {
+    const tecsPorLengua = {};
+    subset.records.forEach(r => {
+      const l = (r['Lengua'] || '').trim();
+      const t = (r['Tecnica'] || '').trim();
+      if (!l || l.toLowerCase() === 'español' || l.toLowerCase() === 'na') return;
+      if (!tecsPorLengua[l]) tecsPorLengua[l] = new Set();
+      tecsPorLengua[l].add(t);
+    });
+    Object.entries(tecsPorLengua)
+      .map(([l, s]) => [l, s.size])
+      .sort((a, b) => b[1] - a[1])
+      .forEach(([l, n]) => {
+        children.push(new Paragraph({ text: `• ${l}: ${n} técnica${n !== 1 ? 's' : ''}`, spacing: { after: 60 } }));
+      });
+  }
+
+  if (id === 'transmision') {
+    const colsA = { Madre: 'Madre', Abuela: 'Abuela', Tía: 'Tia', Hermana: 'Hermana',
+                    Cuñada: 'Cunada', Padre: 'Padre', 'Instructor/a': 'Instructora' };
+    const colsE = { Hijas: 'Hijas', Hijos: 'Hijos', Nietos: 'Nietos',
+                    Sobrinos: 'Sobrinos', Pareja: 'Pareja', Estudiantes: 'Estudiantes' };
+    const aprende = {}; Object.keys(colsA).forEach(k => aprende[k] = 0);
+    const ensena  = {}; Object.keys(colsE).forEach(k => ensena[k]  = 0);
+    subset.records.forEach(r => {
+      Object.entries(colsA).forEach(([k, col]) => { if (parseInt(r[col] || 0, 10) > 0) aprende[k]++; });
+      Object.entries(colsE).forEach(([k, col]) => { if (parseInt(r[col] || 0, 10) > 0) ensena[k]++; });
+    });
+    children.push(new Paragraph({ children: [new TextRun({ text: 'De quién aprendieron:', bold: true })], spacing: { before: 120, after: 60 } }));
+    Object.entries(aprende).forEach(([k, n]) => children.push(new Paragraph({ text: `• ${k}: ${n}`, spacing: { after: 40 } })));
+    children.push(new Paragraph({ children: [new TextRun({ text: 'A quién enseñan:', bold: true })], spacing: { before: 120, after: 60 } }));
+    Object.entries(ensena).forEach(([k, n]) => children.push(new Paragraph({ text: `• ${k}: ${n}`, spacing: { after: 40 } })));
+  }
+
+  if (id === 'tenidos') {
+    const cuentas = { Plantas: 0, Minerales: 0, 'Animales/Insectos': 0 };
+    subset.records.forEach(r => {
+      if (parseInt(r['Plantas'] || 0, 10) > 0)   cuentas.Plantas++;
+      if (parseInt(r['Minerales'] || 0, 10) > 0) cuentas.Minerales++;
+      if (parseInt(r['Animales'] || 0, 10) > 0)  cuentas['Animales/Insectos']++;
+    });
+    Object.entries(cuentas).forEach(([tipo, n]) => {
+      children.push(new Paragraph({ text: `• ${tipo}: ${n} mencione${n !== 1 ? 's' : ''}`, spacing: { after: 60 } }));
+    });
+  }
+
+  if (id === 'testimonios') {
+    const ts = [];
+    subset.tecnicas.forEach(t => {
+      if (t.historia && t.historia.length > 30) {
+        ts.push({ tecnica: t.tecnica, texto: t.historia, tipo: 'Historia' });
+      }
+      if (t.significados && t.significados.length) {
+        t.significados.slice(0, 1).forEach(s => {
+          if (s && s.length > 20) ts.push({ tecnica: t.tecnica, texto: s, tipo: 'Significado' });
+        });
+      }
+    });
+    ts.slice(0, 30).forEach(t => {
+      const txt = t.texto.length > 280 ? t.texto.slice(0, 277) + '…' : t.texto;
+      children.push(new Paragraph({
+        children: [new TextRun({ text: '"' + txt + '"', italics: true })],
+        spacing: { before: 100, after: 30 },
+      }));
+      children.push(new Paragraph({
+        children: [new TextRun({ text: `— ${t.tecnica} · ${t.tipo}`, color: 'B50552', size: 18 })],
+        spacing: { after: 80 },
+      }));
+    });
+  }
+}
+
+// Hook de los botones del Paso 3 — se hace una sola vez en initReporteView
+function bindReportePaso3() {
+  document.getElementById('reporte-regenerate')?.addEventListener('click', generarReporte);
+  document.getElementById('reporte-download-pdf')?.addEventListener('click', descargarReportePDF);
+  document.getElementById('reporte-download-word')?.addEventListener('click', descargarReporteWord);
 }
 
 loadCSVs();
