@@ -1,6 +1,6 @@
 # Atlas Nacional de Técnicas del Arte Textil
 
-Plataforma de visualización interactiva del patrimonio textil mexicano, desarrollada en el marco del **Encuentro Nacional de Arte Textil ORIGINAL** por la UNESCO México y la Secretaría de Cultura.
+Plataforma de visualización interactiva del patrimonio textil mexicano, desarrollada en el marco del **Encuentro Nacional de Arte Textil ORIGINAL**, en colaboración con UNESCO México y la Secretaría de Cultura.
 
 ---
 

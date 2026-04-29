@@ -181,7 +181,10 @@ function buildAtlasFromCSV(techRows, recordRows, imgRows) {
     const edad_promedio = num(row['edad_prom']) || null;
 
     // Materiales — string concatenado y limpio
-    const materiales = (row['Materiales_concat_clean'] || '').trim();
+    // Materiales — se prefiere la columna curada `materiales_lista` (lista
+    // limpia separada por comas, deduplicada y consolidada). Como fallback
+    // se usa `Materiales_concat_clean`, que es el campo crudo.
+    const materiales = (row['materiales_lista'] || row['Materiales_concat_clean'] || '').trim();
 
     // Manufactura — conteos agregados
     const manufactura = {
@@ -265,30 +268,19 @@ function buildAtlasFromCSV(techRows, recordRows, imgRows) {
     });
     const temporalidad = nAntigua >= nNueva ? 'antigua' : 'nueva';
 
-    // Historia — se toma el fragmento más extenso y rico entre todos los registros.
-    // No se muestran todos los fragmentos individuales: se elige el más representativo
-    // (mayor longitud) como texto único de la sección.
-    const historiaFrags = records
-      .map(r => (r['Historia'] || '').trim())
-      .filter(s => s.length >= 20);
-    const historia = historiaFrags.length > 0
-      ? historiaFrags.reduce((a, b) => b.length > a.length ? b : a)
-      : '';
-
-    // Significado — se toman los fragmentos S1-S5 únicos y se agrupan
-    // en un solo párrafo separado por puntos, eliminando duplicados exactos
-    // y fragmentos triviales (menos de 10 chars).
-    // Se limita a los 5 más representativos (los más largos) para no saturar.
-    const significadoFrags = [...new Set(
-      records.flatMap(r =>
-        ['S1','S2','S3','S4','S5']
-          .map(k => (r[k] || '').trim())
-          .filter(s => s.length >= 10)
-      )
-    )];
-    const significados = significadoFrags
-      .sort((a, b) => b.length - a.length)
-      .slice(0, 5);
+    // ── Contenido textual curado ──────────────────────────────────
+    // Las columnas `historia`, `significados` y `materiales_lista` del
+    // CSV de técnicas son redacciones sintéticas hechas a partir de
+    // todos los registros de cada técnica. Se prefieren sobre cualquier
+    // cálculo automático desde records porque consolidan las voces
+    // múltiples en una sola narrativa coherente y eliminan repeticiones.
+    const historia     = (row['historia'] || '').trim();
+    const significadosRaw = (row['significados'] || '').trim();
+    // Para mantener compatibilidad con el resto del código, dejamos
+    // `significados` como array (la ficha decide cómo presentarlo).
+    // Si el CSV trae un párrafo completo, lo guardamos como un único
+    // elemento del array.
+    const significados = significadosRaw ? [significadosRaw] : [];
 
     // Imágenes
     const imagenes = imgByTech[nombre] || [];
@@ -323,18 +315,37 @@ function buildAtlasFromCSV(techRows, recordRows, imgRows) {
       // Contenido textual consolidado
       historia, significados,
       cat1, cat2, cat3, cat4,
+      // ── Validación curatorial (calidad de los datos) ─────────────
+      // El score combina la riqueza de los reactivos completados en cada
+      // record (historia, significados, materiales, lengua, multimedia,
+      // transmisión, manufactura, etc.) con un bonus logarítmico por
+      // número de registros. La columna `incluida` marca las 60 técnicas
+      // mejor calificadas, que son las que aparecen en el Atlas público.
+      score_calidad: num(row['score_calidad']),
+      score_volumen: num(row['score_volumen']),
+      score_total:   num(row['score_total']),
+      ranking:       num(row['ranking']),
+      incluida:      ((row['incluida'] || '').trim().toLowerCase() === 'sí'),
     };
   })
   .filter(t => t.tecnica)
   // ─────────────────────────────────────────────────────────────────
-  // FILTRO GLOBAL DE LA PLATAFORMA: Solo técnicas con MÁS DE 1 registro.
-  // Excluye técnicas reportadas por una sola persona, que se consideran
-  // poco representativas para mostrar como parte del Atlas público.
-  // Este filtro se aplica una sola vez aquí; todas las vistas (mapa,
-  // catálogo, red, clasificación, reporte, "Acerca del Atlas") operan
-  // sobre el subset resultante sin saberlo.
+  // FILTRO GLOBAL DE LA PLATAFORMA: solo técnicas con datos sólidos
+  // (`incluida === sí` en data_by_technique_id.csv).
+  //
+  // El criterio NO es "número de registros". Se basa en un score que
+  // evalúa la riqueza de los reactivos completados en cada ficha
+  // (historia, significados, materiales, lengua indígena, multimedia,
+  // transmisión, manufactura, teñido, etc.) más un bonus logarítmico
+  // por volumen. Esto permite conservar técnicas con un solo registro
+  // pero documentación rica (ej. Punto de cruz, Telar de cintura), y
+  // descartar técnicas con reactivos pobres aunque tengan más fichas.
+  //
+  // Se aplica una sola vez aquí; todas las vistas (mapa, catálogo, red,
+  // clasificación, reporte, "Acerca del Atlas") operan sobre el subset
+  // resultante sin saberlo.
   // ─────────────────────────────────────────────────────────────────
-  .filter(t => (t.n_fichas || 0) > 1);
+  .filter(t => t.incluida);
 
   // Set con los nombres de técnicas que pasaron el filtro
   const tecnicasValidas = new Set(tecnicas.map(t => t.tecnica));
@@ -1316,11 +1327,19 @@ function openFicha(tecnicaNombre) {
     </div>`;
   }
 
-  // Significado — hasta 5 chips, no lista de tarjetas
+  // Significado y Simbolismo — se renderiza como párrafo único. La fuente
+  // es la columna `significados` del CSV, que contiene una redacción
+  // curada que sintetiza los fragmentos S1-S5 de los records en un texto
+  // coherente. Si en el futuro la columna trae múltiples párrafos
+  // separados por dos saltos de línea, cada uno se renderiza por separado.
   if (t.significados && t.significados.length > 0) {
+    const parrafos = t.significados[0]
+      .split(/\n\s*\n/)
+      .map(s => s.trim())
+      .filter(Boolean);
     html += `<div class="section">
       <div class="section-head"><span class="section-title">Significado y Simbolismo</span></div>
-      <div class="tag-cloud">${t.significados.map(s => `<span class="sig-tag">${esc(s)}</span>`).join('')}</div>
+      ${parrafos.map(p => `<p class="ficha-parrafo">${esc(p)}</p>`).join('')}
     </div>`;
   }
 

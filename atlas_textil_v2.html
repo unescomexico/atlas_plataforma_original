@@ -392,14 +392,15 @@ function renderAll(rowsTec, rowsRec) {
   Chart.defaults.font.family = "'DM Sans', sans-serif";
 
   // ─────────────────────────────────────────────────────────────────
-  // FILTRO GLOBAL DE LA PLATAFORMA: solo técnicas con MÁS DE 1 registro.
-  // (Mismo criterio aplicado en main.js / buildAtlasFromCSV.)
-  // Filtramos rowsTec por n_fichas > 1, y rowsRec se restringe a los
-  // registros cuya técnica pasó el filtro, para que TODAS las gráficas
-  // y conteos del reporte interno operen sobre el mismo universo
-  // que el resto del Atlas.
+  // FILTRO GLOBAL DE LA PLATAFORMA: solo técnicas con datos sólidos
+  // (`incluida === sí` en data_by_technique_id.csv).
+  //
+  // El criterio se basa en un score curatorial que evalúa la riqueza
+  // de los reactivos en cada ficha (historia, significados, materiales,
+  // lengua indígena, multimedia, transmisión, manufactura, etc.) más
+  // un bonus por volumen. Mismo criterio aplicado en main.js.
   // ─────────────────────────────────────────────────────────────────
-  rowsTec = rowsTec.filter(r => num(r['n_fichas']) > 1);
+  rowsTec = rowsTec.filter(r => (r['incluida'] || '').trim().toLowerCase() === 'sí');
   const tecnicasValidas = new Set(rowsTec.map(r => (r['Tecnica'] || r['tecnica_norm'] || '').trim()));
   rowsRec = rowsRec.filter(r => tecnicasValidas.has((r['Tecnica'] || '').trim()));
 
