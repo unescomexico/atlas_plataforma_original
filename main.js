@@ -235,6 +235,7 @@ function buildAtlasFromCSV(techRows, recordRows, imgRows) {
     };
 
     // Prendas y ceremonias — resúmenes agregados
+    const prenda_principal   = row['prenda_principal']   || '';
     const prendas_resumen    = row['prendas_resumen']    || '';
     const ceremonias_resumen = row['ceremonias_resumen'] || '';
 
@@ -310,7 +311,7 @@ function buildAtlasFromCSV(techRows, recordRows, imgRows) {
       manufactura, manufactura_tipos,
       tenido, tenido_tipos,
       aprendizaje, ensenanza,
-      prendas_resumen, ceremonias_resumen,
+      prenda_principal, prendas_resumen, ceremonias_resumen,
       imagenes,
       // Contenido textual consolidado
       historia, significados,
@@ -1650,6 +1651,191 @@ const TENIDO_HUBS = [
   { key: 'Animales/Insectos', label: 'Animales/Insectos',color: '#B50552' },
 ];
 
+// ── Hubs de MATERIALES ──────────────────────────────────────────────
+// Agrupamos los materiales en familias curatoriales para que la red
+// tenga un número manejable de hubs en lugar de los ~77 materiales
+// únicos del catálogo. Cada hub agrupa palabras clave que aparecen en
+// las listas de materiales. El orden de declaración importa: las
+// categorías más específicas (Telares, Máquinas, Abalorios, Cueros)
+// se evalúan ANTES que la categoría genérica "Herramientas" para
+// evitar que un telar caiga en herramientas.
+const MATERIALES_HUBS = [
+  { key: 'Fibras vegetales',  color: '#05B794',
+    keywords: ['algodón','algodon','lino','ixtle','henequén','henequen','palma',
+               'fibra natural','fibras vegetales','torote','sotol','crin',
+               'pita','fibra de maguey','maguey','fibra'] },
+  { key: 'Fibras animales',   color: '#B50552',
+    keywords: ['lana','lana de borrego','lana cardada','lana virgen','lana teñida',
+               'seda','hilo de seda'] },
+  { key: 'Hilos e hilazas',   color: '#FB4801',
+    keywords: ['hilo','hilos','hilo de algodón','hilo de seda','hilo de lana',
+               'hilo dorado','hilo industrial','hilo natural','hilo crochet',
+               'hilo cera','hilo vela','hilo iris','hilo mish','hilo fino',
+               'hilaza','estambre','hilera','hilo de bordar'] },
+  { key: 'Telas y soportes',  color: '#035A79',
+    keywords: ['tela','manta','popelina','popelín','popelin','cambray','dacrón',
+               'dacron','lino','satín','satin','crepé','crepe','poliéster',
+               'poliester','cuadrillé','cuadrille','cañamazo','organza','encaje',
+               'tela industrial','tela de manta','tela de algodón',
+               'tela hoja de pino','manta cruda','rayón'] },
+  { key: 'Tintes naturales',  color: '#7B4F9D',
+    keywords: ['añil','indigo','índigo','cochinilla','grana cochinilla','muicle',
+               'aliso','huizache','pericón','palo de Brasil','palo de campeche',
+               'corteza','cortezas','flores','hojas','raíz','raiz','flor de muerto',
+               'tintes naturales','tinte','colorante','plantas tintóreas'] },
+  // ── Telares y bastidores: separados de "Herramientas" porque son los
+  // instrumentos icónicos del oficio textil mexicano (Saltillo, Tenancingo,
+  // Teotitlán) y merecen su propia familia visual.
+  { key: 'Telares y bastidores', color: '#0EB0E2',
+    keywords: ['telar','telar de cintura','telar de pedal','telar pequeño',
+               'telar de madera','urdidor','komen','malacate','huso','rueca',
+               'lanzadera','peine','peine de carrizo','mecapal','bastidor',
+               'aro','marco'] },
+  // ── Máquinas: era moderna del oficio (s. XX en adelante).
+  { key: 'Máquinas',          color: '#8B6914',
+    keywords: ['máquina','maquina','máquina de coser','máquina de pedal',
+               'máquina industrial'] },
+  // ── Herramientas manuales: agujas, tijeras, ganchos.
+  { key: 'Herramientas',      color: '#5A7D9A',
+    keywords: ['aguja','agujas','aguja chica','aguja capotera','tijeras','tijera',
+               'dedal','molde','plancha','gancho','crochet','ganchillo',
+               'horquilla','mazo','maso'] },
+  // ── Abalorios y aplicaciones: bordados con chaquira (huichol, nahua),
+  // lentejuela, cuentas. Categoría visual única.
+  { key: 'Abalorios y aplicaciones', color: '#E07AAA',
+    keywords: ['chaquira','mostacilla','cuentas','cuenta','lentejuela',
+               'aplicación','aplicacion','listón','liston','espejo','botones',
+               'cinta de renacimiento'] },
+  // ── Pieles y cueros: piteado, talabartería, cuera tamaulipeca.
+  { key: 'Pieles y cueros',   color: '#A0522D',
+    keywords: ['cuero','vaqueta','piel'] },
+  { key: 'Otros',             color: '#C8932A',
+    keywords: ['cera','cera de campeche','barniz','pegamento','jabón',
+               'laqueado','espinas','hueso','leña','ollas','chatal'] },
+];
+
+function clasificarMaterial(material) {
+  const m = (material || '').toLowerCase().trim();
+  if (!m) return null;
+  for (const hub of MATERIALES_HUBS) {
+    if (hub.keywords.some(kw => m === kw || m.includes(kw))) return hub.key;
+  }
+  return null;
+}
+
+// Devuelve set de hubs (categorías) que aplican a una técnica
+function hubsMaterialesDe(t) {
+  const set = new Set();
+  (t.materiales || '').split(',').forEach(m => {
+    const hub = clasificarMaterial(m);
+    if (hub) set.add(hub);
+  });
+  return [...set];
+}
+
+// ── Hubs de PRENDAS Y OBJETOS ───────────────────────────────────────
+// Las prendas vienen del campo `prendas_resumen` con MUCHO ruido
+// (variantes, plurales, erratas). Las agrupamos en categorías macro,
+// destacando prendas icónicas mexicanas (rebozos, huipiles) en sus
+// propios hubs. El orden de declaración importa: las categorías más
+// específicas se evalúan ANTES que las genéricas para evitar que un
+// huipil ceremonial caiga en "Indumentaria femenina" antes de llegar a
+// "Indumentaria ceremonial".
+const PRENDAS_HUBS = [
+  // ── Indumentaria ceremonial: prioridad alta para que huipiles
+  // ceremoniales no caigan en "Huipiles y blusas" antes.
+  { key: 'Indumentaria ceremonial', color: '#7B4F9D',
+    keywords: ['huipil ceremonial','huipiles ceremoniales','huipil de gala',
+               'traje de gala','indumentaria ceremonial','traje ceremonial',
+               'capa','capas','indumentaria de boda','traje de boda',
+               'indumentaria de fiesta','vestido ceremonial','vestido de novia',
+               'fiesta tradicional','yumare'] },
+  // ── Rebozos y chales: categoría icónica de México (Saltillo,
+  // Tenancingo, Santa María del Río).
+  { key: 'Rebozos y chales',  color: '#FB4801',
+    keywords: ['rebozo','rebozos','reboso','rebosos','chalina','chalinas',
+               'chal','chales','pañoleta','pañoletas'] },
+  // ── Huipiles y blusas: prendas más documentadas del Atlas.
+  { key: 'Huipiles y blusas', color: '#B50552',
+    keywords: ['huipil','huipiles','blusa','blusas','hipil','hipiles'] },
+  // ── Resto de indumentaria femenina (faldas, vestidos, enaguas).
+  { key: 'Indumentaria femenina', color: '#D85B89',
+    keywords: ['enagua','enaguas','falda','faldas','vestido','vestidos','vestimenta',
+               'quechquémitl','quechquemitl','enredo','enredos','nagua','naguas',
+               'mañanita','mañanitas','ruana','ruanas','indumentaria','bestido',
+               'bestidos','terno'] },
+  { key: 'Indumentaria masculina', color: '#035A79',
+    keywords: ['camisa','camisas','calzón','calzon','calzones','jorongo','jorongos',
+               'sarape','sarapes','gabán','gaban','gabanes','poncho','ponchos',
+               'guayabera','guayaberas','sombrero','sombreros','traje tradicional',
+               'traje típico','traje tipico','pantalón','pantalon','pantalones',
+               'chaleco','chalecos','cotón','coton','tomicoton','tomicotones',
+               'chaqueta','chaquetas','corset'] },
+  // ── Joyería textil: aretes, collares, anillos, pulseras hechos con
+  // técnicas textiles (chaquira, randa, etc.).
+  { key: 'Joyería textil',    color: '#E07AAA',
+    keywords: ['arete','aretes','collar','collares','pulsera','pulseras',
+               'pulcera','pulceras','anillo','anillos','tocado','tocados',
+               'diadema','diademas'] },
+  { key: 'Accesorios',        color: '#0EB0E2',
+    keywords: ['bolsa','bolsas','bolso','bolsos','morral','morrales',
+               'mochila','mochilas','cinturón','cinturon','cinturones',
+               'faja','fajas','pañuelo','pañuelos',
+               'monedero','monederos','cartera','carteras','billetera','billeteras',
+               'cosmetiquera','cosmetiqueras','llavero','llaveros'] },
+  { key: 'Hogar y mantelería', color: '#05B794',
+    keywords: ['servilleta','servilletas','mantel','manteles','máteles',
+               'camino de mesa','caminos de mesa','cojín','cojin','cojines',
+               'almohada','almohadas','colcha','colchas','tapete','tapetes',
+               'tortillero','tortilleros','portavaso','portavasos','funda','fundas',
+               'colchón','colchon','cubrebandeja','manta de uso','sábana','sabana',
+               'sábanas','sabanas','cobertor','cobertores','cobija','cobijas',
+               'cortina','cortinas','carpeta','carpetas'] },
+  { key: 'Decorativos',       color: '#C8932A',
+    keywords: ['cuadro','cuadros','figura','figuras','tapiz','tapices','adorno',
+               'adornos','muñeco','muñecos','muñeca','muñecas','animalitos',
+               'mural','murales','escultura','esculturas','arte utilitario',
+               'decoración','decoracion'] },
+  { key: 'Abrigo',            color: '#8B6914',
+    keywords: ['suéter','sueter','suéteres','sueteres','chamarra','chamarras',
+               'saco','sacos','abrigo','abrigos','bufanda','bufandas','chuj',
+               'pañal','pañales'] },
+];
+
+function clasificarPrenda(prenda) {
+  const p = (prenda || '').toLowerCase().trim()
+    .replace(/\(\d+\)/g, '')   // quitar "(1)", "(2)" etc.
+    .replace(/[,\.]/g, '')     // puntuación
+    .trim();
+  if (!p) return null;
+  for (const hub of PRENDAS_HUBS) {
+    if (hub.keywords.some(kw => p === kw || p.includes(kw))) return hub.key;
+  }
+  return null;
+}
+
+// Devuelve set de hubs (categorías) que aplican a una técnica
+function hubsPrendasDe(t) {
+  const set = new Set();
+  // 1) prenda_principal (canónica, una por técnica)
+  if (t.prenda_principal) {
+    const hub = clasificarPrenda(t.prenda_principal);
+    if (hub) set.add(hub);
+  }
+  // 2) prendas_resumen (lista compleja). Tomamos las top 8 prendas mencionadas
+  if (t.prendas_resumen) {
+    const items = t.prendas_resumen.split(/[;,]/)
+      .map(s => s.split(':')[0].trim())
+      .filter(Boolean)
+      .slice(0, 8);
+    items.forEach(it => {
+      const hub = clasificarPrenda(it);
+      if (hub) set.add(hub);
+    });
+  }
+  return [...set];
+}
+
 // Cache para colores asignados por hub (lenguas y estados — generados al vuelo)
 let _layerColorCache = { lenguas: {}, estados: {} };
 
@@ -1711,6 +1897,30 @@ const NET_LAYERS = [
       return hub ? ((TENIDO_HUBS.find(h => h.key === hub) || {}).color || COLORS.arena) : COLORS.arena;
     },
     listHubs: () => TENIDO_HUBS.map(h => h.key),
+  },
+  {
+    id: 'materiales', label: 'Materiales', icon: '◈',
+    description: 'Familias de materiales utilizados',
+    getHubs: t => hubsMaterialesDe(t),
+    hubColor: hubLabel => (MATERIALES_HUBS.find(h => h.key === hubLabel) || {}).color || COLORS.arena,
+    nodeColor: t => {
+      const hubs = hubsMaterialesDe(t);
+      const first = hubs[0];
+      return first ? ((MATERIALES_HUBS.find(h => h.key === first) || {}).color || COLORS.arena) : COLORS.arena;
+    },
+    listHubs: () => MATERIALES_HUBS.map(h => h.key),
+  },
+  {
+    id: 'prendas', label: 'Prendas y objetos', icon: '◇',
+    description: 'Tipo de prenda u objeto resultante',
+    getHubs: t => hubsPrendasDe(t),
+    hubColor: hubLabel => (PRENDAS_HUBS.find(h => h.key === hubLabel) || {}).color || COLORS.arena,
+    nodeColor: t => {
+      const hubs = hubsPrendasDe(t);
+      const first = hubs[0];
+      return first ? ((PRENDAS_HUBS.find(h => h.key === first) || {}).color || COLORS.arena) : COLORS.arena;
+    },
+    listHubs: () => PRENDAS_HUBS.map(h => h.key),
   },
   {
     id: 'estados', label: 'Estados', icon: '⬢',
