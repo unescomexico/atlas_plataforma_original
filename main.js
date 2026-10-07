@@ -75,45 +75,122 @@ let ATLAS = null;        // { tecnicas: [], estados: {} }
 let tecnicasMap = {};
 let estadosTecnicas = {};
 let municipiosTecnicas = {}; // "Estado||Municipio" -> [tecnicas]
+let GALLERY_ITEMS = [];
+let IMAGE_META_BY_FILE = {};
+let BIBLIO_TECH_CARDS = new Map();
+let BIBLIO_TAXONOMY_CARDS = new Map();
+let CURRENT_FICHA_TECHNIQUE = null;
+let CURRENT_FICHA_SOURCE = 'testimonio';
 
 // ────────────────────────────────────────────────
 // CSV PARSER (sin dependencias)
 // ────────────────────────────────────────────────
 function parseCSV(text) {
-  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-  if (lines.length < 2) return [];
-
-  const headers = parseCSVRow(lines[0]);
-  const rows = [];
-
-  for (let i = 1; i < lines.length; i++) {
-    if (!lines[i].trim()) continue;
-    const vals = parseCSVRow(lines[i]);
-    const obj = {};
-    headers.forEach((h, idx) => { obj[h] = vals[idx] !== undefined ? vals[idx] : ''; });
-    rows.push(obj);
-  }
-  return rows;
-}
-
-function parseCSVRow(line) {
-  const result = [];
+  const source = String(text || '').replace(/^\uFEFF/, '');
+  const matrix = [];
+  let row = [];
   let cur = '';
   let inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
+
+  for (let i = 0; i < source.length; i++) {
+    const ch = source[i];
+
     if (ch === '"') {
-      if (inQuotes && line[i + 1] === '"') { cur += '"'; i++; }
-      else { inQuotes = !inQuotes; }
-    } else if (ch === ',' && !inQuotes) {
-      result.push(cur.trim());
-      cur = '';
-    } else {
-      cur += ch;
+      if (inQuotes && source[i + 1] === '"') {
+        cur += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
     }
+
+    if (ch === ',' && !inQuotes) {
+      row.push(cur.trim());
+      cur = '';
+      continue;
+    }
+
+    if ((ch === '\n' || ch === '\r') && !inQuotes) {
+      if (ch === '\r' && source[i + 1] === '\n') i++;
+      row.push(cur.trim());
+      cur = '';
+      if (row.some(v => v !== '')) matrix.push(row);
+      row = [];
+      continue;
+    }
+
+    cur += ch;
   }
-  result.push(cur.trim());
-  return result;
+
+  if (cur.length || row.length) {
+    row.push(cur.trim());
+    if (row.some(v => v !== '')) matrix.push(row);
+  }
+
+  if (matrix.length < 2) return [];
+  const headers = matrix[0].map(h => h.trim());
+  return matrix.slice(1).map(vals => {
+    const obj = {};
+    headers.forEach((h, idx) => { obj[h] = vals[idx] !== undefined ? vals[idx] : ''; });
+    return obj;
+  });
+}
+
+function normalizeLookup(value) {
+  return String(value || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function splitBibliography(value) {
+  return String(value || '')
+    .split(/\n+/)
+    .map(s => s.trim())
+    .filter(Boolean);
+}
+
+function buildBibliographyIndexes(techRows, taxonomyRows) {
+  BIBLIO_TECH_CARDS = new Map();
+  (techRows || []).forEach(row => {
+    const name = (row.technique_name || '').trim();
+    const ready = String(row.ready_for_platform || '').trim().toLowerCase();
+    if (!name || !['true', '1', 'yes', 'si', 'sí'].includes(ready)) return;
+    BIBLIO_TECH_CARDS.set(normalizeLookup(name), row);
+  });
+
+  BIBLIO_TAXONOMY_CARDS = new Map();
+  (taxonomyRows || []).forEach(row => {
+    const level = normalizeLookup(row.nivel);
+    const name = normalizeLookup(row.nombre);
+    if (!level || !name) return;
+    BIBLIO_TAXONOMY_CARDS.set(`${level}|||${name}`, row);
+  });
+}
+
+function getTechniqueBibliographyCard(tecnicaNombre) {
+  const key = normalizeLookup(tecnicaNombre);
+  if (BIBLIO_TECH_CARDS.has(key)) return BIBLIO_TECH_CARDS.get(key);
+
+  // Equivalencias editoriales confirmadas entre el catálogo público y el archivo bibliográfico.
+  const aliases = {
+    'bordado de chaquira': 'bordados en chaquira',
+  };
+  const alias = aliases[key];
+  return alias ? (BIBLIO_TECH_CARDS.get(alias) || null) : null;
+}
+
+function getTaxonomyBibliographyCard(level, name) {
+  const levelKey = normalizeLookup(level);
+  let nameKey = normalizeLookup(name);
+
+  // El archivo bibliográfico denomina "Tejido artesanal" a la categoría
+  // que la plataforma presenta de forma abreviada como "Tejido".
+  if (levelKey === 'categoria' && nameKey === 'tejido') nameKey = 'tejido artesanal';
+
+  return BIBLIO_TAXONOMY_CARDS.get(`${levelKey}|||${nameKey}`) || null;
 }
 
 // ────────────────────────────────────────────────
@@ -144,14 +221,22 @@ function buildAtlasFromCSV(techRows, recordRows, imgRows) {
   // ════════════════════════════════════════════════════
 
   // ── 1. Índice de imágenes ─────────────────────────
+  // La clave se normaliza para que diferencias de mayúsculas/acentos no dejen
+  // una técnica sin fotografía (p. ej. "Sarape Fino..." vs "Sarape fino...").
+  const imageKey = value => String(value || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
   const imgByTech = {};
   (imgRows || []).forEach(r => {
     const tecnica = (r['Tecnica'] || '').trim();
     const archivo = (r['archivo_descargado'] || '').trim();
     const status  = (r['status'] || '').toLowerCase().trim();
-    if (!tecnica || !archivo || status === 'error') return;
-    if (!imgByTech[tecnica]) imgByTech[tecnica] = [];
-    imgByTech[tecnica].push(archivo);
+    if (!archivo || status === 'error') return;
+    if (tecnica) {
+      const key = imageKey(tecnica);
+      if (!imgByTech[key]) imgByTech[key] = [];
+      imgByTech[key].push(archivo);
+    }
   });
 
   // ── 2. Índice de registros individuales por técnica ─
@@ -285,8 +370,11 @@ function buildAtlasFromCSV(techRows, recordRows, imgRows) {
     // elemento del array.
     const significados = significadosRaw ? [significadosRaw] : [];
 
-    // Imágenes
-    const imagenes = imgByTech[nombre] || [];
+    // Imágenes. Primero se empareja por nombre normalizado y, como respaldo,
+    // por el identificador del registro individual. Se deduplican manteniendo orden.
+    const imagenes = [...new Set([
+      ...(imgByTech[imageKey(nombre)] || [])
+    ])];
 
     // Acumular para el mapa
     estados.forEach(est => {
@@ -395,23 +483,35 @@ async function loadCSVs() {
   const errBanner = document.getElementById('error-banner');
 
   try {
-    const [techRes, recRes, imgRes] = await Promise.all([
-      fetch('data_by_technique_id.csv'),
-      fetch('data_by_record_id.csv'),
-      fetch('indice_imagenes.csv'),
+    const [techRes, recRes, imgRes, galleryRes, biblioTechRes, biblioTaxRes] = await Promise.all([
+      fetch('data/data_by_technique_id.csv'),
+      fetch('data/data_by_record_id.csv'),
+      fetch('data/indice_imagenes.csv'),
+      fetch('data/galeria.json'),
+      fetch('data/fichas_bibliograficas_tecnicas.csv'),
+      fetch('data/fichas_bibliograficas_taxonomia.csv'),
     ]);
 
     if (!techRes.ok || !recRes.ok) throw new Error('No se pudieron cargar los CSV.');
 
-    const [techText, recText, imgText] = await Promise.all([
+    const [techText, recText, imgText, galleryPayload, biblioTechText, biblioTaxText] = await Promise.all([
       techRes.text(),
       recRes.text(),
       imgRes.ok ? imgRes.text() : Promise.resolve(''),
+      galleryRes.ok ? galleryRes.json() : Promise.resolve({ images: [] }),
+      biblioTechRes.ok ? biblioTechRes.text() : Promise.resolve(''),
+      biblioTaxRes.ok ? biblioTaxRes.text() : Promise.resolve(''),
     ]);
 
     const techRows   = parseCSV(techText);
     const recordRows = parseCSV(recText);
     const imgRows    = imgText ? parseCSV(imgText) : [];
+    const biblioTechRows = biblioTechText ? parseCSV(biblioTechText) : [];
+    const biblioTaxRows = biblioTaxText ? parseCSV(biblioTaxText) : [];
+    buildBibliographyIndexes(biblioTechRows, biblioTaxRows);
+    GALLERY_ITEMS = Array.isArray(galleryPayload?.images) ? galleryPayload.images : [];
+    IMAGE_META_BY_FILE = {};
+    GALLERY_ITEMS.forEach(item => { if (item?.archivo) IMAGE_META_BY_FILE[item.archivo] = item; });
 
     ATLAS = buildAtlasFromCSV(techRows, recordRows, imgRows);
     tecnicasMap     = {};
@@ -419,14 +519,11 @@ async function loadCSVs() {
     municipiosTecnicas = ATLAS.municipios || {};
     ATLAS.tecnicas.forEach(t => { tecnicasMap[t.tecnica] = t; });
 
-    // Update header stats
+    // Panorama del Atlas: se integra en la introducción inicial.
     const nEstados = Object.keys(estadosTecnicas).length;
     const nTecnicas = ATLAS.tecnicas.length;
     const nRegistros = ATLAS.tecnicas.reduce((s, t) => s + t.n_fichas, 0);
-
-    document.querySelector('.hstat[data-stat="registros"] .hstat-num').textContent = Math.round(nRegistros);
-    document.querySelector('.hstat[data-stat="estados"] .hstat-num').textContent = nEstados;
-    document.querySelector('.hstat[data-stat="tecnicas"] .hstat-num').textContent = nTecnicas;
+    updateIntroStats(Math.round(nRegistros), nEstados, nTecnicas);
 
     // Hide loading
     overlay.classList.add('hidden');
@@ -464,11 +561,22 @@ function esc(s) {
 
 function escJs(s) {
   if (!s) return '';
-  return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  return String(s)
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\r/g, '\\r')
+    .replace(/\n/g, '\\n');
 }
 
 function imgPath(filename) {
-  return filename ? `imagenes/${filename}` : '';
+  if (!filename) return '';
+  // Encode each filename for browser-safe URLs. Image filenames in the deployment
+  // are ASCII-safe, but this also protects against spaces and reserved characters.
+  return `imagenes/${encodeURIComponent(String(filename))}`;
 }
 
 function parseSummary(str) {
@@ -587,18 +695,47 @@ function renderStatesList() {
 }
 
 // ────────────────────────────────────────────────
+// MAPA — resumen inicial del panel derecho
+// Se muestra únicamente al cargar la plataforma. Cualquier interacción
+// cartográfica lo reemplaza y no vuelve a aparecer hasta recargar.
+// ────────────────────────────────────────────────
+let initialMapOverviewActive = false;
+
+function updateIntroStats(registros, estados, tecnicas) {
+  const values = { registros, estados, tecnicas };
+  document.querySelectorAll('[data-intro-stat]').forEach(el => {
+    const key = el.getAttribute('data-intro-stat');
+    if (key && values[key] != null) {
+      el.textContent = Number(values[key]).toLocaleString('es-MX');
+    }
+  });
+}
+
+function renderInitialMapOverview() {
+  initialMapOverviewActive = false;
+}
+
+function dismissInitialMapOverview() {
+  initialMapOverviewActive = false;
+  document.querySelector('.side-panel')?.classList.remove('initial-overview');
+}
+
+// ────────────────────────────────────────────────
 // TABS
 // ────────────────────────────────────────────────
 let currentTab = 'mapa';
 let networkInitialized = false;
 let catalogInitialized = false;
 let arbolInitialized = false;
+let galleryInitialized = false;
 let reporteInitialized = false;
 
 document.querySelectorAll('.nav-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     const id = tab.dataset.tab;
+    if (!id) return;
     if (id === currentTab) return;
+    if (id !== 'mapa' && typeof dismissInitialMapOverview === 'function') dismissInitialMapOverview();
     currentTab = id;
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
@@ -606,13 +743,18 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
     document.getElementById(`view-${id}`).classList.add('active');
 
     if (id === 'mapa') {
-      setTimeout(() => map && map.invalidateSize(), 80);
+      setTimeout(() => {
+        if (map) map.invalidateSize({ animate: false, pan: false });
+        if (typeof refreshMapViewport === 'function') refreshMapViewport();
+      }, 80);
     } else if (id === 'catalogo' && !catalogInitialized) {
       catalogInitialized = true; renderCatalog();
     } else if (id === 'red' && !networkInitialized) {
       networkInitialized = true; initNetwork();
     } else if (id === 'arbol' && !arbolInitialized) {
       arbolInitialized = true; initArbol();
+    } else if (id === 'galeria' && !galleryInitialized) {
+      galleryInitialized = true; initGallery();
     } else if (id === 'reporte' && !reporteInitialized) {
       reporteInitialized = true; initReporteView();
     }
@@ -630,6 +772,7 @@ let selectedStateName = null;
 
 // ── Capa de comunidades (centroides de municipios) ──
 let municipiosLayer = null;
+let municipiosAllFeatureLayers = []; // referencia estable para filtros espaciales
 let municipiosLoaded = false;       // true cuando el geojson terminó de cargar
 let comunidadesVisible = false;     // si la capa está visible en el mapa
 let selectedMunicipioKey = null;    // "Estado||Municipio" del seleccionado, o null
@@ -648,13 +791,23 @@ function initMap() {
     maxBounds: MX_BOUNDS,
     maxBoundsViscosity: 1.0, // 1.0 = el mapa rebota al borde, no se sale
   });
+  // Capas con orden explícito: contexto territorial < comunidades.
+  map.createPane('atlasTerritoryPane');
+  map.getPane('atlasTerritoryPane').style.zIndex = 430;
+  map.createPane('atlasCommunitiesPane');
+  map.getPane('atlasCommunitiesPane').style.zIndex = 520;
+
   L.control.zoom({ position: 'bottomright' }).addTo(map);
+  // Sustituye el prefijo gráfico predeterminado de Leaflet por un enlace textual.
+  map.attributionControl.setPrefix('<a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a>');
   L.tileLayer('https://www.unesco.org/tiles/clearmap/{z}/{x}/{y}.png', {
     attribution: '© UNESCO',
     maxZoom: 19,
     minZoom: 5,
   }).addTo(map);
   map.fitBounds([[14.5, -118.4], [32.7, -86.7]]);
+  // Leaflet necesita recalcularse después de que el layout responsive termine de asentarse.
+  setTimeout(() => { if (typeof refreshMapViewport === 'function') refreshMapViewport({ refit: true }); }, 120);
 
   fetch('https://raw.githubusercontent.com/angelnmara/geojson/master/mexicoHigh.json')
     .then(r => r.json())
@@ -666,13 +819,18 @@ function initMap() {
           const count = countForEstado(name);
           if (count > 0) {
             layer.bindTooltip(
-              `<b>${name}</b><br>${count} técnica${count !== 1 ? 's' : ''}`,
+              `<b>${esc(name)}</b><br>${count} técnica${count !== 1 ? 's' : ''}`,
               { className: 'leaflet-tooltip-atlas', direction: 'top', sticky: true }
             );
           }
           layer.on({
             mouseover: e => {
-              if (name !== selectedStateName) {
+              // Los estados solo son interactivos visualmente en el enfoque Estado.
+              // En Lengua/Ecosistema funcionan como contexto neutro y no deben
+              // conservar resaltados al mover el cursor.
+              const activeDriver = document.querySelector('.map-driver-btn.active')?.dataset.mapDriver || 'estado';
+              if (activeDriver !== 'estado') return;
+              if (!(typeof isStateSelected === 'function' ? isStateSelected(name) : name === selectedStateName)) {
                 if (mapFilteredTecnicas) {
                   const base = filteredStateStyle(name);
                   e.target.setStyle({ ...base, weight: 2.5, color: COLORS.negro });
@@ -682,7 +840,15 @@ function initMap() {
               }
             },
             mouseout: e => {
-              if (name !== selectedStateName) {
+              const activeDriver = document.querySelector('.map-driver-btn.active')?.dataset.mapDriver || 'estado';
+              if (activeDriver !== 'estado') {
+                e.target.setStyle({
+                  fillColor: '#F3EEE9', weight: 0.7, opacity: 0.72,
+                  color: '#C7BFB8', fillOpacity: 0.08,
+                });
+                return;
+              }
+              if (!(typeof isStateSelected === 'function' ? isStateSelected(name) : name === selectedStateName)) {
                 if (mapFilteredTecnicas) {
                   e.target.setStyle(filteredStateStyle(name));
                 } else {
@@ -690,7 +856,10 @@ function initMap() {
                 }
               }
             },
-            click: () => onStateClick(name, layer, feat),
+            click: () => {
+              const activeDriver = document.querySelector('.map-driver-btn.active')?.dataset.mapDriver || 'estado';
+              if (activeDriver === 'estado') onStateClick(name, layer, feat);
+            },
           });
         }
       }).addTo(map);
@@ -745,6 +914,7 @@ const COMUNIDAD_STYLE_SELECTED = {
 };
 
 function onMunicipioClick(estado, municipio, layer) {
+  if (typeof dismissInitialMapOverview === 'function') dismissInitialMapOverview();
   selectedMunicipioKey = municipioKey(estado, municipio);
   selectedStateName = estado;
 
@@ -769,7 +939,7 @@ function onMunicipioClick(estado, municipio, layer) {
 // el usuario activa la capa de comunidades.
 async function loadMunicipiosLayer() {
   if (municipiosLoaded) return municipiosLayer;
-  const res = await fetch('mexico_municipios_centroids.geojson');
+  const res = await fetch('geodata/mexico_municipios_centroids.geojson');
   if (!res.ok) throw new Error('No se pudo cargar el archivo de comunidades');
   const data = await res.json();
 
@@ -789,7 +959,7 @@ async function loadMunicipiosLayer() {
   municipiosLayer = L.geoJSON(
     { type: 'FeatureCollection', features: featuresFiltradas },
     {
-      pointToLayer: (feat, latlng) => L.circleMarker(latlng, COMUNIDAD_STYLE),
+      pointToLayer: (feat, latlng) => L.circleMarker(latlng, { ...COMUNIDAD_STYLE, pane: 'atlasCommunitiesPane' }),
       onEachFeature: (feat, layer) => {
         const est = feat.properties.estado_nombre || '';
         const mun = feat.properties.NOMGEO || '';
@@ -817,9 +987,25 @@ async function loadMunicipiosLayer() {
     }
   );
 
+  municipiosAllFeatureLayers = municipiosLayer.getLayers();
   municipiosLoaded = true;
   return municipiosLayer;
 }
+
+// Filtra la capa principal de comunidades sin destruir sus objetos Leaflet.
+// predicate(feature, layer) => true conserva la comunidad visible.
+function setCommunityFilter(predicate = null) {
+  if (!municipiosLayer || !municipiosAllFeatureLayers.length) return;
+  municipiosAllFeatureLayers.forEach(layer => {
+    const visible = !predicate || Boolean(predicate(layer.feature, layer));
+    const present = municipiosLayer.hasLayer(layer);
+    if (visible && !present) municipiosLayer.addLayer(layer);
+    if (!visible && present) municipiosLayer.removeLayer(layer);
+  });
+  municipiosLayer.eachLayer(layer => layer.setStyle(COMUNIDAD_STYLE));
+  selectedMunicipioKey = null;
+}
+
 
 // Activa o desactiva la capa de comunidades (carga lazy la primera vez)
 async function toggleComunidadesLayer(visible) {
@@ -876,7 +1062,7 @@ function onStateClick(name, layer, feat) {
 function renderSidePanel(tecnicas) {
   const body = document.getElementById('panel-body');
   if (!tecnicas || tecnicas.length === 0) {
-    body.innerHTML = `<div class="welcome-state"><h3>Sin registros</h3><p>No se documentaron técnicas en este estado.</p></div>`;
+    body.innerHTML = `<div class="welcome-state"><h3>Sin registros</h3><p>No hay técnicas que coincidan con la selección actual.</p></div>`;
     return;
   }
   // Agrupar por CAT-N-1 → CAT-N-2
@@ -917,262 +1103,243 @@ function renderSidePanel(tecnicas) {
 }
 
 // ────────────────────────────────────────────────
-// MAP FILTER — filtro jerárquico por categoría y técnica
+// MAP FILTER — filtros multiselección por categoría y técnica
+// Regla: OR dentro de un mismo nivel; AND entre niveles diferentes.
 // ────────────────────────────────────────────────
-let mapFilterState = { cat1: null, cat2: null, cat3: null, cat4: null, tecnica: null };
+let mapFilterState = {
+  cat1: new Set(), cat2: new Set(), cat3: new Set(), cat4: new Set(), tecnica: new Set()
+};
 let mapFilteredTecnicas = null; // Set de nombres de técnica activas, null = todas
+
+function mapSet(level) {
+  const value = mapFilterState[level];
+  if (value instanceof Set) return value;
+  const set = new Set(value ? [value] : []);
+  mapFilterState[level] = set;
+  return set;
+}
+
+function checkboxSummary(set, emptyLabel = 'Todas') {
+  if (!set || !set.size) return emptyLabel;
+  if (set.size === 1) {
+    const value = [...set][0];
+    return value.length > 28 ? `${value.slice(0, 26)}…` : value;
+  }
+  return `${set.size} seleccionadas`;
+}
+
+function setFilterSummary(id, set, emptyLabel = 'Todas') {
+  const el = document.getElementById(id);
+  if (el) el.textContent = checkboxSummary(set, emptyLabel);
+}
+
+function valuesAvailableAtLevel(level) {
+  const levels = ['cat1','cat2','cat3','cat4'];
+  const idx = levels.indexOf(level);
+  if (idx < 0) return [];
+  const rows = ATLAS.tecnicas.filter(t => {
+    for (let i = 0; i < idx; i++) {
+      const selected = mapSet(levels[i]);
+      if (selected.size && !selected.has(t[levels[i]])) return false;
+    }
+    return true;
+  });
+  return [...new Set(rows.map(t => t[level]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
+}
+
+function filterRowColor(level, value) {
+  if (level === 'cat1') return CAT1_COLOR[value] || COLORS.arena;
+  const row = ATLAS.tecnicas.find(t => t[level] === value);
+  if (level === 'cat2') return CAT2_COLOR[value] || CAT1_COLOR[row?.cat1] || COLORS.arena;
+  return CAT2_COLOR[row?.cat2] || CAT1_COLOR[row?.cat1] || COLORS.arena;
+}
+
+function renderClassificationLevel(level, containerId, summaryId, emptyLabel) {
+  const wrap = document.getElementById(containerId);
+  if (!wrap) return;
+  const selected = mapSet(level);
+  const values = valuesAvailableAtLevel(level);
+  wrap.innerHTML = '';
+  values.forEach((value, i) => {
+    const row = document.createElement('div');
+    row.className = 'filter-checkbox-item';
+    const inputId = `map-${level}-${i}`;
+    const checked = selected.has(value);
+    row.innerHTML = `<input type="checkbox" id="${inputId}" ${checked ? 'checked' : ''}>
+      <span class="map-chip-swatch" style="background:${filterRowColor(level, value)}"></span>
+      <label for="${inputId}" class="filter-checkbox-name">${esc(value)}</label>`;
+    row.querySelector('input').addEventListener('change', () => onMapChipClick(level, value));
+    wrap.appendChild(row);
+  });
+  setFilterSummary(summaryId, selected, emptyLabel);
+}
+
+function renderTechniqueFilterList() {
+  const wrap = document.getElementById('map-chips-tecs');
+  if (!wrap) return;
+  const selected = mapSet('tecnica');
+  const q = (document.getElementById('map-filter-search')?.value || '').toLowerCase().trim();
+  const base = getFilteredTecnicas({ ignoreTechnique: true });
+  const rows = q ? base.filter(t => t.tecnica.toLowerCase().includes(q)) : base;
+  wrap.innerHTML = '';
+  rows.forEach((t, i) => {
+    const row = document.createElement('div');
+    row.className = 'filter-checkbox-item filter-technique-item';
+    const inputId = `map-tecnica-${i}`;
+    row.innerHTML = `<input type="checkbox" id="${inputId}" ${selected.has(t.tecnica) ? 'checked' : ''}>
+      <span class="map-chip-swatch" style="background:${getCatColor(t)}"></span>
+      <label for="${inputId}" class="filter-checkbox-name">${esc(t.tecnica)}</label>
+      <button type="button" class="filter-row-action">Ver ficha</button>`;
+    row.querySelector('input').addEventListener('change', () => selectTecnicaOnMap(t.tecnica));
+    row.querySelector('.filter-row-action').addEventListener('click', e => {
+      e.preventDefault(); e.stopPropagation(); openFicha(t.tecnica);
+    });
+    wrap.appendChild(row);
+  });
+  const summary = document.getElementById('map-tecs-summary');
+  if (summary) summary.textContent = selected.size
+    ? checkboxSummary(selected, 'Todas')
+    : `${base.length} disponibles`;
+}
 
 function initMapFilter() {
   if (!ATLAS) return;
-  // Construir los chips de CAT-N-1
-  const cat1s = [...new Set(ATLAS.tecnicas.map(t => t.cat1).filter(Boolean))].sort();
-  const wrap1 = document.getElementById('map-chips-cat1');
-  if (!wrap1) return;
-  wrap1.innerHTML = '';
-  cat1s.forEach(c1 => {
-    const color = CAT1_COLOR[c1] || COLORS.arena;
-    const btn = document.createElement('button');
-    btn.className = 'map-chip';
-    btn.dataset.val = c1;
-    btn.textContent = c1;
-    btn.style.setProperty('--chip-color', color);
-    btn.addEventListener('click', () => onMapChipClick('cat1', c1));
-    wrap1.appendChild(btn);
-  });
-
-  // Autocomplete
   const searchEl = document.getElementById('map-filter-search');
-  const acEl = document.getElementById('map-filter-autocomplete');
-  if (searchEl) {
-    searchEl.addEventListener('input', function() {
-      const q = this.value.toLowerCase().trim();
-      acEl.innerHTML = '';
-      acEl.style.display = 'none';
-      if (q.length < 2) return;
-      const matches = ATLAS.tecnicas
-        .filter(t => t.tecnica.toLowerCase().includes(q))
-        .slice(0, 10);
-      if (!matches.length) return;
-      matches.forEach(t => {
-        const item = document.createElement('div');
-        item.className = 'map-ac-item';
-        item.innerHTML = `<span class="map-ac-name">${esc(t.tecnica)}</span>
-          <span class="map-ac-cat" style="color:${CAT1_COLOR[t.cat1]||COLORS.arena}">${esc(t.cat1||'')}</span>`;
-        item.addEventListener('click', () => {
-          searchEl.value = t.tecnica;
-          acEl.style.display = 'none';
-          selectTecnicaOnMap(t.tecnica);
-        });
-        acEl.appendChild(item);
-      });
-      acEl.style.display = 'block';
-    });
-    document.addEventListener('click', e => {
-      if (!searchEl.contains(e.target) && !acEl.contains(e.target)) acEl.style.display = 'none';
-    });
+  if (searchEl && !searchEl.dataset.bound) {
+    searchEl.dataset.bound = '1';
+    searchEl.addEventListener('input', renderTechniqueFilterList);
   }
+  rebuildMapFilterCascade();
 }
 
 function onMapChipClick(level, val) {
-  // Toggle
-  if (mapFilterState[level] === val) {
-    // Deselect — reset to parent level
-    mapFilterState[level] = null;
-    if (level === 'cat1') { mapFilterState.cat2 = null; mapFilterState.cat3 = null; mapFilterState.cat4 = null; mapFilterState.tecnica = null; }
-    if (level === 'cat2') { mapFilterState.cat3 = null; mapFilterState.cat4 = null; mapFilterState.tecnica = null; }
-    if (level === 'cat3') { mapFilterState.cat4 = null; mapFilterState.tecnica = null; }
-    if (level === 'cat4') { mapFilterState.tecnica = null; }
-  } else {
-    mapFilterState[level] = val;
-    // Reset children
-    if (level === 'cat1') { mapFilterState.cat2 = null; mapFilterState.cat3 = null; mapFilterState.cat4 = null; mapFilterState.tecnica = null; }
-    if (level === 'cat2') { mapFilterState.cat3 = null; mapFilterState.cat4 = null; mapFilterState.tecnica = null; }
-    if (level === 'cat3') { mapFilterState.cat4 = null; mapFilterState.tecnica = null; }
-  }
+  dismissInitialMapOverview();
+  const set = mapSet(level);
+  if (set.has(val)) set.delete(val); else set.add(val);
+  pruneMapFilterChildren(level);
   rebuildMapFilterCascade();
   applyMapFilter();
 }
 
 function selectTecnicaOnMap(nombre) {
-  mapFilterState = { cat1: null, cat2: null, cat3: null, cat4: null, tecnica: nombre };
-  const t = tecnicasMap[nombre];
-  if (t) {
-    mapFilterState.cat1 = t.cat1;
-    mapFilterState.cat2 = t.cat2;
-    mapFilterState.cat3 = t.cat3;
-    mapFilterState.cat4 = t.cat4;
-  }
+  dismissInitialMapOverview();
+  const set = mapSet('tecnica');
+  if (set.has(nombre)) set.delete(nombre); else set.add(nombre);
   rebuildMapFilterCascade();
   applyMapFilter();
 }
 
 function clearMapFilter() {
-  mapFilterState = { cat1: null, cat2: null, cat3: null, cat4: null, tecnica: null };
+  dismissInitialMapOverview();
+  mapFilterState = { cat1: new Set(), cat2: new Set(), cat3: new Set(), cat4: new Set(), tecnica: new Set() };
   const search = document.getElementById('map-filter-search');
   if (search) search.value = '';
   rebuildMapFilterCascade();
   applyMapFilter();
 }
 
-function rebuildMapFilterCascade() {
-  const { cat1, cat2, cat3 } = mapFilterState;
-
-  // Highlight active chip level 1
-  document.querySelectorAll('#map-chips-cat1 .map-chip').forEach(b => {
-    b.classList.toggle('active', b.dataset.val === cat1);
-  });
-
-  // CAT-N-2
-  const level2 = document.getElementById('map-level-cat2');
-  const chips2 = document.getElementById('map-chips-cat2');
-  if (cat1 && chips2) {
-    const cat2s = [...new Set(ATLAS.tecnicas.filter(t => t.cat1 === cat1 && t.cat2).map(t => t.cat2))].sort();
-    if (cat2s.length) {
-      chips2.innerHTML = '';
-      cat2s.forEach(c2 => {
-        const color = CAT2_COLOR[c2] || CAT1_COLOR[cat1] || COLORS.arena;
-        const btn = document.createElement('button');
-        btn.className = 'map-chip' + (c2 === cat2 ? ' active' : '');
-        btn.dataset.val = c2; btn.textContent = c2;
-        btn.style.setProperty('--chip-color', color);
-        btn.addEventListener('click', () => onMapChipClick('cat2', c2));
-        chips2.appendChild(btn);
-      });
-      level2.style.display = '';
-    } else { level2.style.display = 'none'; }
-  } else { if (level2) level2.style.display = 'none'; }
-
-  // CAT-N-3
-  const level3 = document.getElementById('map-level-cat3');
-  const chips3 = document.getElementById('map-chips-cat3');
-  if (cat2 && chips3) {
-    const cat3s = [...new Set(ATLAS.tecnicas.filter(t => t.cat2 === cat2 && t.cat3).map(t => t.cat3))].sort();
-    if (cat3s.length) {
-      chips3.innerHTML = '';
-      cat3s.forEach(c3 => {
-        const btn = document.createElement('button');
-        btn.className = 'map-chip' + (c3 === cat3 ? ' active' : '');
-        btn.dataset.val = c3; btn.textContent = c3;
-        btn.style.setProperty('--chip-color', CAT2_COLOR[cat2] || COLORS.arena);
-        btn.addEventListener('click', () => onMapChipClick('cat3', c3));
-        chips3.appendChild(btn);
-      });
-      level3.style.display = '';
-    } else { level3.style.display = 'none'; }
-  } else { if (level3) level3.style.display = 'none'; }
-
-  // CAT-N-4
-  const level4 = document.getElementById('map-level-cat4');
-  const chips4 = document.getElementById('map-chips-cat4');
-  if (mapFilterState.cat3 && chips4) {
-    const cat4s = [...new Set(ATLAS.tecnicas.filter(t => t.cat3 === mapFilterState.cat3 && t.cat4).map(t => t.cat4))].sort();
-    if (cat4s.length) {
-      chips4.innerHTML = '';
-      cat4s.forEach(c4 => {
-        const btn = document.createElement('button');
-        btn.className = 'map-chip' + (c4 === mapFilterState.cat4 ? ' active' : '');
-        btn.dataset.val = c4; btn.textContent = c4;
-        btn.style.setProperty('--chip-color', COLORS.arena);
-        btn.addEventListener('click', () => onMapChipClick('cat4', c4));
-        chips4.appendChild(btn);
-      });
-      level4.style.display = '';
-    } else { level4.style.display = 'none'; }
-  } else { if (level4) level4.style.display = 'none'; }
-
-  // Técnicas resultantes
-  const levelT = document.getElementById('map-level-tecs');
-  const chipsT = document.getElementById('map-chips-tecs');
-  const labelT = document.getElementById('map-tecs-label');
-  const filtered = getFilteredTecnicas();
-  if (cat1 && filtered.length > 0 && filtered.length < 80 && chipsT) {
-    chipsT.innerHTML = '';
-    filtered.slice(0, 60).forEach(t => {
-      const btn = document.createElement('button');
-      btn.className = 'map-chip map-chip-tec' + (mapFilterState.tecnica === t.tecnica ? ' active' : '');
-      btn.dataset.val = t.tecnica;
-      btn.textContent = t.tecnica;
-      btn.style.setProperty('--chip-color', getCatColor(t));
-      // Click en una técnica del sidebar → abre la ficha (igual que en el panel derecho)
-      btn.addEventListener('click', () => {
-        openFicha(t.tecnica);
-      });
-      chipsT.appendChild(btn);
-    });
-    if (labelT) labelT.textContent = `Técnicas (${filtered.length})`;
-    levelT.style.display = '';
-  } else { if (levelT) levelT.style.display = 'none'; }
-}
-
-function getFilteredTecnicas() {
-  const { cat1, cat2, cat3, cat4, tecnica } = mapFilterState;
+function techniquesMatchingThrough(level) {
+  const levels = ['cat1','cat2','cat3','cat4'];
+  const idx = levels.indexOf(level);
   return ATLAS.tecnicas.filter(t => {
-    if (tecnica && t.tecnica !== tecnica) return false;
-    if (cat4 && t.cat4 !== cat4) return false;
-    if (cat3 && t.cat3 !== cat3) return false;
-    if (cat2 && t.cat2 !== cat2) return false;
-    if (cat1 && t.cat1 !== cat1) return false;
+    for (let i=0; i<=idx; i++) {
+      const key = levels[i];
+      const set = mapSet(key);
+      if (set.size && !set.has(t[key])) return false;
+    }
     return true;
   });
 }
 
-function applyMapFilter() {
-  const filtered = getFilteredTecnicas();
-  const activeEl = document.getElementById('map-filter-active');
-  const activeText = document.getElementById('map-filter-active-text');
-  const { cat1, cat2, cat3, cat4, tecnica } = mapFilterState;
-
-  const hasFilter = cat1 || tecnica;
-
-  if (!hasFilter) {
-    mapFilteredTecnicas = null;
-    if (activeEl) activeEl.style.display = 'none';
-  } else {
-    mapFilteredTecnicas = new Set(filtered.map(t => t.tecnica));
-    const parts = [cat1, cat2, cat3, cat4, tecnica].filter(Boolean);
-    const label = parts.join(' › ');
-    if (activeText) activeText.textContent = `${label} · ${filtered.length} técnica${filtered.length!==1?'s':''}`;
-    if (activeEl) activeEl.style.display = '';
+function pruneMapFilterChildren(changedLevel) {
+  const levels = ['cat1','cat2','cat3','cat4'];
+  const idx = levels.indexOf(changedLevel);
+  if (idx < 0) return;
+  for (let i = idx + 1; i < levels.length; i++) {
+    const key = levels[i];
+    const allowed = new Set(valuesAvailableAtLevel(key));
+    [...mapSet(key)].forEach(v => { if (!allowed.has(v)) mapSet(key).delete(v); });
   }
+  const allowedTechs = new Set(getFilteredTecnicas({ ignoreTechnique: true }).map(t => t.tecnica));
+  [...mapSet('tecnica')].forEach(v => { if (!allowedTechs.has(v)) mapSet('tecnica').delete(v); });
+}
 
-  // Repaint estados
+function rebuildMapFilterCascade() {
+  renderClassificationLevel('cat1', 'map-chips-cat1', 'map-cat1-summary', 'Todas');
+  renderClassificationLevel('cat2', 'map-chips-cat2', 'map-cat2-summary', 'Todas');
+  renderClassificationLevel('cat3', 'map-chips-cat3', 'map-cat3-summary', 'Todos');
+  renderClassificationLevel('cat4', 'map-chips-cat4', 'map-cat4-summary', 'Todas');
+  renderTechniqueFilterList();
+}
+
+function getFilteredTecnicas(options={}) {
+  const ignoreTechnique=Boolean(options.ignoreTechnique);
+  return ATLAS.tecnicas.filter(t=>{
+    for (const key of ['cat1','cat2','cat3','cat4']) {
+      const set=mapSet(key);
+      if (set.size && !set.has(t[key])) return false;
+    }
+    const techSet=mapSet('tecnica');
+    if (!ignoreTechnique && techSet.size && !techSet.has(t.tecnica)) return false;
+    return true;
+  });
+}
+
+function mapFilterHasSelection() {
+  return ['cat1','cat2','cat3','cat4','tecnica'].some(k=>mapSet(k).size>0);
+}
+
+function mapFilterSummaryParts() {
+  const labels={cat1:'Categoría',cat2:'Subcategoría',cat3:'Tipo',cat4:'Variante',tecnica:'Técnicas'};
+  return ['cat1','cat2','cat3','cat4','tecnica'].flatMap(key=>{
+    const set=mapSet(key); if(!set.size) return [];
+    const vals=[...set];
+    const shown=vals.slice(0,3).join(', ')+(vals.length>3?` +${vals.length-3}`:'');
+    return [`${labels[key]}: ${shown}`];
+  });
+}
+
+function applyMapFilter() {
+  dismissInitialMapOverview();
+  const filtered=getFilteredTecnicas();
+  const activeEl=document.getElementById('map-filter-active');
+  const activeText=document.getElementById('map-filter-active-text');
+  const hasFilter=mapFilterHasSelection();
+  mapFilteredTecnicas=hasFilter?new Set(filtered.map(t=>t.tecnica)):null;
+  if(activeEl) activeEl.style.display=hasFilter?'':'none';
+  if(activeText && hasFilter) activeText.textContent=`${mapFilterSummaryParts().join(' · ')} · ${filtered.length} técnica${filtered.length!==1?'s':''}`;
+
   if (geojsonLayer) {
-    geojsonLayer.eachLayer(l => {
-      const name = l.feature?.properties?.name || l.feature?.properties?.NAME_1 || '';
-      l.setStyle(mapFilteredTecnicas ? filteredStateStyle(name) : stateStyle(l.feature));
-      // update tooltip
+    geojsonLayer.eachLayer(l=>{
+      const name=l.feature?.properties?.name || l.feature?.properties?.NAME_1 || '';
+      l.setStyle(mapFilteredTecnicas?filteredStateStyle(name):stateStyle(l.feature));
       l.unbindTooltip();
-      const count = mapFilteredTecnicas ? countForEstadoFiltered(name) : countForEstado(name);
-      if (count > 0) {
-        l.bindTooltip(`<b>${name}</b><br>${count} técnica${count!==1?'s':''}`,
-          { className: 'leaflet-tooltip-atlas', direction: 'top', sticky: true });
-      }
+      const count=mapFilteredTecnicas?countForEstadoFiltered(name):countForEstado(name);
+      if(count>0) l.bindTooltip(`<b>${esc(name)}</b><br>${count} técnica${count!==1?'s':''}`,{className:'leaflet-tooltip-atlas',direction:'top',sticky:true});
     });
   }
-  // La capa de comunidades es de simbología uniforme, no se recolorea por filtro.
-  // Solo limpiamos la selección visual.
-  if (municipiosLayer) {
-    municipiosLayer.eachLayer(l => l.setStyle(COMUNIDAD_STYLE));
+  if(municipiosLayer) municipiosLayer.eachLayer(l=>l.setStyle(COMUNIDAD_STYLE));
+  selectedMunicipioKey=null;
+
+  if (typeof updateStateSelectionStyles === 'function') updateStateSelectionStyles();
+  if (typeof renderStatesList === 'function') renderStatesList();
+  if (typeof refreshCommunities === 'function') refreshCommunities();
+  if (typeof updateStatePanel === 'function') updateStatePanel();
+  else {
+    document.getElementById('panel-title').textContent='Estados de la República';
+    document.getElementById('panel-subtitle').textContent=hasFilter?`Mostrando ${filtered.length} técnicas filtradas`:'Selecciona uno o varios estados';
+    document.getElementById('panel-body').innerHTML=`<div class="welcome-state"><h3>${hasFilter?'Filtro activo':'Explora el mapa'}</h3><p>${hasFilter?'Selecciona uno o varios estados para combinar el filtro territorial con la clasificación activa.':'Puedes seleccionar más de un estado en el mapa o en la lista.'}</p></div>`;
   }
-  // Reset panel
-  selectedStateName = null;
-  selectedMunicipioKey = null;
-  document.getElementById('panel-title').textContent = 'Estados de la República';
-  document.getElementById('panel-subtitle').textContent = hasFilter
-    ? `Mostrando ${filtered.length} técnica${filtered.length!==1?'s':''} filtrada${filtered.length!==1?'s':''}`
-    : 'Selecciona un estado para ver sus técnicas';
-  document.getElementById('panel-body').innerHTML = `<div class="welcome-state"><h3>${hasFilter ? 'Filtro activo' : 'Explora el mapa'}</h3><p>${hasFilter ? 'Los estados coloreados tienen técnicas que coinciden con el filtro. Selecciona un estado de la lista o del mapa.' : 'Cada estado está coloreado según el número de técnicas documentadas.'}</p></div>`;
-  renderStatesList(); // refresca conteos según filtro activo
 }
 
 function countForEstadoFiltered(name) {
-  const tecs = getTecnicasForEstado(name);
-  return tecs.filter(t => mapFilteredTecnicas && mapFilteredTecnicas.has(t)).length;
+  const tecs=getTecnicasForEstado(name);
+  return tecs.filter(t=>mapFilteredTecnicas && mapFilteredTecnicas.has(t)).length;
 }
 
 function filteredStateStyle(name) {
-  const count = countForEstadoFiltered(name);
-  return { fillColor: getMapColor(count), weight: 1.2, opacity: 1, color: '#fff', fillOpacity: count > 0 ? 0.88 : 0.08 };
+  const count=countForEstadoFiltered(name);
+  return {fillColor:getMapColor(count),weight:1.2,opacity:1,color:'#fff',fillOpacity:count>0?0.88:0.08};
 }
 
 // ────────────────────────────────────────────────
@@ -1196,7 +1363,7 @@ function renderCatalog() {
     const estados = (t.estados || []).slice(0, 3).join(', ');
     return `<div class="tec-card" onclick="openFicha('${escJs(t.tecnica)}')">
       <div class="tec-card-img" style="background:${COLORS.negro}">
-        ${img ? `<img src="${imgPath(esc(img))}" alt="${esc(t.tecnica)}" loading="lazy">` : `<span class="tec-card-no-img">&#129525;</span>`}
+        ${img ? `<img src="${esc(imgPath(img))}" alt="${esc(t.tecnica)}" loading="lazy">` : `<span class="tec-card-no-img">&#129525;</span>`}
         <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${color}"></div>
       </div>
       <div class="tec-card-body">
@@ -1226,18 +1393,139 @@ document.getElementById('catalog-search').addEventListener('input', function() {
 });
 
 // ────────────────────────────────────────────────
+// GALERÍA FOTOGRÁFICA
+// Clasificación curatorial desde Notas/Clasificación.
+// ────────────────────────────────────────────────
+let activeGalleryCategory = 'Todas';
+let activeGalleryTechnique = '';
+let activeGalleryState = '';
+let galleryFilteredItems = [];
+
+function gallerySafe(value, fallback = 'No registrado') {
+  const v = String(value || '').trim();
+  return v && v.toUpperCase() !== 'NA' ? v : fallback;
+}
+
+function galleryPlace(item) {
+  return [item.localidad, item.municipio, item.estado]
+    .map(v => String(v || '').trim())
+    .filter(v => v && v.toUpperCase() !== 'NA')
+    .join(' · ');
+}
+
+function populateGallerySelects() {
+  const all = GALLERY_ITEMS.filter(item => item && item.archivo);
+  const techniques = [...new Set(all.map(item => String(item.tecnica || '').trim()).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+  const states = [...new Set(all.map(item => String(item.estado || '').trim()).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+
+  const techniqueSelect = document.getElementById('gallery-technique-filter');
+  const stateSelect = document.getElementById('gallery-state-filter');
+  if (techniqueSelect) {
+    techniqueSelect.innerHTML = '<option value="">Todas las técnicas</option>' + techniques
+      .map(value => `<option value="${esc(value)}">${esc(value)}</option>`).join('');
+    techniqueSelect.value = activeGalleryTechnique;
+  }
+  if (stateSelect) {
+    stateSelect.innerHTML = '<option value="">Todos los estados</option>' + states
+      .map(value => `<option value="${esc(value)}">${esc(value)}</option>`).join('');
+    stateSelect.value = activeGalleryState;
+  }
+}
+
+function initGallery() {
+  populateGallerySelects();
+  document.querySelectorAll('.gallery-filter').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeGalleryCategory = btn.dataset.galleryCategory || 'Todas';
+      document.querySelectorAll('.gallery-filter').forEach(b => b.classList.toggle('active', b === btn));
+      renderGallery();
+    });
+  });
+  document.getElementById('gallery-technique-filter')?.addEventListener('change', e => {
+    activeGalleryTechnique = e.target.value || '';
+    renderGallery();
+  });
+  document.getElementById('gallery-state-filter')?.addEventListener('change', e => {
+    activeGalleryState = e.target.value || '';
+    renderGallery();
+  });
+  document.getElementById('gallery-reset-filters')?.addEventListener('click', () => {
+    activeGalleryCategory = 'Todas';
+    activeGalleryTechnique = '';
+    activeGalleryState = '';
+    document.querySelectorAll('.gallery-filter').forEach(btn => btn.classList.toggle('active', btn.dataset.galleryCategory === 'Todas'));
+    const techniqueSelect = document.getElementById('gallery-technique-filter');
+    const stateSelect = document.getElementById('gallery-state-filter');
+    if (techniqueSelect) techniqueSelect.value = '';
+    if (stateSelect) stateSelect.value = '';
+    renderGallery();
+  });
+  renderGallery();
+}
+
+function renderGallery() {
+  const grid = document.getElementById('gallery-grid');
+  const count = document.getElementById('gallery-count');
+  if (!grid) return;
+
+  const all = GALLERY_ITEMS.filter(item => item && item.archivo);
+  galleryFilteredItems = all.filter(item => {
+    if (activeGalleryCategory !== 'Todas' && item.categoria !== activeGalleryCategory) return false;
+    if (activeGalleryTechnique && String(item.tecnica || '').trim() !== activeGalleryTechnique) return false;
+    if (activeGalleryState && String(item.estado || '').trim() !== activeGalleryState) return false;
+    return true;
+  });
+
+  if (count) count.textContent = `${galleryFilteredItems.length.toLocaleString('es-MX')} fotografía${galleryFilteredItems.length === 1 ? '' : 's'}`;
+
+  if (!galleryFilteredItems.length) {
+    grid.innerHTML = '<div class="gallery-empty"><h3>Sin fotografías</h3><p>No hay imágenes que coincidan con los filtros seleccionados.</p></div>';
+    return;
+  }
+
+  grid.innerHTML = galleryFilteredItems.map((item, index) => {
+    const place = galleryPlace(item);
+    const artisan = gallerySafe(item.artesano, 'Nombre no registrado');
+    return `<button class="gallery-card" type="button" data-gallery-index="${index}" aria-label="Abrir fotografía de ${esc(item.tecnica || 'técnica textil')}">
+      <div class="gallery-card-image">
+        <img src="${esc(imgPath(item.archivo))}" alt="${esc(item.tecnica || 'Técnica textil')}" loading="lazy">
+        ${item.categoria ? `<span class="gallery-category-badge">${esc(item.categoria)}</span>` : ''}
+      </div>
+      <div class="gallery-card-copy">
+        <strong>${esc(item.tecnica || 'Técnica no registrada')}</strong>
+        <span>${esc(artisan)}</span>
+        ${place ? `<small>${esc(place)}</small>` : ''}
+      </div>
+    </button>`;
+  }).join('');
+
+  grid.querySelectorAll('.gallery-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const index = Number(card.dataset.galleryIndex) || 0;
+      const files = galleryFilteredItems.map(item => item.archivo);
+      openLightbox(imgPath(files[index]), files, index);
+    });
+  });
+}
+
+// ────────────────────────────────────────────────
 // FICHA MODAL
 // ────────────────────────────────────────────────
 function openFicha(tecnicaNombre) {
   const t = tecnicasMap[tecnicaNombre];
   if (!t) return;
 
+  CURRENT_FICHA_TECHNIQUE = tecnicaNombre;
+  CURRENT_FICHA_SOURCE = 'testimonio';
+
   // ── HERO — Carrusel ──
   const hero = document.getElementById('modal-hero');
   if (t.imagenes && t.imagenes.length > 0) {
     const slides = t.imagenes.map((fn, i) =>
       `<div class="carousel-slide" data-index="${i}">
-        <img class="carousel-img" src="${imgPath(esc(fn))}" alt="${esc(t.tecnica)} ${i+1}" loading="${i === 0 ? 'eager' : 'lazy'}">
+        <img class="carousel-img" src="${esc(imgPath(fn))}" alt="${esc(t.tecnica)} ${i+1}" loading="${i === 0 ? 'eager' : 'lazy'}">
       </div>`
     ).join('');
 
@@ -1260,15 +1548,12 @@ function openFicha(tecnicaNombre) {
       <div class="modal-badge">${t.n_fichas} registro${t.n_fichas !== 1 ? 's' : ''}</div>
       <div class="carousel-counter" id="carousel-counter">1 / ${t.imagenes.length}</div>`;
 
-    // Click on image → lightbox
     hero.querySelectorAll('.carousel-img').forEach((img, i) => {
       img.addEventListener('click', () => openLightbox(imgPath(t.imagenes[i]), t.imagenes, i));
     });
 
-    // Store images on hero for navigation functions
     hero._images = t.imagenes;
     hero._current = 0;
-
   } else {
     hero.innerHTML = `
       <div class="gallery-placeholder">
@@ -1279,19 +1564,104 @@ function openFicha(tecnicaNombre) {
       <div class="modal-badge">${t.n_fichas} registro${t.n_fichas !== 1 ? 's' : ''}</div>`;
   }
 
-  // ── BODY ──
-  let html = '';
+  renderFichaBody(t, 'testimonio');
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
 
-  html += `<div class="modal-titulo">${esc(t.tecnica)}</div>`;
-  // Clasificación experta
+function switchFichaSource(source) {
+  if (!CURRENT_FICHA_TECHNIQUE) return;
+  const t = tecnicasMap[CURRENT_FICHA_TECHNIQUE];
+  if (!t) return;
+  if (source === 'bibliografia' && !getTechniqueBibliographyCard(t.tecnica)) return;
+  CURRENT_FICHA_SOURCE = source === 'bibliografia' ? 'bibliografia' : 'testimonio';
+  renderFichaBody(t, CURRENT_FICHA_SOURCE);
+}
+
+function fichaHeaderHTML(t, source, hasBibliography) {
+  let html = `<div class="modal-titulo">${esc(t.tecnica)}</div>`;
+
   if (t.cat1) {
     const color1 = CAT1_COLOR[t.cat1] || COLORS.arena;
-    const color2 = CAT2_COLOR[t.cat2] || color1;
     let breadcrumb = esc(t.cat1);
     if (t.cat2) breadcrumb += ` <span style="opacity:.6">›</span> ${esc(t.cat2)}`;
     if (t.cat3) breadcrumb += ` <span style="opacity:.6">›</span> ${esc(t.cat3)}`;
     if (t.cat4) breadcrumb += ` <span style="opacity:.6">›</span> ${esc(t.cat4)}`;
     html += `<div class="modal-grupo" style="background:${color1}">${breadcrumb}</div>`;
+  }
+
+  html += `<div class="ficha-source-switch" role="group" aria-label="Fuente de la ficha">
+    <button type="button" class="ficha-source-btn${source === 'testimonio' ? ' active' : ''}" onclick="switchFichaSource('testimonio')" title="Ficha basada en testimonios" aria-label="Mostrar ficha basada en testimonios">
+      <img src="assets/testimonio.png" alt="" aria-hidden="true">
+      <span class="sr-only">Testimonios</span>
+    </button>
+    ${hasBibliography ? `<button type="button" class="ficha-source-btn${source === 'bibliografia' ? ' active' : ''}" onclick="switchFichaSource('bibliografia')" title="Ficha bibliográfica" aria-label="Mostrar ficha bibliográfica">
+      <img src="assets/bibliografia.png" alt="" aria-hidden="true">
+      <span class="sr-only">Bibliografía</span>
+    </button>` : ''}
+  </div>`;
+
+  if (source === 'bibliografia') {
+    html += `<div class="ficha-source-note biblio-note"><strong>Esta ficha está basada en la revisión documental y bibliográfica de diferentes fuentes. Las referencias utilizadas se presentan al final.</strong></div>`;
+  } else {
+    html += `<div class="ficha-source-note"><strong>Esta ficha está basada en testimonios e información proporcionada por artesanas y artesanos participantes en ORIGINAL, sistematizados para el Atlas.</strong></div>`;
+  }
+
+  return html;
+}
+
+function renderBibliographyContent(card, materialsLabel = 'Materiales y procesos') {
+  if (!card) return '';
+  let html = '';
+
+  if (card.descripcion) {
+    html += `<div class="section biblio-section">
+      <div class="section-head"><span class="section-title">Descripción</span></div>
+      <p class="ficha-parrafo">${esc(card.descripcion)}</p>
+    </div>`;
+  }
+
+  if (card.historia_antecedentes) {
+    html += `<div class="section biblio-section">
+      <div class="section-head"><span class="section-title">Historia y antecedentes</span></div>
+      <p class="ficha-parrafo">${esc(card.historia_antecedentes)}</p>
+    </div>`;
+  }
+
+  const materials = card.materiales_procesos || card.materiales || '';
+  if (materials) {
+    html += `<div class="section biblio-section">
+      <div class="section-head"><span class="section-title">${esc(materialsLabel)}</span></div>
+      <p class="ficha-parrafo">${esc(materials)}</p>
+    </div>`;
+  }
+
+  const refs = splitBibliography(card.bibliografia);
+  if (refs.length) {
+    html += `<div class="section biblio-section">
+      <div class="section-head"><span class="section-title">Bibliografía</span></div>
+      <ol class="biblio-reference-list">
+        ${refs.map(ref => `<li>${esc(ref)}</li>`).join('')}
+      </ol>
+    </div>`;
+  }
+
+  return html;
+}
+
+function renderFichaBody(t, source = 'testimonio') {
+  const biblioCard = getTechniqueBibliographyCard(t.tecnica);
+  let html = fichaHeaderHTML(t, source, Boolean(biblioCard));
+
+  if (source === 'bibliografia' && biblioCard) {
+    html += renderBibliographyContent(biblioCard, 'Materiales');
+    html += `<div class="ficha-return-row">
+      <button type="button" class="ficha-return-btn" onclick="switchFichaSource('testimonio')">
+        <img src="assets/testimonio.png" alt="" aria-hidden="true"> Regresar a la ficha basada en testimonios
+      </button>
+    </div>`;
+    document.getElementById('modal-body').innerHTML = html;
+    return;
   }
 
   // Temporalidad badge
@@ -1307,7 +1677,6 @@ function openFicha(tecnicaNombre) {
     </div>`;
   }
 
-  // Estadísticas — todos los .val toman color de CSS (.stat-box .val → --magenta)
   html += `<div class="stats-row">
     <div class="stat-box"><div class="val">${t.n_fichas}</div><div class="key">Registros</div></div>
     <div class="stat-box"><div class="val">${t.n_mujeres}</div><div class="key">Mujeres</div></div>
@@ -1322,7 +1691,6 @@ function openFicha(tecnicaNombre) {
     </div>`;
   }
 
-  // Historia — un solo párrafo (el fragmento más representativo)
   if (t.historia) {
     html += `<div class="section">
       <div class="section-head"><span class="section-title">Historia y Origen</span></div>
@@ -1330,11 +1698,6 @@ function openFicha(tecnicaNombre) {
     </div>`;
   }
 
-  // Significado y Simbolismo — se renderiza como párrafo único. La fuente
-  // es la columna `significados` del CSV, que contiene una redacción
-  // curada que sintetiza los fragmentos S1-S5 de los records en un texto
-  // coherente. Si en el futuro la columna trae múltiples párrafos
-  // separados por dos saltos de línea, cada uno se renderiza por separado.
   if (t.significados && t.significados.length > 0) {
     const parrafos = t.significados[0]
       .split(/\n\s*\n/)
@@ -1377,7 +1740,6 @@ function openFicha(tecnicaNombre) {
     </div>`;
   }
 
-  // Clasificación experta en ficha
   if (t.cat1) {
     const color1 = CAT1_COLOR[t.cat1] || COLORS.arena;
     const color2 = CAT2_COLOR[t.cat2] || color1;
@@ -1446,8 +1808,6 @@ function openFicha(tecnicaNombre) {
   </div>`;
 
   document.getElementById('modal-body').innerHTML = html;
-  document.getElementById('modal-overlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
 }
 
 function barRow(label, val, total, color) {
@@ -1579,10 +1939,43 @@ function openLightbox(src, images, index) {
 }
 
 function _renderLightbox() {
-  document.getElementById('lightbox-img').src = _lbImages[_lbCurrent]
-    ? `imagenes/${_lbImages[_lbCurrent]}` : _lbImages[_lbCurrent];
+  const filename = _lbImages[_lbCurrent] || '';
+  const image = document.getElementById('lightbox-img');
+  if (image) {
+    image.src = filename ? imgPath(filename) : '';
+    const meta = IMAGE_META_BY_FILE[filename] || {};
+    image.alt = meta.tecnica ? `Fotografía asociada a ${meta.tecnica}` : 'Fotografía del Atlas';
+  }
+
   const counter = document.getElementById('lightbox-counter');
   if (counter) counter.textContent = `${_lbCurrent + 1} / ${_lbImages.length}`;
+
+  const meta = IMAGE_META_BY_FILE[filename] || null;
+  const credit = document.getElementById('lightbox-credit');
+  if (credit) {
+    if (!meta) {
+      credit.innerHTML = '';
+      credit.style.display = 'none';
+    } else {
+      const artisan = gallerySafe(meta.artesano, 'Nombre no registrado');
+      const estado = gallerySafe(meta.estado);
+      const municipio = gallerySafe(meta.municipio);
+      const localidad = gallerySafe(meta.localidad);
+      const tecnica = gallerySafe(meta.tecnica, 'Técnica no registrada');
+      credit.style.display = '';
+      credit.innerHTML = `
+        ${meta.categoria ? `<div class="lightbox-credit-kicker">${esc(meta.categoria)}</div>` : '<div class="lightbox-credit-kicker">Registro fotográfico</div>'}
+        <h3>${esc(tecnica)}</h3>
+        <dl>
+          <div><dt>Artesana/o</dt><dd>${esc(artisan)}</dd></div>
+          <div><dt>Estado</dt><dd>${esc(estado)}</dd></div>
+          <div><dt>Municipio</dt><dd>${esc(municipio)}</dd></div>
+          <div><dt>Localidad</dt><dd>${esc(localidad)}</dd></div>
+        </dl>
+        <p>Crédito asociado al registro de la técnica en el Atlas.</p>`;
+    }
+  }
+
   // show/hide arrows
   const prev = document.getElementById('lightbox-prev');
   const next = document.getElementById('lightbox-next');
@@ -2369,6 +2762,90 @@ function bindNetworkEvents() {
     transform.k = newK; drawNetwork();
   }, { passive: false });
 
+  // ── Soporte táctil (móvil/tablet): un dedo = arrastrar nodo o desplazar
+  // el lienzo (equivalente a mousedown/mousemove/mouseup); dos dedos = pinch-zoom.
+  let touchMode = null;       // 'pan' | 'drag' | 'pinch'
+  let touchStart = null;      // {x,y} del primer toque, para distinguir tap de arrastre
+  let pinchStartDist = 0;
+  let pinchStartK = 1;
+  let pinchMidpoint = null;
+
+  function touchPoint(t) {
+    const rect = canvas.getBoundingClientRect();
+    return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+  }
+  function touchDist(t1, t2) {
+    return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+  }
+
+  canvas.addEventListener('touchstart', e => {
+    if (e.touches.length === 1) {
+      const p = touchPoint(e.touches[0]);
+      touchStart = p;
+      const node = getNodeAtPoint(p.x, p.y);
+      if (node) { dragNode = node; touchMode = 'drag'; }
+      else { isPanning = true; panStart = { x: p.x, y: p.y }; touchMode = 'pan'; }
+    } else if (e.touches.length === 2) {
+      dragNode = null; isPanning = false; touchMode = 'pinch';
+      pinchStartDist = touchDist(e.touches[0], e.touches[1]);
+      pinchStartK = transform.k;
+      const p1 = touchPoint(e.touches[0]), p2 = touchPoint(e.touches[1]);
+      pinchMidpoint = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+    }
+    e.preventDefault();
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', e => {
+    if (touchMode === 'pinch' && e.touches.length === 2) {
+      const dist = touchDist(e.touches[0], e.touches[1]);
+      const newK = Math.max(0.3, Math.min(3, pinchStartK * (dist / pinchStartDist)));
+      const mx = pinchMidpoint.x, my = pinchMidpoint.y;
+      transform.x = mx - (mx - transform.x) * (newK / transform.k);
+      transform.y = my - (my - transform.y) * (newK / transform.k);
+      transform.k = newK; drawNetwork();
+    } else if (e.touches.length === 1) {
+      const p = touchPoint(e.touches[0]);
+      if (touchMode === 'pan' && panStart) {
+        transform.x += p.x - panStart.x; transform.y += p.y - panStart.y;
+        panStart = { x: p.x, y: p.y }; drawNetwork();
+      } else if (touchMode === 'drag' && dragNode) {
+        dragNode.x = (p.x - transform.x) / transform.k;
+        dragNode.y = (p.y - transform.y) / transform.k;
+        dragNode.fx = dragNode.x; dragNode.fy = dragNode.y;
+        drawNetwork();
+      }
+    }
+    e.preventDefault();
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', e => {
+    if (dragNode) { dragNode.fx = null; dragNode.fy = null; }
+    // Tap (toque breve sin desplazamiento) = equivalente a click: abre ficha o resalta grupo
+    if (touchMode !== 'pinch' && touchStart) {
+      const p = touchStart;
+      const node = getNodeAtPoint(p.x, p.y);
+      const moved = touchMode === 'pan' && panStart
+        ? Math.abs(p.x - panStart.x) >= 5
+        : false;
+      if (node && !moved) {
+        if (node.type === 'tecnica') openFicha(node.id);
+        else if (node.type === 'grupo') {
+          highlightedNode = highlightedNode?.id === node.id ? null : node;
+          renderSublayerChips();
+          drawNetwork();
+        }
+      }
+    }
+    dragNode = null; isPanning = false; panStart = null;
+    touchMode = null; touchStart = null;
+    tooltip.classList.remove('visible');
+  }, { passive: true });
+
+  canvas.addEventListener('touchcancel', () => {
+    dragNode = null; isPanning = false; panStart = null;
+    touchMode = null; touchStart = null;
+  }, { passive: true });
+
   document.getElementById('net-zoom-in').addEventListener('click',  () => { transform.k = Math.min(3, transform.k * 1.25); drawNetwork(); });
   document.getElementById('net-zoom-out').addEventListener('click', () => { transform.k = Math.max(0.3, transform.k * 0.8); drawNetwork(); });
   document.getElementById('net-reset').addEventListener('click',    () => { transform = { x: 0, y: 0, k: 1 }; drawNetwork(); });
@@ -2532,146 +3009,499 @@ function initNetworkSearch() {
 
 
 // ────────────────────────────────────────────────
-// ÁRBOL DE CLASIFICACIÓN
+// ÁRBOL DE CLASIFICACIÓN — diagrama de llaves
 // ────────────────────────────────────────────────
 function initArbol() {
   if (!ATLAS) return;
-  const tecnicas = ATLAS.tecnicas;
+  const tecnicas = ATLAS.tecnicas || [];
+  const container = document.getElementById('arbol-container');
+  if (!container) return;
 
-  // Build tree from expert classification CAT-N-1 → N-2 → N-3 → N-4
-  const tree = {};
+  const root = { name: 'Técnicas del arte textil', count: tecnicas.length, categories: [] };
+  const byCategory = new Map();
+
   tecnicas.forEach(t => {
-    const c1 = t.cat1 || 'Sin clasificar';
-    const c2 = t.cat2 || null;
-    const c3 = t.cat3 || null;
-    const c4 = t.cat4 || null;
-    if (!tree[c1]) tree[c1] = { color: CAT1_COLOR[c1] || COLORS.arena, children: {} };
-    if (!c2) {
-      // leaf at level 1
-      if (!tree[c1].tecnicas) tree[c1].tecnicas = [];
-      tree[c1].tecnicas.push(t.tecnica);
-      return;
-    }
-    if (!tree[c1].children[c2]) tree[c1].children[c2] = { color: CAT2_COLOR[c2] || tree[c1].color, children: {} };
-    const node2 = tree[c1].children[c2];
-    if (!c3) {
-      if (!node2.tecnicas) node2.tecnicas = [];
-      node2.tecnicas.push(t.tecnica);
-      return;
-    }
-    if (!node2.children[c3]) node2.children[c3] = { color: node2.color, children: {} };
-    const node3 = node2.children[c3];
-    if (!c4) {
-      if (!node3.tecnicas) node3.tecnicas = [];
-      node3.tecnicas.push(t.tecnica);
-      return;
-    }
-    if (!node3.children[c4]) node3.children[c4] = { color: node3.color, tecnicas: [] };
-    node3.children[c4].tecnicas.push(t.tecnica);
-  });
+    const cat1 = (t.cat1 || 'Sin categoría').trim();
+    const cat2 = (t.cat2 || 'Sin subcategoría').trim();
+    const cat3 = (t.cat3 || '').trim();
+    const cat4 = (t.cat4 || '').trim();
 
-  let activeLeaf = null;
-
-  function renderTree() {
-    const container = document.getElementById('arbol-container');
-
-    function leafHTML(name, node, color) {
-      const isActive = activeLeaf === name;
-      const count = (node.tecnicas || []).length;
-      return `<div class="arbol-leaf ${isActive ? 'active' : ''}" data-leaf="${esc(name)}" style="--leaf-color:${color}">
-        <span class="arbol-leaf-name">${esc(name)}</span>
-        <span class="arbol-leaf-count">${count}</span>
-      </div>`;
-    }
-
-    function subgroupHTML(name, node, parentColor) {
-      const color = node.color || parentColor;
-      if (node.tecnicas) {
-        return leafHTML(name, node, color || parentColor);
-      }
-      // Has children
-      const childrenHTML = Object.entries(node.children || {}).map(([cName, cNode]) =>
-        subgroupHTML(cName, cNode, color)
-      ).join('');
-      return `<div class="arbol-subgroup">
-        <div class="arbol-subgroup-label" style="color:${color}">${esc(name)}</div>
-        <div class="arbol-subgroup-children">${childrenHTML}</div>
-      </div>`;
-    }
-
-    const mainBranches = Object.entries(tree).map(([branchName, branch]) => {
-      const childrenHTML = Object.entries(branch.children || {}).map(([cName, cNode]) =>
-        subgroupHTML(cName, cNode, branch.color)
-      ).join('');
-      // If branch itself has tecnicas (no sub-children)
-      const selfLeafs = (branch.tecnicas || []).length > 0 ? leafHTML(branchName, branch, branch.color) : '';
-      return `<div class="arbol-branch">
-        <div class="arbol-branch-label" style="background:${branch.color}">${esc(branchName)}</div>
-        <div class="arbol-branch-children">${selfLeafs}${childrenHTML}</div>
-      </div>`;
-    }).join('');
-
-    // Find active leaf node
-    let activeTecnicas = [];
-    let activeColor = COLORS.magenta;
-    if (activeLeaf) {
-      function findLeaf(name, node, color) {
-        if (node.tecnicas && name === activeLeaf) {
-          activeTecnicas = node.tecnicas;
-          activeColor = node.color || color;
-          return true;
-        }
-        for (const [cName, cNode] of Object.entries(node.children || {})) {
-          if (findLeaf(cName, cNode, node.color || color)) return true;
-        }
-        return false;
-      }
-      Object.entries(tree).forEach(([branchName, branch]) => {
-        findLeaf(branchName, branch, branch.color);
-        Object.entries(branch.children || {}).forEach(([cName, cNode]) => {
-          findLeaf(cName, cNode, branch.color);
-        });
+    if (!byCategory.has(cat1)) {
+      byCategory.set(cat1, {
+        name: cat1,
+        color: CAT1_COLOR[cat1] || COLORS.arena,
+        tecnicas: new Set(),
+        subcats: new Map(),
       });
     }
 
-    const panelHTML = activeLeaf ? `
-      <div class="arbol-panel">
-        <div class="arbol-panel-header" style="border-color:${activeColor}">
-          <span class="arbol-panel-title" style="color:${activeColor}">${esc(activeLeaf)}</span>
-          <span class="arbol-panel-count">${activeTecnicas.length} técnica${activeTecnicas.length !== 1 ? 's' : ''}</span>
-          <button class="arbol-panel-close" onclick="arbolClosePanel()">✕</button>
+    const catNode = byCategory.get(cat1);
+    catNode.tecnicas.add(t.tecnica);
+
+    if (!catNode.subcats.has(cat2)) {
+      catNode.subcats.set(cat2, {
+        name: cat2,
+        parent: cat1,
+        color: CAT2_COLOR[cat2] || catNode.color,
+        tecnicas: new Set(),
+        tipos: new Map(),
+      });
+    }
+
+    const subNode = catNode.subcats.get(cat2);
+    subNode.tecnicas.add(t.tecnica);
+
+    if (cat3) {
+      if (!subNode.tipos.has(cat3)) {
+        subNode.tipos.set(cat3, {
+          name: cat3,
+          parent: cat2,
+          category: cat1,
+          tecnicas: new Set(),
+          variantes: new Map(),
+        });
+      }
+      const typeNode = subNode.tipos.get(cat3);
+      typeNode.tecnicas.add(t.tecnica);
+
+      if (cat4) {
+        if (!typeNode.variantes.has(cat4)) {
+          typeNode.variantes.set(cat4, {
+            name: cat4,
+            parent: cat3,
+            subcategory: cat2,
+            category: cat1,
+            tecnicas: new Set(),
+          });
+        }
+        typeNode.variantes.get(cat4).tecnicas.add(t.tecnica);
+      }
+    }
+  });
+
+  root.categories = [...byCategory.values()].map(cat => ({
+    ...cat,
+    subcatsArr: [...cat.subcats.values()].map(sub => ({
+      ...sub,
+      tiposArr: [...sub.tipos.values()].map(type => ({
+        ...type,
+        variantesArr: [...type.variantes.values()].sort((a, b) => b.tecnicas.size - a.tecnicas.size || a.name.localeCompare(b.name, 'es')),
+      })).sort((a, b) => b.tecnicas.size - a.tecnicas.size || a.name.localeCompare(b.name, 'es')),
+    })).sort((a, b) => b.tecnicas.size - a.tecnicas.size || a.name.localeCompare(b.name, 'es')),
+  })).sort((a, b) => b.tecnicas.size - a.tecnicas.size || a.name.localeCompare(b.name, 'es'));
+
+  const categoryIndex = new Map(root.categories.map(cat => [cat.name, cat]));
+  const subcategoryIndex = new Map();
+  const typeIndex = new Map();
+  const variantIndex = new Map();
+
+  root.categories.forEach(cat => {
+    cat.subcatsArr.forEach(sub => {
+      const subKey = `${cat.name}|||${sub.name}`;
+      subcategoryIndex.set(subKey, sub);
+      sub.tiposArr.forEach(type => {
+        const typeKey = `${subKey}|||${type.name}`;
+        typeIndex.set(typeKey, type);
+        type.variantesArr.forEach(variant => {
+          const variantKey = `${typeKey}|||${variant.name}`;
+          variantIndex.set(variantKey, variant);
+        });
+      });
+    });
+  });
+
+  const expandedCategories = new Set(root.categories.map(cat => cat.name));
+  const expandedSubcategories = new Set();
+  const expandedTypes = new Set();
+
+  let activeCategory = root.categories[0]?.name || null;
+  let activeSubcategoryKey = null;
+  let activeTypeKey = null;
+  let activeVariantKey = null;
+
+  function escAttr(s) { return esc(String(s || '')); }
+
+  function getCategoryCounts(cat) {
+    const tipos = new Set();
+    const variantes = new Set();
+    cat.subcatsArr.forEach(sub => {
+      sub.tiposArr.forEach(type => {
+        tipos.add(type.name);
+        type.variantesArr.forEach(v => variantes.add(v.name));
+      });
+    });
+    return { tipos: tipos.size, variantes: variantes.size };
+  }
+
+  function activateCategory(catName) {
+    activeCategory = catName;
+    activeSubcategoryKey = null;
+    activeTypeKey = null;
+    activeVariantKey = null;
+  }
+
+  function activateSubcategory(subKey) {
+    activeSubcategoryKey = subKey;
+    activeTypeKey = null;
+    activeVariantKey = null;
+    activeCategory = subKey.split('|||')[0] || activeCategory;
+  }
+
+  function activateType(typeKey) {
+    activeTypeKey = typeKey;
+    activeVariantKey = null;
+    activeSubcategoryKey = typeKey.split('|||').slice(0,2).join('|||');
+    activeCategory = typeKey.split('|||')[0] || activeCategory;
+  }
+
+  function activateVariant(variantKey) {
+    activeVariantKey = variantKey;
+    activeTypeKey = variantKey.split('|||').slice(0,3).join('|||');
+    activeSubcategoryKey = variantKey.split('|||').slice(0,2).join('|||');
+    activeCategory = variantKey.split('|||')[0] || activeCategory;
+  }
+
+  function renderVariantRows(type, typeKey) {
+    if (!type.variantesArr.length) return '';
+    const open = expandedTypes.has(typeKey);
+    return `<div class="brace-variant-list${open ? ' open' : ''}">
+      ${type.variantesArr.map(v => {
+        const variantKey = `${typeKey}|||${v.name}`;
+        const isActive = activeVariantKey === variantKey;
+        return `<div class="brace-variant-row">
+          <span class="brace-variant-bullet" aria-hidden="true"></span>
+          <button type="button" class="brace-variant-card${isActive ? ' is-active' : ''}" data-variant-select="${escAttr(variantKey)}">
+            <span class="brace-level-copy">
+              <span class="brace-level-label">Variante</span>
+              <span class="brace-level-name">${esc(v.name)}</span>
+            </span>
+            <span class="brace-subcat-count">${v.tecnicas.size}</span>
+          </button>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  function renderTypeRows(sub, subKey) {
+    if (!sub.tiposArr.length) return '';
+    const open = expandedSubcategories.has(subKey);
+    return `<div class="brace-type-list${open ? ' open' : ''}">
+      ${sub.tiposArr.map(type => {
+        const typeKey = `${subKey}|||${type.name}`;
+        const typeOpen = expandedTypes.has(typeKey);
+        const isActive = activeTypeKey === typeKey;
+        return `<div class="brace-type-node">
+          <div class="brace-type-row">
+            <button type="button" class="brace-mini-toggle" data-type-toggle="${escAttr(typeKey)}" aria-expanded="${typeOpen}" title="${typeOpen ? 'Ocultar' : 'Mostrar'} variantes">
+              ${type.variantesArr.length ? (typeOpen ? '−' : '+') : '•'}
+            </button>
+            <button type="button" class="brace-type-card${isActive ? ' is-active' : ''}" data-type-select="${escAttr(typeKey)}">
+              <span class="brace-level-copy">
+                <span class="brace-level-label">Tipo</span>
+                <span class="brace-level-name">${esc(type.name)}</span>
+              </span>
+              <span class="brace-subcat-count">${type.tecnicas.size}</span>
+            </button>
+          </div>
+          ${renderVariantRows(type, typeKey)}
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  function categoryCardHTML(cat) {
+    const expanded = expandedCategories.has(cat.name);
+    const active = activeCategory === cat.name && !activeSubcategoryKey && !activeTypeKey && !activeVariantKey;
+    return `<section class="brace-group${active ? ' active' : ''}" style="--brace-color:${cat.color}">
+      <div class="brace-cat-col">
+        <div class="brace-cat-main">
+          <button type="button" class="brace-mini-toggle brace-cat-toggle" data-cat-toggle="${escAttr(cat.name)}" aria-expanded="${expanded}" title="${expanded ? 'Ocultar' : 'Mostrar'} subcategorías">${expanded ? '−' : '+'}</button>
+          <button type="button" class="brace-cat-card${active ? ' is-active' : ''}" data-cat-select="${escAttr(cat.name)}">
+            <span class="brace-cat-name">${esc(cat.name)}</span>
+            <span class="brace-cat-count">${cat.tecnicas.size}</span>
+          </button>
         </div>
-        <div class="arbol-panel-note">Una técnica puede clasificarse en más de una rama.</div>
-        <div class="arbol-panel-list">
-          ${activeTecnicas.map(tname => {
-            const td = tecnicasMap[tname];
-            const color = td ? getCatColor(td) : COLORS.arena;
-            return `<div class="arbol-tec-item" onclick="openFicha('${escJs(tname)}')">
-              <div class="arbol-tec-dot" style="background:${color}"></div>
-              <span>${esc(tname)}</span>
+      </div>
+      <div class="brace-link${expanded ? ' open' : ''}" aria-hidden="true"></div>
+      <div class="brace-subcats-wrap${expanded ? '' : ' collapsed'}"${expanded ? '' : ' hidden'}>
+        <div class="brace-subcats-list${expanded ? ' open' : ''}">
+          ${cat.subcatsArr.map(sub => {
+            const key = `${cat.name}|||${sub.name}`;
+            const activeSub = activeSubcategoryKey === key && !activeTypeKey && !activeVariantKey;
+            const subOpen = expandedSubcategories.has(key);
+            return `<div class="brace-subcat-node" style="--subcat-color:${sub.color}">
+              <div class="brace-subcat-row">
+                <button type="button" class="brace-mini-toggle" data-subcat-toggle="${escAttr(key)}" aria-expanded="${subOpen}" title="${subOpen ? 'Ocultar' : 'Mostrar'} tipos">${sub.tiposArr.length ? (subOpen ? '−' : '+') : '•'}</button>
+                <button type="button" class="brace-subcat-card${activeSub ? ' is-active' : ''}" data-subcat-select="${escAttr(key)}">
+                  <span class="brace-subcat-copy">
+                    <span class="brace-subcat-name">${esc(sub.name)}</span>
+                  </span>
+                  <span class="brace-subcat-count">${sub.tecnicas.size}</span>
+                </button>
+              </div>
+              ${renderTypeRows(sub, key)}
             </div>`;
           }).join('')}
         </div>
-      </div>` : `<div class="arbol-panel arbol-panel-empty">
-        <p>Selecciona una categoría para ver las técnicas clasificadas en ella.</p>
-      </div>`;
+      </div>
+    </section>`;
+  }
 
-    container.innerHTML = `
-      <div class="arbol-layout">
-        <div class="arbol-tree">${mainBranches}</div>
-        ${panelHTML}
-      </div>`;
+  function renderDefaultDetail() {
+    return `<aside class="class-detail-panel class-detail-empty">
+      <div class="class-detail-kicker">Cómo leer el diagrama</div>
+      <h3>Diagrama de llaves</h3>
+      <p>Cada llave muestra la relación entre <strong>categorías</strong>, <strong>subcategorías</strong>, <strong>tipos</strong> y <strong>variantes</strong>. Selecciona cualquier nivel para consultar las técnicas registradas dentro de ese grupo.</p>
+    </aside>`;
+  }
 
-    // Bind leaf clicks
-    container.querySelectorAll('.arbol-leaf').forEach(el => {
-      el.addEventListener('click', () => {
-        activeLeaf = el.dataset.leaf === activeLeaf ? null : el.dataset.leaf;
+  function renderTechList(names) {
+    return `<div class="class-detail-list">
+      ${names.map(name => `<button type="button" class="class-detail-tech" data-tech-name="${escAttr(name)}"><span>${esc(name)}</span><b>Ver ficha</b></button>`).join('')}
+    </div>`;
+  }
+
+  function taxonomyBibliographyButton(card, level, displayName) {
+    if (!card) return '';
+    return `<button type="button" class="taxonomy-biblio-btn" data-tax-biblio="1" data-tax-level="${escAttr(level)}" data-tax-name="${escAttr(displayName)}">
+      <img src="assets/bibliografia.png" alt="" aria-hidden="true">
+      <span><b>Bibliografía</b><small>Consultar información documental</small></span>
+    </button>`;
+  }
+
+  function openTaxonomyBibliographyModal(level, displayName, card) {
+    if (!card) return;
+    const overlay = document.getElementById('taxonomy-biblio-overlay');
+    const body = document.getElementById('taxonomy-biblio-modal-body');
+    if (!overlay || !body) return;
+
+    body.innerHTML = `
+      <div class="taxonomy-modal-kicker">${esc(level)} · información bibliográfica</div>
+      <h2 class="taxonomy-modal-title" id="taxonomy-biblio-modal-title">${esc(displayName)}</h2>
+      <div class="ficha-source-note biblio-note"><strong>Esta ficha está basada en la revisión documental y bibliográfica de diferentes fuentes. Las referencias utilizadas se presentan al final.</strong></div>
+      ${renderBibliographyContent(card)}
+    `;
+
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeTaxonomyBibliographyModal() {
+    const overlay = document.getElementById('taxonomy-biblio-overlay');
+    if (!overlay) return;
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  function detailPanelHTML() {
+    if (activeVariantKey && variantIndex.has(activeVariantKey)) {
+      const node = variantIndex.get(activeVariantKey);
+      const names = [...node.tecnicas].sort((a,b) => a.localeCompare(b, 'es'));
+      return `<aside class="class-detail-panel">
+        <div class="class-detail-kicker">Variante</div>
+        <h3>${esc(node.name)}</h3>
+        <div class="class-detail-path"><span>${esc(node.category)}</span><b>›</b><span>${esc(node.subcategory)}</span><b>›</b><span>${esc(node.parent)}</span><b>›</b><span>${esc(node.name)}</span></div>
+        <div class="class-detail-summary"><strong>${names.length}</strong><span>técnica${names.length !== 1 ? 's' : ''} registradas en esta variante</span></div>
+        <p class="class-detail-note">Selecciona una técnica para consultar su ficha.</p>
+        ${renderTechList(names)}
+      </aside>`;
+    }
+
+    if (activeTypeKey && typeIndex.has(activeTypeKey)) {
+      const node = typeIndex.get(activeTypeKey);
+      const names = [...node.tecnicas].sort((a,b) => a.localeCompare(b, 'es'));
+      return `<aside class="class-detail-panel">
+        <div class="class-detail-kicker">Tipo</div>
+        <h3>${esc(node.name)}</h3>
+        <div class="class-detail-path"><span>${esc(node.category)}</span><b>›</b><span>${esc(node.parent)}</span><b>›</b><span>${esc(node.name)}</span></div>
+        <div class="class-detail-summary"><strong>${names.length}</strong><span>técnica${names.length !== 1 ? 's' : ''} registradas en este tipo</span></div>
+        <div class="class-detail-mini-grid">
+          <div><b>${node.variantesArr.length}</b><span>Variante${node.variantesArr.length !== 1 ? 's' : ''}</span></div>
+        </div>
+        <p class="class-detail-note">Selecciona una técnica para consultar su ficha.</p>
+        ${renderTechList(names)}
+      </aside>`;
+    }
+
+    if (activeSubcategoryKey && subcategoryIndex.has(activeSubcategoryKey)) {
+      const node = subcategoryIndex.get(activeSubcategoryKey);
+      const biblioCard = getTaxonomyBibliographyCard('Subcategoría', node.name);
+      const names = [...node.tecnicas].sort((a,b) => a.localeCompare(b, 'es'));
+      const variantCount = node.tiposArr.reduce((sum, t) => sum + t.variantesArr.length, 0);
+      return `<aside class="class-detail-panel">
+        <div class="class-detail-kicker">Subcategoría</div>
+        <h3>${esc(node.name)}</h3>
+        <div class="class-detail-path"><span>${esc(node.parent)}</span><b>›</b><span>${esc(node.name)}</span></div>
+        ${taxonomyBibliographyButton(biblioCard, 'Subcategoría', node.name)}
+        <div class="class-detail-summary"><strong>${names.length}</strong><span>técnica${names.length !== 1 ? 's' : ''} registradas en esta subcategoría</span></div>
+        <div class="class-detail-mini-grid">
+          <div><b>${node.tiposArr.length}</b><span>Tipo${node.tiposArr.length !== 1 ? 's' : ''}</span></div>
+          <div><b>${variantCount}</b><span>Variante${variantCount !== 1 ? 's' : ''}</span></div>
+        </div>
+        <p class="class-detail-note">Selecciona una técnica para consultar su ficha.</p>
+        ${renderTechList(names)}
+      </aside>`;
+    }
+
+    if (activeCategory && categoryIndex.has(activeCategory)) {
+      const cat = categoryIndex.get(activeCategory);
+      const biblioCard = getTaxonomyBibliographyCard('Categoría', cat.name);
+      const counts = getCategoryCounts(cat);
+      return `<aside class="class-detail-panel">
+        <div class="class-detail-kicker">Categoría</div>
+        <h3>${esc(cat.name)}</h3>
+        ${taxonomyBibliographyButton(biblioCard, 'Categoría', cat.name)}
+        <div class="class-detail-summary"><strong>${cat.tecnicas.size}</strong><span>técnica${cat.tecnicas.size !== 1 ? 's' : ''} agrupadas en esta categoría</span></div>
+        <div class="class-detail-mini-grid">
+          <div><b>${cat.subcatsArr.length}</b><span>Subcategoría${cat.subcatsArr.length !== 1 ? 's' : ''}</span></div>
+          <div><b>${counts.tipos}</b><span>Tipos</span></div>
+          <div><b>${counts.variantes}</b><span>Variantes</span></div>
+          <div><b>${cat.tecnicas.size}</b><span>Técnicas</span></div>
+        </div>
+        <p class="class-detail-note">Selecciona una subcategoría del diagrama para consultar sus técnicas.</p>
+        <div class="class-detail-list compact">
+          ${cat.subcatsArr.map(sub => `<button type="button" class="class-detail-tech" data-subcat-detail="${escAttr(`${cat.name}|||${sub.name}`)}"><span>${esc(sub.name)}</span><b>${sub.tecnicas.size}</b></button>`).join('')}
+        </div>
+      </aside>`;
+    }
+
+    return renderDefaultDetail();
+  }
+
+  function renderTree() {
+    container.innerHTML = `<div class="class-schema-layout brace-layout">
+      <section class="class-schema brace-schema">
+        <div class="brace-toolbar">
+          <div class="brace-toolbar-copy">Selecciona cualquier grupo para consultar sus técnicas.</div>
+          <div class="brace-toolbar-actions">
+            <button type="button" class="brace-toolbar-btn" id="brace-expand-all">Expandir todas</button>
+            <button type="button" class="brace-toolbar-btn" id="brace-collapse-all">Contraer todas</button>
+          </div>
+        </div>
+        <div class="brace-groups">
+          ${root.categories.map(categoryCardHTML).join('')}
+        </div>
+      </section>
+      ${detailPanelHTML()}
+    </div>`;
+
+    container.querySelectorAll('[data-cat-toggle]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const name = btn.dataset.catToggle;
+        if (expandedCategories.has(name)) expandedCategories.delete(name);
+        else expandedCategories.add(name);
         renderTree();
       });
     });
+
+    container.querySelectorAll('[data-subcat-toggle]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const key = btn.dataset.subcatToggle;
+        if (expandedSubcategories.has(key)) expandedSubcategories.delete(key);
+        else expandedSubcategories.add(key);
+        renderTree();
+      });
+    });
+
+    container.querySelectorAll('[data-type-toggle]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const key = btn.dataset.typeToggle;
+        if (expandedTypes.has(key)) expandedTypes.delete(key);
+        else expandedTypes.add(key);
+        renderTree();
+      });
+    });
+
+    container.querySelectorAll('[data-cat-select]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activateCategory(btn.dataset.catSelect);
+        renderTree();
+      });
+    });
+
+    container.querySelectorAll('[data-subcat-select],[data-subcat-detail]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.subcatSelect || btn.dataset.subcatDetail;
+        if (!key) return;
+        activateSubcategory(key);
+        expandedCategories.add(activeCategory);
+        expandedSubcategories.add(key);
+        renderTree();
+      });
+    });
+
+    container.querySelectorAll('[data-type-select]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.typeSelect;
+        activateType(key);
+        expandedCategories.add(activeCategory);
+        expandedSubcategories.add(activeSubcategoryKey);
+        expandedTypes.add(key);
+        renderTree();
+      });
+    });
+
+    container.querySelectorAll('[data-variant-select]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.variantSelect;
+        activateVariant(key);
+        expandedCategories.add(activeCategory);
+        expandedSubcategories.add(activeSubcategoryKey);
+        expandedTypes.add(activeTypeKey);
+        renderTree();
+      });
+    });
+
+    container.querySelectorAll('[data-tech-name]').forEach(btn => {
+      btn.addEventListener('click', () => openFicha(btn.dataset.techName));
+    });
+
+    container.querySelectorAll('[data-tax-biblio]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const level = btn.dataset.taxLevel || '';
+        const name = btn.dataset.taxName || '';
+        const card = getTaxonomyBibliographyCard(level, name);
+        openTaxonomyBibliographyModal(level, name, card);
+      });
+    });
+
+    const taxOverlay = document.getElementById('taxonomy-biblio-overlay');
+    const taxClose = document.getElementById('taxonomy-biblio-modal-close');
+    if (taxClose && !taxClose.dataset.bound) {
+      taxClose.addEventListener('click', closeTaxonomyBibliographyModal);
+      taxClose.dataset.bound = '1';
+    }
+    if (taxOverlay && !taxOverlay.dataset.bound) {
+      taxOverlay.addEventListener('click', e => {
+        if (e.target === taxOverlay) closeTaxonomyBibliographyModal();
+      });
+      taxOverlay.dataset.bound = '1';
+    }
+
+    document.getElementById('brace-expand-all')?.addEventListener('click', () => {
+      root.categories.forEach(cat => {
+        cat.subcatsArr.forEach(sub => {
+          const subKey = `${cat.name}|||${sub.name}`;
+          if (sub.tiposArr.length) expandedSubcategories.add(subKey);
+          sub.tiposArr.forEach(type => { if (type.variantesArr.length) expandedTypes.add(`${subKey}|||${type.name}`); });
+        });
+      });
+      renderTree();
+    });
+
+    document.getElementById('brace-collapse-all')?.addEventListener('click', () => {
+      expandedSubcategories.clear();
+      expandedTypes.clear();
+      renderTree();
+    });
   }
 
-  window.arbolClosePanel = function() { activeLeaf = null; renderTree(); };
+  if (!activeCategory && root.categories.length) activeCategory = root.categories[0].name;
   renderTree();
 }
 
@@ -3226,7 +4056,7 @@ function construirPortada(titulo, autor, fecha, filtrosResumen, subset) {
   return `
     <section class="rep-cover">
       <div class="rep-cover-logos">
-        <img src="atlas_plataforma_logos.png" alt="Logos institucionales" />
+        <img src="assets/atlas_plataforma_logos_cropped.png" alt="Logos institucionales" />
       </div>
       <div class="rep-cover-eyebrow">Atlas Nacional de Técnicas del Arte Textil</div>
       <h1 class="rep-cover-title">${esc(titulo)}</h1>
@@ -4049,3 +4879,40 @@ function bindReportePaso3() {
 }
 
 loadCSVs();
+
+// ────────────────────────────────────────────────
+// ADAPTACIÓN MÓVIL — altura real del header + nav
+// ────────────────────────────────────────────────
+(function () {
+  function updateChromeHeight() {
+    const header = document.querySelector('.header');
+    const nav = document.querySelector('.nav-tabs');
+    const h = (header ? header.offsetHeight : 0) + (nav ? nav.offsetHeight : 0);
+    if (h > 0) document.documentElement.style.setProperty('--chrome-h', h + 'px');
+  }
+  updateChromeHeight();
+  window.addEventListener('resize', updateChromeHeight);
+  window.addEventListener('orientationchange', () => setTimeout(updateChromeHeight, 250));
+  window.addEventListener('load', updateChromeHeight);
+  if (window.ResizeObserver) {
+    const ro = new ResizeObserver(updateChromeHeight);
+    document.addEventListener('DOMContentLoaded', () => {
+      const header = document.querySelector('.header');
+      const nav = document.querySelector('.nav-tabs');
+      if (header) ro.observe(header);
+      if (nav) ro.observe(nav);
+    });
+  }
+})();
+
+// Cerrar modal bibliográfico de clasificación con Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const overlay = document.getElementById('taxonomy-biblio-overlay');
+    if (overlay?.classList.contains('open')) {
+      overlay.classList.remove('open');
+      overlay.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+  }
+});

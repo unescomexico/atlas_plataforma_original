@@ -1,0 +1,494 @@
+Sede,Genero,tecnica_grupo,Tecnica,Lengua,Estado,Municipio,Materiales,Temporalidad,Plantas,Minerales,Animales,Madre,Abuela,Tia,Hermana,Cunada,Instructora,Padre,Hijas,Hijos,Nietos,Sobrinos,Pareja,Estudiantes
+Mérida,mujer,Tejido a mano,Urdido,Maya Yucateco,Yucatán,Chapab,"Hilos, telas, aguja",es_una_t_cnica_antigua,0,1,0,1,1,0,1,0,0,0,1,0,0,0,1,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Tseltal,Chiapas,Comitán de Domínguez,,es_una_t_cnica_antigua,0,1,1,0,0,0,1,0,0,0,0,0,0,1,0,1
+Mérida,hombre,Bordado a mano,Bordado tenango,,Hidalgo,Tenango de Doria,"manta de algodón, hilos de algodón o poliéster de colores brillantes, agujas, lápiz o marcador para el dibujo previo, bastidor (opcional), tijeras, y en ocasiones tela de lino o mezclilla para piezas más elaboradas.",es_una_t_cnica_antigua,1,1,1,0,1,0,0,0,1,0,1,0,0,1,0,0
+Mérida,mujer,Bordado a mano,Bordado ch'ol tzeltal,,Chiapas,,"Hilo,ajuga telares de pintura urdidor etc.",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
+Mérida,mujer,Bordado a máquina,Macizo,Maya Yucateco,Yucatán,Oxkutzcab,"Máquina industrial para bordar, tela blanca o de color, hilos iris para bordar e hilera",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1
+Mérida,mujer,Bordado a máquina,Puntada de red,Maya Yucateco,Yucatán,Oxkutzcab,"Máquina industrial para bordar, tela blanca o de color, hilos iris para bordar e hilera",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1
+Mérida,mujer,Bordado a mano,Cadeneta o cadenilla,Tsotsil,Chiapas,San Cristóbal de las Casas,"Estambre, algodón, hilasa",es_una_t_cnica_antigua,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a máquina,Deslizado,Maya Yucateco,Yucatán,Oxkutzcab,"Máquina industrial para bordar, tela blanca o de color, hilos iris para bordar e hilera",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1
+Mérida,mujer,Bordado a máquina,Macizo,Maya Yucateco,Yucatán,Oxkutzcab,Tela hilos para bordar marca iris,es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Cadeneta o cadenilla,Maya Yucateco,Yucatán,Oxkutzcab,"Máquina de bordar, tela blanca o de color, hilo iris para bordar, aro e hilera. A mano tela, tela, aro, aguja, hilo lino o estambres",es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1
+Mérida,mujer,Bordado a mano,Punto de cruz,Tseltal,Chiapas,Yajalón,"Tela Cuadrille, Manta cruda, hilos de acrilan en tres hebras y aguja normal.",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Amuzgo,Guerrero,Xochistlahuaca,"Hojas,frutas y algodón natural en sus 3 variedades verde ,blanco y coyuchi",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Punto de cruz,Maya Yucateco,Yucatán,Hoctún,"Tela, hilos de estambre, aguja de mano, caneva maya, tijera",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
+Mérida,mujer,Bordado a mano,Pepenado,Otomí,Hidalgo,Cardonal,Tela para bordar manta lino cambray cuadrille,es_una_t_cnica_antigua,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Hilván,Otomí,Hidalgo,Cardonal,Tela para bordar manta lino cambray cuadrille,es_una_t_cnica_antigua,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0
+CDMX,mujer,,Punto de cruz,K'iche',Veracruz de Ignacio de la Llave,Benito Juárez,,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,hombre,Bordado a máquina,Cadeneta o cadenilla,Mixe,Oaxaca,San Juan Guichicovi,"Telas (de distintas texturas) , hilos (principalmente seda) (algodón en ocasiones)",es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Cadeneta o cadenilla,,Oaxaca,San Juan Guichicovi,"Una maquina de cadenilla de pedal,telas,hilos,y aguja capotera",es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0
+Mérida,hombre,Telar de cintura,Telar de cintura,Tsotsil,Chiapas,Larráinzar,Hilos de algodón,es_una_t_cnica_antigua,1,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,,Oaxaca,San Pedro Cajonos,Todo en hilo de seda Natural,es_una_t_cnica_antigua,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Tejido a mano,Trenzado,Tsotsil,Chiapas,Zinacantán,"Algodón, estambre, lana",es_una_t_cnica_nueva,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Luchbilltaaval,Tsotsil,Chiapas,,"Tela, aguja, hilo, buen conteo de hebra en hebra de la tela",es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,1,0,1,1,1,0
+Mérida,hombre,Telar de cintura,Tafetán,Náhuatl,Morelos,Hueyapan,"Tintes naturales, en lana de borrego.",es_una_t_cnica_antigua,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,1
+Mérida,mujer,Telar de cintura,Sarape fino de saltillo,,Coahuila de Zaragoza,Saltillo,"Hilo para urdimjre, hilo de lana, tintes ya sea naturales o minerales",es_una_t_cnica_antigua,1,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Macizo,,Oaxaca,San Francisco Ixhuatán,"Hilo de algodón, aguja, gancho bastidores de diferentes tamaños, tela diferente (terciopelo, piel de angel, lino etc)",es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,1,0,0,0,0,0
+Mérida,hombre,Bordado a máquina,Tääsuun ekëëp,Sayulteco,Oaxaca,Huautla de Jiménez,Maquina,es_una_t_cnica_antigua,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Amuzgo,Guerrero,Xochistlahuaca,Hilos de algodón,es_una_t_cnica_antigua,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Punto de cruz,Maya Yucateco,Yucatán,Muna,"Tela, canevá, hilos de algodón",es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1
+Mérida,mujer,Bordado a mano,Pepenado,,Tlaxcala,Ixtenco,"Anteriormente la manta cruda ahora podemos utilizar cualquier tipo de telas , hilos de algodón y las muestras de nuestras tatarabuelas.s",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,1,0,1
+Mérida,mujer,Bordado a mano,Hilván,,Tlaxcala,Ixtenco,"Anteriormente la manta cruda ahora podemos utilizar cualquier tipo de telas , hilos de algodón y las muestras de nuestras tatarabuelas.s",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,1,0,1
+CDMX,mujer,,Telar de cintura,Chinanteco,Oaxaca,San Lucas Ojitlán,HILO DE ALGODÓN,es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,1,1,0,0,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Purépecha,Michoacán de Ocampo,Paracho,"hilo de algodón, lana teñida",es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Punto de cruz,Maya Yucateco,Yucatán,Tekax,"Caneva, estambres de colores, tela y agujas",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
+Mérida,mujer,Bordado a mano,Punto de cruz,Maya Yucateco,Yucatán,Teabo,"Tela, canevá, hilos, aguja, Patrón de dibujos",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Mixe,Oaxaca,San Juan Cotzocón,"Hilo de algodón calibre 36/2, tinte natural, hilo para unir los lienzos, agujas, herramientas de madera para la construcción del telar, urdidora, mecapal, mecate para sostener el telar,",es_una_t_cnica_antigua,1,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Tafetán,Náhuatl,Morelos,Hueyapan,Hilo de Lana,es_una_t_cnica_antigua,1,1,1,1,1,0,0,0,0,0,1,0,0,1,0,0
+Mérida,mujer,Bordado a máquina,Tejido de fibra natural,Otomí,Hidalgo,San Salvador,"Fibra de maguey, telar de cintura, gancho y aguja.",es_una_t_cnica_antigua,1,1,1,0,1,0,0,0,0,0,1,0,0,0,0,1
+Mérida,mujer,Bordado a mano,Brocado,Tsotsil,Chiapas,Venustiano Carranza,"Hilo de algodón,seda, hilazas de algodón y estambre",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Tsotsil,Chiapas,Zinacantán,"Hilos,agujas, tijeras,urdidora,enrollador de hilos  e instrumentos k necesito para Aser el telar etc.",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
+Mérida,mujer,Bordado a mano,Punto de cruz,Mazateco,Oaxaca,Huautla de Jiménez,Ahora e hilo de algodón,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Punto confite,Totonaco,Puebla,Atlequizayan,"El telar, hilos de algodón, un hueso de guajolote espinas de naranjo o limón, hilo de algodón",es_una_t_cnica_antigua,1,0,0,1,1,0,0,0,1,0,0,0,0,0,0,1
+Mérida,hombre,Bordado a mano,Punto de cruz,Tseltal,Chiapas,Chilón,"Telas, etamina, hilos, agujas, aros,",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Náhuatl,Veracruz de Ignacio de la Llave,Soledad Atzompa,"Tejido con ajugas,  lana teñida con tintes naturales, y tejido de trenzado con las manos para los tlapiales, y el tejido de ojitos (eyi xiotl  en nahuatl ) es una técnica que se hace para los quexkemitl y jorongos tradicionales",es_una_t_cnica_antigua,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1
+Mérida,mujer,Telar de cintura,Telar de cintura,Triqui,Oaxaca,San Juan Bautista Tuxtepec,"Palito, estambre,hebra,cristal",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,1,0,0,0
+Mérida,mujer,Bordado a mano,Pata de gallo,Mixteco,Oaxaca,Santa María Huazolotitlán,Telar y manta.hilos de algodon,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a máquina,Macizo,Maya Yucateco,Yucatán,Acanceh,"Telas ,hilos ,hileras ,aro ,lápiz  máquina 20u, tijeras  reglas  cinta métrica  agujas ,encajes   Planchas ,",es_una_t_cnica_nueva,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
+Mérida,hombre,Bordado a mano,Punto de cruz,,Oaxaca,Villa Hidalgo Yalálag,Hilo bela y hilo articela,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,hombre,Telar de cintura,Telar de cintura,Tsotsil,Chiapas,Larráinzar,"Urdidor, carreta, machete = jalamteil, cuchillotsutsubil, yolinabil",es_una_t_cnica_antigua,1,0,0,1,1,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Purépecha,Michoacán de Ocampo,Nahuatzen,"Algodón, hilo de tu tubo (poliéster)",es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1
+Mérida,hombre,Bordado a mano,Punto de cruz,Mixteco,Guerrero,Cochoapa el Grande,#NAME?,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a máquina,Macizo,,Yucatán,Maní,"Tela,hilos,agujas,maquina eléctrica,aros",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Gasa fina y técnica de gasa,Náhuatl,Puebla,Cuetzalan del Progreso,El juego de telar y hilo de algodón,es_una_t_cnica_antigua,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a máquina,Cadeneta o cadenilla,Zapoteco,Oaxaca,Asunción Ixtaltepec,"Maquina de cadeneta, hilo delgado de cañuto, telas de seda o seda",es_una_t_cnica_nueva,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Punto de cruz,Otomí,Querétaro,Amealco de Bonfil,"Estambre,auja,cuadrller,manta,tela",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Punto de cruz,,Yucatán,Peto,"Tela lino, estambre",es_una_t_cnica_antigua,0,0,0,0,1,0,0,0,0,0,1,0,1,0,0,1
+Mérida,mujer,Bordado a máquina,Macizo,,Yucatán,Tekit,"Hilos,aros, telas tijeras  y agujas",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Tsotsil,Chiapas,Larráinzar,"hilos,agujas,palitos,lazo y un urdidor",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Tsotsil,Chiapas,Larráinzar,Hilo de algodón 100%,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,1
+Mérida,mujer,Bordado a mano,Punto de cruz,Tseltal,Chiapas,Yajalón,"Tela cuadrille, manta cruda, hilos de acrilan en 3 hebras y aguja normal",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,,Veracruz de Ignacio de la Llave,Soledad Atzompa,"Lana de borrego, palitos que se utilizan durante en telar de cintura y sí  queremos que sea de color, tenemos que conseguir los ingredientes  ya sea flores, cortezas  o plantas para  teñir  la lana.",es_una_t_cnica_antigua,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0
+CDMX,mujer,Bordado a mano,Hilván,Tarahumara,Chihuahua,Ojinaga,Hilazas,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,1,0,1,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Tsotsil,Chiapas,Zinacantán,Hilo de algodón,es_una_t_cnica_antigua,0,0,0,1,1,1,0,0,0,0,0,0,0,1,0,1
+Mérida,mujer,Telar de cintura,Sapo,Tsotsil,Chiapas,Aldama,"Hilos, komen (urdidor) herramientas del telar",es_una_t_cnica_antigua,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1
+Mérida,mujer,Bordado a mano,Punto de cruz,Maya Yucateco,Yucatán,Hoctún,"Aguja, malla, tela, caneva, estambre.",es_una_t_cnica_antigua,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Punto de cruz,Maya Yucateco,Yucatán,Kanasín,"Tela,caneva,hilos,caneva maya,aguja, tijeras,descosedor,almohada,",es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1,0
+Mérida,mujer,Telar de cintura,Telar de cintura,,Oaxaca,San Bartolo Yautepec,En primer lugar hilo de algodón un juego de palitos como tres palos de una misma medida un carrizo grande y uno chiquito dependiendo del ancho de la figura y dos clavitos una orquetita hilo para meter el blun  y para tejer ahujaa,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Hilván,,Oaxaca,San Antonino Castillo Velasco,"Tela de algodón, manta, lino o rayón. Se realiza con hilos de algodón, seda y crochet.",es_una_t_cnica_antigua,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0
+Mérida,mujer,Bordado a mano,Hilván,Totonaco,Puebla,Atlequizayan,"Tela de telar,cuadrille,manta,popelina, aguja, hilos de algodón",es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,0,0,0,1,0,0
+Mérida,mujer,Bordado a mano,Hilo contado,Maya Yucateco,Yucatán,Chacsinkín,"tela, hilo de algodón, caneva o malla, agujas",es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1
+Mérida,mujer,Telar de cintura,Telar de cintura,Tsotsil,Chiapas,Larráinzar,Hilos de algodon,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Tsotsil,Chiapas,Larráinzar,Algodón,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Pepenado,Mazahua,México,San Felipe y Santiago,"Tela de manta, hilo de algodón y aguja",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Bordado ch'ol tzeltal,Tseltal,Chiapas,Palenque,"Tela, agujas, tijeras,hilos ,aros para bordar",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Punto de cruz,Maya Yucateco,Yucatán,Tekax,"Caneva,Maya yucateco, cuadrille, aguja,hilaza,Acrilan de tres Ebras,hilo perle",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,1
+Mérida,mujer,Telar de cintura,Brocado,Tsotsil,Chiapas,Aldama,Hilos madera,es_una_t_cnica_antigua,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Punto de cruz,Maya Yucateco,Yucatán,Tahdziú,Caneva hilos telas agujas de mano ahora pues en la localidad donde vivo tenemos una técnica única y es de pintar el caneba con picelines al color de los hilos para que se le facilite a los varones y niños para ayudarnos a elaborar prendas,es_una_t_cnica_antigua,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Hilo contado,Maya Yucateco,Yucatán,Teabo,"Tela, hilo, canevá, aguja, patrón del dibujo",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,1,0,0
+Mérida,mujer,Bordado a máquina,Macizo,,Yucatán,Maní,"Tela, aro, lápiz e hilos",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
+Mérida,mujer,Bordado a máquina,Macizo,Maya Yucateco,Yucatán,Izamal,Algodón manta lino hilos de seda,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Tsotsil,Chiapas,Zinacantán,"Hilos, palos de madera, lazos para amarrar , cinturón para amarrar",es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Hilván,Tsotsil,Chiapas,Huixtán,Manta  prelavada o telar . Hilos ilaza y agujas,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,1
+Mérida,hombre,Telar de cintura,Telar de cintura,Purépecha,Michoacán de Ocampo,Paracho,Hilo de algodón,es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0
+Mérida,mujer,Bordado a mano,Macizo,Totonaco,Puebla,Atlequizayan,,es_una_t_cnica_nueva,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Hilván,Mazateco,Oaxaca,Huautla de Jiménez,"Tela de cuadriyel, agujas, hilos de algodón",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,1,1,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Tsotsil,Chiapas,Chenalhó,Para tejer utilizamos los palos y otros cosas  teñir los madejas de algodón y plantas para teñir los hilos de algodón,es_una_t_cnica_antigua,1,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Maya Yucateco,Sinaloa,El Fuerte,"Istle, la vaqueta o piel",es_una_t_cnica_antigua,1,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0
+Mérida,hombre,Telar de cintura,Telar de cintura,Tseltal,Chiapas,Aldama,Algodón y tintes naturales,es_una_t_cnica_antigua,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Punto de cruz,Maya Yucateco,Yucatán,Tekax,"Estambre, hilaza de nailon, dmc",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Deshilado,,Aguascalientes,Calvillo,"Aro, aguja, hilo,navaja, tijeras y telas de algodón",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Punto de cruz,Maya Yucateco,Yucatán,Tahdziú,"Hilo ,aguja ,tela y caneva",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,0
+Mérida,mujer,Bordado a mano,Gasa fina y técnica de gasa,Náhuatl,Puebla,Cuetzalan del Progreso,Manejo algodón marca omega,es_una_t_cnica_nueva,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a máquina,Macizo,Maya Yucateco,Yucatán,Izamal,"Máquina industrial 20u, hilos de seda iris, aro de madera.s, conos",es_una_t_cnica_antigua,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Tsotsil,Chiapas,Venustiano Carranza,Era comida delscomunidad,es_una_t_cnica_antigua,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Punto de cruz,Maya Yucateco,Yucatán,Tahdziú,"Hilo, tela aguja caneva",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Hilo contado,,Yucatán,Tekit,Caneva o canneva Maya hilos tela,es_una_t_cnica_antigua,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Punto de cruz,Maya Yucateco,Yucatán,Teabo,"Tela ,caneva hilos, agujas",es_una_t_cnica_antigua,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a máquina,Macizo,Maya Yucateco,Yucatán,Maní,"Tela ,hilos iris por tubo , aguja ,tijera hilera ,aros y maquina de pedal y motor",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,1,0,0,0
+Mérida,hombre,Bordado a mano,Pata de gallo,Mixteco,Oaxaca,Santa María Huazolotitlán,"Manta, hilo, aguja maquina de comer, tijera,",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Purépecha,Michoacán de Ocampo,Paracho,"Puro algodón, plumas y articela",es_una_t_cnica_antigua,1,0,1,1,0,0,0,0,0,0,1,0,1,1,0,0
+Mérida,hombre,Bordado a mano,Punto de cruz,Purépecha,Michoacán de Ocampo,Charapan,"Hilo, tela",es_una_t_cnica_antigua,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1
+Mérida,mujer,Bordado a mano,Macizo,Maya Yucateco,Yucatán,Izamal,"tela, hilo de seda, hileras,",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
+Mérida,mujer,Bordado a mano,Punto de cruz,Chinanteco,Oaxaca,San Juan Bautista Valle Nacional,"Hilos de algodón, aguja",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Cadeneta o cadenilla,Mixteco,Oaxaca,Santiago Pinotepa Nacional,"Hilo de algodón,aguja,listón  oh razo",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Deshilado,,Aguascalientes,Calvillo,"Tela , hilos ,aguja ,cinta ,tijeras, aro o bastidor, descosedor y tijeras",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Relleno,,Oaxaca,San Miguel Soyaltepec,"Manta blanca y de color, telas frescas como lino, popelina strech,rayón, hilo de algodón",es_una_t_cnica_antigua,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Tsotsil,Chiapas,Larráinzar,"Hilos, rodillos machete bastidor para  fijar el telar",es_una_t_cnica_antigua,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Tsotsil,Chiapas,Larráinzar,Hilos de algodón,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Punto de cruz,,Michoacán de Ocampo,Uruapan,Manta e hilos de algodón,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,1,0,1,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Brocado,Tsotsil,Chiapas,Pantelhó,"Se utilizan Hilos, la madera para el Hurdimbre, al momento de tejer se usa el machete de tejer y los palitos del armamento",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,,Puebla,Cuetzalan del Progreso,Algodón,es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Lomillo,Mazahua,México,San Felipe Santiago,"Manta ,tela de lana, estambre,hilos",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,,Veracruz de Ignacio de la Llave,Soledad Atzompa,"Lana de borreo, los palitos para hacer el telar de cintura y los materiales  para teñir  en caso de querer agregarle color.",es_una_t_cnica_antigua,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Punto de cruz,Totonaco,Puebla,Atlequizayan,,es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Punto de cruz,Maya Yucateco,Yucatán,Hoctún,"Hilo de colores de tres hebras, maya, caneva, tela, y sobre todo la aguja.",es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Tsotsil,Chiapas,Larráinzar,Algodón,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Punto de cruz,,,,,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Punto de cruz,Maya Yucateco,Yucatán,Teabo,"Tela de lino y algodón, caneva, agujas hilo de algodón, tijeras",es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,0,0,0,1,0,1
+Mérida,mujer,Bordado a mano,Punto de cruz,Maya Yucateco,Quintana Roo,Tulum,"Canepa, hilo algodón, tela, aguja",es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1
+Mérida,mujer,Telar de cintura,Brocado,Tsotsil,Chiapas,Pantelhó,"Se utiliza hilos, una madera para el hurdimbre, se utiliza palos de escoba para montado,",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Punto de cruz,Purépecha,Michoacán de Ocampo,Nahuatzen,"Cuadrille, etamina, hilos y aguja",es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,0
+Mérida,mujer,Telar de cintura,Brocado,Tsotsil,Chiapas,Zinacantán,"Algodón, lana y acrilana",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a máquina,Cadeneta o cadenilla,Mixe,Oaxaca,San Juan Guichicovi,"Utilizo  telar,tela industrial, hilo seda y una máquina de  pedal que se maneja con pies y mano.",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Amuzgo,Guerrero,Xochistlahuaca,"Hilo vela,  telar de cintura",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,1,0,1,1,0,0
+Mérida,mujer,Bordado a mano,Punto de cruz,Maya Yucateco,Yucatán,Maní,"Tela de algodón o de lino, caneva de algodón estambre de colores, agujas, tijeras descosedor, hileras, aro.",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
+Mérida,mujer,Bordado a máquina,Rayado,Maya Yucateco,Yucatán,Teabo,"Hilo de seda, hilo de algodón",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Brocado,Tsotsil,Chiapas,Larráinzar,"Algodón, lana, hilza",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Brocado,Tsotsil,Chiapas,Larráinzar,Hilos de algodón,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,1
+Mérida,mujer,Tejido a mano,Urdido,Maya Yucateco,Yucatán,Chumayel,Primero necesito un barcidor una aguja llamado kaiche. Y los tubos o los madeos de nuestros hijos para realizar nuestra hamaca que tiene por nombre urdido de agua,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,1,0,0,1,1,1
+Mérida,mujer,Telar de cintura,Brocado,Chinanteco,Oaxaca,San Juan Bautista Tlacoatzintepec,"Hilos, cinturon, machete, urdidor,",es_una_t_cnica_antigua,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,,Guerrero,Xochistlahuaca,Algodón natural,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Telar de cintura,Mixteco,Oaxaca,San Juan Colorado,"Materia prima (hilo de algodón mercerizado, tintes naturales, algodón hilado a malate 100% organico). Palos de madera se utiliza una aprieta grande para la trama y una chica para el brocado, el machete para entrelazar el urimbre y trama, machete delgado para el brocado, en los extremos sw sostiene con 2 palos y en la trama igual llevan 2 palos de herramienta",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Tejido a mano,Urdido,Maya Yucateco,Yucatán,Chumayel,El hilo de nailon y el algodón,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,1,0,0,1,1,1
+Mérida,mujer,Bordado a mano,Bordado de chaquira,Amuzgo,Guerrero,Ometepec,"Chaquira (en diferentes colores), hilos, agujas, cuadrillé (tela para bordar la chaquira), telas para confeccionar las prendas…",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Brocado,Mixe,Oaxaca,San Juan Cotzocón,"Hilo calibre 16-2, hilo vela, maderas (carrizo), mecapal (cintura) y cuerda, ahora se usa la aguja",es_una_t_cnica_antigua,1,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0
+Tijuana,hombre,Bordado a mano,Hilván,Mazateco,Oaxaca,Huautla de Jiménez,"Hilo, telas cuadriculadas, muestras, tijeras",es_una_t_cnica_nueva,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Hilván,Náhuatl,Puebla,Pahuatlán,"Manta, lino",es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,1,0,1,1,0,0
+Mérida,mujer,Telar de cintura,Brocado,Purépecha,Michoacán de Ocampo,Paracho,Hilo de algodón del calibre más delgado,es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Brocado,Tsotsil,Chiapas,Larráinzar,"Lana, telar, algodón",,1,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Mérida,mujer,Telar de cintura,Brocado,,Michoacán de Ocampo,Paracho,"Algodón, lana de borrego",es_una_t_cnica_antigua,0,0,1,1,0,0,0,0,0,0,1,0,0,1,0,0
+Mérida,hombre,Bordado a mano,Punto de cruz,Chinanteco,Oaxaca,San Felipe Usila,"Relación con la naturaleza  cosmovisión chinanteca, vida, muerte, el jaguar",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,1,0,0,0,0,1
+Mérida,mujer,Bordado a mano,Cadeneta o cadenilla,Seri,Sonora,Hermosillo,,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,1,0,0
+Mérida,mujer,Telar de cintura,Gasa fina y técnica de gasa,Náhuatl,Puebla,Cuetzalan del Progreso,Algodón,es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,1,0,0,0,0,0
+Mérida,hombre,Telar de pedal,Telar de pedal,Zapoteco,Oaxaca,San Dionisio Ocotepec,Algodón,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
+Mérida,mujer,Telar de cintura,Gasa fina y técnica de gasa,Amuzgo,Guerrero,Xochistlahuaca,"Gasa, hilo de algodón natural",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,0,0,1,0,1
+Mérida,mujer,Bordado a mano,Punto de cruz,Mazahua,México,Villa de Allende,Hilo aguja y lana,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Hilván,Mazahua,México,Villa de Allende,Hilo aguja y lana,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Pepenado,Mazahua,México,Villa de Allende,Hilo aguja y lana,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Tejido a mano,Trencilla,Mazahua,México,Villa de Allende,Hilo aguja y lana,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,mujer,Bordado a mano,Lomillo,Otomí,Hidalgo,Cardonal,"Hilos de madeja, de algodón o de seda",es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,1,0,1,0,0,1
+Mérida,mujer,Bordado a mano,Bordado de chaquira,Náhuatl,Guerrero,Ometepec,"Cuadrillé, hilo, chaquira, agujas, popelina, rayón.",es_una_t_cnica_nueva,0,0,0,1,0,0,0,0,0,0,1,0,1,1,0,0
+Mérida,mujer,Telar de cintura,Discontinuo,Huave,Oaxaca,San Mateo del Mar,"Pericon, palo de Campeche,",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1
+Tijuana,mujer,Bordado a mano,Punto de cruz,Tsotsil,Chihuahua,Chihuahua,,es_una_t_cnica_antigua,1,0,1,1,0,1,0,0,0,1,1,1,0,0,0,0
+Tijuana,mujer,Bordado a mano,Punto de cruz,Mazateco,Jalisco,Chiquilistlán,,es_una_t_cnica_antigua,0,1,0,1,0,0,0,0,0,1,1,1,0,0,0,0
+Tijuana,mujer,Bordado a mano,Punto de cruz,Chol,Guerrero,Ixcateopan de Cuauhtémoc,no sé nada,es_una_t_cnica_antigua,1,0,0,1,1,0,0,0,0,1,1,1,0,0,0,0
+Tijuana,hombre,Bordado a mano,Punto de cruz,Tseltal,Chiapas,Francisco León,,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,1,1,1,0,0,0,0
+Tijuana,hombre,Bordado a mano,Punto de cruz,Maya Yucateco,Yucatán,Abalá,,es_una_t_cnica_antigua,1,0,0,1,0,1,0,0,0,0,1,0,0,0,1,0
+Tijuana,mujer,Bordado a máquina,Nëxuy,Sayulteco,Oaxaca,Santa María Tlahuitoltepec,Manta de algodón Hilos de algodón Máquina de pedal,es_una_t_cnica_antigua,1,0,0,1,1,0,0,0,0,1,1,1,1,1,1,1
+Tijuana,mujer,Bordado a mano,Relleno,Náhuatl,Puebla,San Gabriel Chilac,"hilo, aguja, aros y tela",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,1,0,0,0,0
+Tijuana,mujer,Bordado a mano,Cadeneta o cadenilla,Mixteco,Oaxaca,San Pedro Jicayán,"Hilo de algodón natural , o de algodón",es_una_t_cnica_antigua,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,1
+Tijuana,mujer,Telar de cintura,Pepenado,Náhuatl,Puebla,Cuetzalan del Progreso,Algodón mercerizado,,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Tijuana,hombre,Telar de pedal,Telar de pedal,,Coahuila de Zaragoza,Saltillo,,es_una_t_cnica_antigua,1,1,1,0,0,0,0,0,1,0,0,0,0,0,0,1
+Tijuana,hombre,Bordado a mano,Lomillo,Mazateco,Oaxaca,Huautla de Jiménez,"Hilos, telas cuadriculadas, figurines, agujas, tijeras",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Tijuana,mujer,Bordado a mano,Punto de cruz,Maya Yucateco,Campeche,Palizada,"Caneva de algodón, hilos y aguja",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Tijuana,hombre,Telar de pedal,Telar de pedal,,Jalisco,Chapala,,es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+Tijuana,mujer,Bordado a mano,Hilván,Náhuatl,Puebla,Zacatlán,"Agua,plantas .",es_una_t_cnica_antigua,1,1,1,1,1,0,0,0,0,0,1,0,0,0,1,0
+Tijuana,mujer,Tejido a mano,Croché,Náhuatl,Puebla,Zacatlán,"Agua,plantas .",es_una_t_cnica_antigua,1,1,1,1,1,0,0,0,0,0,1,0,0,0,1,0
+Tijuana,mujer,Bordado a mano,Punto de cruz,Náhuatl,Puebla,Zacatlán,"Agua,plantas .",es_una_t_cnica_antigua,1,1,1,1,1,0,0,0,0,0,1,0,0,0,1,0
+Tijuana,mujer,Bordado a mano,Punto de cruz,Maya Yucateco,Campeche,Palizada,Caneva.hilo de bordar tela de lino hilo de coser,es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0
+Tijuana,mujer,Bordado a mano,Hilván,Otomí,Hidalgo,Chilcuautla,"Manta, hilo de algodón",es_una_t_cnica_antigua,0,0,0,1,1,1,0,0,0,0,1,0,0,0,0,0
+Tijuana,mujer,Telar de cintura,Telar de cintura,Tsotsil,Chiapas,Venustiano Carranza,"Hilos, palitos de madera y de Carrizo",es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0
+Tijuana,mujer,Telar de cintura,Labrado,,Oaxaca,San Pedro Jicayán,Telar de cintura,es_una_t_cnica_antigua,1,0,1,1,1,0,0,0,0,0,0,0,0,1,0,1
+Tijuana,mujer,Bordado a mano,Purépecha,Purépecha,Michoacán de Ocampo,Tzintzuntzan,"Manta,algodón, abujas, hilo,botones haros,",es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,1,0,1,0,0,0
+Tijuana,mujer,Bordado a mano,Punto de cruz,Maya Yucateco,Campeche,Calkiní,"Telas, hilo, maya plática, caneba",es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,1,0,0,0,0,0
+Tijuana,mujer,Tejido a mano,Labrado,Zapoteco,Oaxaca,Santo Tomás Jalieza,Algodón principalmente,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
+Tijuana,hombre,Bordado a mano,Pata de gallo,,Guerrero,Chilapa de Álvarez,"Algodón,  hilo de rayón y artisela.",es_una_t_cnica_antigua,0,1,0,1,0,0,0,0,0,0,0,0,0,0,1,0
+Tijuana,mujer,Bordado a mano,Punto de cruz,,Chiapas,,El hilo la tela,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Tijuana,mujer,Telar de pedal,Telar de pedal,,Jalisco,Chapala,,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,1,1,0,0,1,0,0
+Tijuana,mujer,Tejido a mano,Trencilla,Paipái,Baja California,Tijuana,"Lana, estambre y algodón",es_una_t_cnica_antigua,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+Tijuana,hombre,Bordado a mano,Puntada de satín,Mazateco,Oaxaca,Huautla de Jiménez,"Hilos, mantas, figurines de papel picado, carbón, lapicero o marcadores, hilo, aguja, tijeras",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Tijuana,mujer,Bordado a mano,Deshilado,,Chiapas,Amatenango del Valle,,es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,0,1,0,0,0,0
+Tijuana,mujer,Telar de cintura,Telar de cintura,Náhuatl,Hidalgo,Acaxochitlán,"Lana,añil",es_una_t_cnica_antigua,1,0,0,1,1,0,0,0,0,0,1,0,0,0,0,0
+Tijuana,hombre,Bordado a mano,Croché,Zapoteco,Oaxaca,Santa Ana Zegache,Hilo mercerizado,es_una_t_cnica_antigua,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0
+Tijuana,mujer,Bordado a mano,Bordado de chaquira,Amuzgo,Guerrero,Ometepec,"Cuadrille, chaquira,hilo,agujas",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Tijuana,mujer,Bordado a mano,Piteado,,Aguascalientes,Aguascalientes,"vaqueta, pita",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,1,1,0,0,0,0,1
+Tijuana,mujer,Telar de cintura,Telar de cintura,Purépecha,Michoacán de Ocampo,Paracho,Hilo mercerizado de algodón,es_una_t_cnica_antigua,1,0,0,1,1,0,0,0,0,0,1,1,0,1,0,0
+CDMX,mujer,,Punto de cruz,,Campeche,Hopelchén,,es_una_t_cnica_nueva,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0
+Tijuana,mujer,Telar de pedal,Telar de pedal,Mixteco,Oaxaca,Oaxaca de Juárez,"Algodón orgánico, y tintes naturales",es_una_t_cnica_antigua,1,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0
+Tijuana,mujer,Bordado a mano,Hilván,Náhuatl,Puebla,Yaonáhuac,,es_una_t_cnica_antigua,1,0,0,1,1,0,0,0,0,0,0,1,0,1,0,1
+Tijuana,mujer,Bordado a mano,Deshilado,Náhuatl,Puebla,Yaonáhuac,,es_una_t_cnica_antigua,1,0,0,1,1,0,0,0,0,0,0,1,0,1,0,1
+Tijuana,mujer,Bordado a mano,Hilván,Maya Yucateco,Campeche,Calkiní,Tela aguja tijera maya plástica y de algodon,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,1,0,1,0,0,0,0,0
+Tijuana,mujer,Telar de cintura,Telar de cintura,Otomí,México,Xonacatlán,"Telar de cintura. Ahuja para unir , malacate",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0
+Tijuana,mujer,Bordado a mano,Lomillo,Náhuatl,Puebla,Yaonáhuac,,es_una_t_cnica_antigua,1,0,0,1,1,0,0,0,0,0,0,1,0,1,0,1
+Tijuana,mujer,Bordado a mano,Punto de cruz,Náhuatl,Puebla,Yaonáhuac,,es_una_t_cnica_antigua,1,0,0,1,1,0,0,0,0,0,0,1,0,1,0,1
+Tijuana,hombre,Telar de pedal,Telar de pedal,Purépecha,Michoacán de Ocampo,Salvador Escalante,Lana,es_una_t_cnica_antigua,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0
+Tijuana,mujer,Bordado a mano,Bordado de chaquira,Amuzgo,Guerrero,Ometepec,Chaquira e hilo,es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0
+Tijuana,mujer,Telar de cintura,Telar de cintura,Tsotsil,Chiapas,Larráinzar,"Machete , técnica para el brocado , dos barrita donde pase el hilo y una barrilla para levantar y meter el machete y mecate",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
+Tijuana,hombre,Bordado a mano,Pepenado,,Oaxaca,San Pablo Tijaltepec,"Manta, hilo en algodón, hilo en estambre, aguja",es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0
+Tijuana,mujer,Bordado a mano,Purépecha,Purépecha,Michoacán de Ocampo,Tzintzuntzan,"manta,lápiz, hilo de algodón,abujas,haros, tijeras, dedal,",es_una_t_cnica_antigua,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0
+Tijuana,mujer,Telar de cintura,Telar de cintura,,Oaxaca,Santiago Ixtayutla,"Hilo de madeja de algodón, calibre 16 - 2 y calibre 36 - 2",es_una_t_cnica_antigua,1,0,1,1,0,0,0,0,0,0,0,0,0,1,0,0
+Tijuana,mujer,Telar de cintura,Telar de cintura,Zapoteco,Oaxaca,San Bartolo Yautepec,"Agujas, hilo, trama (blu), machete, lancera, palos, carrizo",es_una_t_cnica_antigua,1,0,1,1,0,0,0,0,0,0,0,1,0,0,0,0
+Tijuana,mujer,Bordado a mano,Bordado con dos agujas,,México,Villa de Allende,Ahuja lana hilos ect,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Tijuana,mujer,Bordado a mano,Deshilado,,Oaxaca,San Martín Tilcajete,,es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,0,0,0,1,0,0
+Tijuana,mujer,Bordado a mano,Deshilado,,Michoacán de Ocampo,Charapan,"Tela,aros,hilos,tijeras,cinta métrica,descosedor",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,1,1,0,0,0,0,0
+Tijuana,mujer,Telar de cintura,Telar de cintura,,Chiapas,Oxchuc,Hilo y mano,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Tijuana,mujer,Bordado a mano,Punto de cruz,Huichol,Jalisco,Mezquitic,Aguja,es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0
+Tijuana,hombre,Bordado a mano,Relleno,,Chiapas,Tumbalá,"Manta , lino , seda , rayón  y en telar de cintura … en el caso de bordado usamos estambre  acrilan 3 hebras , seda , hilo de algodón , rayón",es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1
+Tijuana,hombre,Bordado a mano,Culebrilla,,Chiapas,Tumbalá,"Manta , lino , seda , rayón  y en telar de cintura … en el caso de bordado usamos estambre  acrilan 3 hebras , seda , hilo de algodón , rayón",es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1
+Tijuana,hombre,Bordado a mano,Punto de cruz,,Chiapas,Tumbalá,"Manta , lino , seda , rayón  y en telar de cintura … en el caso de bordado usamos estambre  acrilan 3 hebras , seda , hilo de algodón , rayón",es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1
+Tijuana,hombre,Bordado a mano,Deshilado,,Chiapas,Tumbalá,"Manta , lino , seda , rayón  y en telar de cintura … en el caso de bordado usamos estambre  acrilan 3 hebras , seda , hilo de algodón , rayón",es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1
+Tijuana,mujer,Bordado a mano,Brocado,Tsotsil,Chiapas,El Bosque,Palos de madera qué en tsotzil llamamos tsutsubil y jalamte' (machete),es_una_t_cnica_antigua,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Tijuana,mujer,Telar de cintura,Telar de cintura,Náhuatl,Puebla,Cohetzala,Hilo algodón y mercerizado,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Tijuana,hombre,Telar de pedal,Telar de pedal,,Michoacán de Ocampo,Pátzcuaro,"Lana de borrego, el teñido se realiza por imersion al temperatura de 45-48°c",es_una_t_cnica_antigua,1,1,1,0,1,0,0,0,1,1,1,0,0,0,0,0
+Tijuana,mujer,Bordado a mano,Punto de cruz,Zapoteco,Oaxaca,San Vicente Coatlán,"Hilo de algodón , ajuga Y manta",es_una_t_cnica_antigua,0,0,0,1,1,1,0,0,0,1,0,1,0,0,0,0
+Tijuana,mujer,Bordado a máquina,Macizo,Náhuatl,Tlaxcala,San Pablo del Monte,"Telas de lino ,manta cruda y tratada ,hilos de ceda",es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0
+Tijuana,hombre,Telar de pedal,Telar de pedal,Zapoteco,Oaxaca,Teotitlán del Valle,Lana de borrego,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,0,0,0,1,1
+Tijuana,hombre,Bordado a mano,Puntada de satín,Zapoteco,Oaxaca,Santa Ana Zegache,Hilos de seda rayón y algodón,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1
+Tijuana,mujer,Bordado a mano,Brocado,Tsotsil,Chiapas,Zinacantán,HILOS Y HERRAMIENTAS DEL TELAR DE CINTURA HECHOS CON MADERA,es_una_t_cnica_antigua,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0
+Tijuana,mujer,Telar de cintura,Telar de cintura,Tsotsil,Chiapas,Larráinzar,"Hilos de primera calidad, shelas, palos,machetes de madera,pepenador de madera, lazos para sujetar el telar,etc.",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Tijuana,hombre,Telar de cintura,Telar de cintura,Amuzgo,Oaxaca,San Pedro Amuzgos,"Hilos de algodón natural, maderas(palos) para armar el telar, hueso que sirve como aguja para acomodar el hilo",es_una_t_cnica_antigua,1,1,0,1,1,1,0,0,0,1,0,0,0,1,1,0
+Tijuana,mujer,Bordado a mano,Croché,Náhuatl,Puebla,Zacatlán,Lana,es_una_t_cnica_nueva,1,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0
+Tijuana,mujer,Bordado a mano,Hilván,Náhuatl,Puebla,Hueyapan,lana,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Telar de cintura,,Chiapas,Aldama,,es_una_t_cnica_antigua,1,0,0,0,0,1,0,0,0,0,1,0,1,0,0,0
+Tijuana,mujer,Bordado a mano,Punto de cruz,Chinanteco,Oaxaca,,Telar de cintura y tela comercial etamina,es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1
+Tijuana,hombre,Telar de pedal,Telar de pedal,,Zacatecas,Villa García,Hilo de lana.,es_una_t_cnica_antigua,1,0,1,0,0,0,0,0,0,1,0,0,0,0,1,0
+Tijuana,hombre,Telar de pedal,Telar de pedal,Zapoteco,Oaxaca,Teotitlán del Valle,Lana teñida con tintes naturales tejido en telar de pedal,es_una_t_cnica_antigua,1,1,0,0,1,0,0,0,0,1,0,0,0,0,1,1
+Tijuana,hombre,Telar de pedal,Telar de pedal,,Michoacán de Ocampo,Pátzcuaro,"Agua ya sea en frio o caliente, anilinas, ácido muriatico, ácido cítrico, sal de grano",es_una_t_cnica_nueva,0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0
+Tijuana,hombre,Telar de pedal,Telar de pedal,Purépecha,Michoacán de Ocampo,Salvador Escalante,Lana,,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0
+Tijuana,mujer,Bordado a mano,Luchbilltaaval,Tsotsil,Chiapas,Chamula,,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,1,0,0,1,0,0
+Tijuana,mujer,Telar de cintura,Telar de cintura,,Chiapas,Chamula,Lana de borrego,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Tijuana,mujer,Bordado a mano,Cadeneta o cadenilla,Zapoteco,Oaxaca,Santa María Xadani,hilos mercerizado: hilos perle de algodón puro num 8 e hilos de seda,es_una_t_cnica_antigua,0,0,0,1,0,0,1,0,0,0,0,0,0,1,0,0
+Tijuana,mujer,Bordado a mano,Bordado con dos agujas,Mazahua,México,Villa de Allende,Como materia prima  tela de algodón y lana así como hilos de algodón y lana teñida,es_una_t_cnica_antigua,1,1,1,1,0,0,0,0,0,0,0,1,0,0,0,0
+Tijuana,mujer,Telar de cintura,Telar de cintura,Tsotsil,Chiapas,Venustiano Carranza,,es_una_t_cnica_antigua,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0
+Tijuana,hombre,Telar de cintura,Pepenado,Otomí,Hidalgo,Ixmiquilpan,Lana y algodon,es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0
+Tijuana,mujer,Telar de cintura,Telar de cintura,,Oaxaca,San Lucas Ojitlán,Hilos de algodón Y algunos agujas caputeras Hacer el urdimbre los hilos de colores para la trama varas que se ocupan como pasante en el urdimbre posteriormente se borda después de terminar el telar,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,1,1,0
+Tijuana,mujer,Bordado a mano,Hilván,,Oaxaca,San Lucas Ojitlán,Hilos de algodón Y algunos agujas caputeras Hacer el urdimbre los hilos de colores para la trama varas que se ocupan como pasante en el urdimbre posteriormente se borda después de terminar el telar,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,1,1,0
+Tijuana,mujer,Telar de cintura,Telar de cintura,,Morelos,Hueyapan,Cortesas flores hojas raíces,es_una_t_cnica_antigua,1,1,1,0,1,0,0,0,0,0,1,0,0,0,0,1
+Tijuana,mujer,Telar de cintura,Telar de cintura,,Morelos,Hueyapan,Juego de palos de madera y las manos,es_una_t_cnica_antigua,1,1,1,0,1,0,0,0,0,0,1,0,0,0,0,1
+Tijuana,mujer,Telar de cintura,Brocado,Tseltal,Chiapas,San Juan Cancuc,Hilos de algodon,es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,0
+Tijuana,mujer,Telar de cintura,Telar de cintura,Mixteco,Chiapas,Pantelhó,"Machete, palos de escoba, barritas del monte y milpas",es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Tijuana,mujer,Bordado a mano,Trencilla,Mazahua,México,San Felipe del Progreso,,es_una_t_cnica_antigua,1,0,0,1,1,0,0,0,0,0,0,1,0,0,1,0
+Tijuana,mujer,Telar de cintura,Telar de cintura,Purépecha,Michoacán de Ocampo,Paracho,,es_una_t_cnica_antigua,1,1,0,1,1,0,0,0,0,0,1,1,1,1,0,0
+Tijuana,mujer,Bordado a mano,Lomillo,Mazahua,México,Villa de Allende,"Aguja, hilo de algodón o lana tejida en tintes naturales. Manta de algodón o tela de lana.",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,1,1,1,1,1,0
+Tijuana,mujer,Bordado a mano,Hilván,,Oaxaca,San Martín Tilcajete,,es_una_t_cnica_antigua,1,0,0,1,1,0,0,0,0,0,0,0,0,1,0,0
+Tijuana,mujer,Telar de cintura,Telar de cintura,Náhuatl,Puebla,Zacatlán,Lana,es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0
+Tijuana,mujer,Bordado a mano,Cadeneta o cadenilla,Mixteco,Oaxaca,Santiago Pinotepa Nacional,"Hilos ,aguja,telar de cintura y listones",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0
+Tijuana,mujer,Bordado a mano,Punto de cruz,Tepehuano del Sur,Durango,Mezquital,"Cuadrille, estambres, agujas de coser",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Tijuana,mujer,Bordado a mano,Punto de cruz,Chinanteco,Oaxaca,San Felipe Usila,"Hilo de Algodón, industrial",es_una_t_cnica_antigua,0,0,0,1,1,0,0,0,0,0,1,0,0,1,0,0
+Tijuana,mujer,Bordado a mano,Cadeneta o cadenilla,Mixe,Oaxaca,San Juan Guichicovi,"Máquina de pedal, agujas, hilo mercerizado, telas comerciales, lienzos de telar de mitla.",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0
+Tijuana,mujer,Bordado a mano,Punto de cruz,Otomí,Querétaro,Amealco de Bonfil,"Hilos de algodón, mantan, linos, cuadrille, manta, etamina, linos de algodón.",es_una_t_cnica_antigua,0,0,0,1,1,1,0,0,0,0,0,0,0,1,0,1
+Tijuana,hombre,Telar de pedal,Telar de pedal,,Oaxaca,Oaxaca de Juárez,Hilos de algodón,es_una_t_cnica_nueva,1,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0
+Tijuana,mujer,Bordado a mano,Relleno,Mazateco,Oaxaca,San Bartolomé Ayautla,"Aguja, manta, lino, etamina",es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,0,1,0,1,0,0
+Tijuana,mujer,Bordado a mano,Hilván,Mazateco,Oaxaca,San Bartolomé Ayautla,"Aguja, manta, lino, etamina",es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,0,1,0,1,0,0
+Tijuana,mujer,Telar de pedal,Brocado,Mixteco,Oaxaca,San Juan Colorado,Baras del campo y ollas para los tintes con agua y leña,es_una_t_cnica_antigua,1,1,0,1,1,0,0,0,0,0,0,1,0,0,0,0
+Tijuana,mujer,Bordado a mano,Relleno,Tseltal,Chiapas,Venustiano Carranza,,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Tijuana,mujer,Telar de cintura,Telar de cintura,Tsotsil,Chiapas,Aldama,Hilo algodón lanas,es_una_t_cnica_antigua,0,0,1,1,0,0,0,0,0,0,1,0,0,0,0,0
+Tijuana,mujer,Bordado a mano,Hilván,Mazahua,México,Villa de Allende,Tela de algodón y lana,es_una_t_cnica_antigua,1,1,1,1,0,0,0,0,0,0,0,1,0,0,0,0
+Tijuana,mujer,Bordado a mano,Pepenado,Mazahua,México,Villa de Allende,Tela de algodón y lana,es_una_t_cnica_antigua,1,1,1,1,0,0,0,0,0,0,0,1,0,0,0,0
+Tijuana,mujer,Telar de cintura,Telar de cintura,Mixteco,Chiapas,Venustiano Carranza,"Mechete, Carrizo, madera",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+Tijuana,,Telar de pedal,Telar de pedal,Mixe,,,"Algodón  , lana",es_una_t_cnica_antigua,1,1,0,1,0,0,0,0,0,1,0,0,0,1,0,1
+Tijuana,mujer,Telar de cintura,Telar de cintura,Amuzgo,Oaxaca,San Pedro Amuzgos,Urdimbre trama hilo y los de algodón aguja capotera y los pasantes Ya está ya y los pasantes .,es_una_t_cnica_antigua,1,0,0,1,1,0,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Telar de cintura,,Guerrero,Tlacoachistlahuaca,"Hiervas, flores, cascara y agua",es_una_t_cnica_antigua,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+Tijuana,hombre,Bordado a mano,Relleno,Mazateco,Oaxaca,San Bartolomé Ayautla,"Manta, hilos, agujas.",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+CDMX,,,Punto de cruz,Maya Yucateco,Campeche,Hopelchén,,,0,0,0,1,0,0,0,0,0,0,0,0,1,0,1,0
+Tijuana,hombre,Bordado a mano,Hilván,Mazateco,Oaxaca,San Bartolomé Ayautla,"Manta, hilos, agujas.",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Tijuana,mujer,,Cadeneta o cadenilla,,Oaxaca,Santiago Pinotepa Nacional,"Agujas, hilos ,listones,y telar de cintura",es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0
+Tijuana,mujer,,Cadeneta o cadenilla,,Oaxaca,Santiago Pinotepa Nacional,"Hilo de algodón, aguja,tijeras , listo y el telar de cintura donde se bordara el cabello",es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0
+CDMX,mujer,,Punto de cruz,Maya Yucateco,Yucatán,Abalá,hilo,es_una_t_cnica_antigua,1,0,1,1,1,0,1,0,0,0,1,0,1,0,1,0
+CDMX,hombre,,Punto de cruz,Maya Yucateco,Tamaulipas,Bustamante,,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+CDMX,mujer,,Contabilidad y vuelta por hilo,Náhuatl,Puebla,Tlaola,Hilo de estambre y Cuadrille y aguja y aros y tela popelina,,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Costilla de ratón,Pima (Nevome),Sonora,Yécora,Hilo de algodón,es_una_t_cnica_antigua,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0
+CDMX,hombre,,Telar de cintura,Purépecha,Michoacán de Ocampo,Pátzcuaro,Algodón lana y estambres,es_una_t_cnica_antigua,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0
+CDMX,hombre,,Telar de cintura,Mixteco,Oaxaca,San Juan Colorado,"Tinas, leña, agua , plantas",es_una_t_cnica_antigua,1,0,0,1,0,1,0,0,0,0,0,1,0,0,0,0
+CDMX,mujer,,Brocado,Amuzgo,Guerrero,Xochistlahuaca,"Ollas, fierros oxidados",es_una_t_cnica_antigua,1,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0
+CDMX,mujer,,Telar de cintura,Purépecha,Michoacán de Ocampo,Pátzcuaro,Hilo de lana algodón estambres telar de cintura de madera,es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0
+CDMX,hombre,,Telar de pedal,,Zacatecas,Villa García,Lana de borrego algodón yute rallon,es_una_t_cnica_antigua,1,0,0,0,1,1,0,0,0,0,0,0,0,0,1,0
+CDMX,mujer,,Telar de cintura,,Michoacán de Ocampo,Paracho,Hilo de algodon,es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+CDMX,mujer,,Relleno,,Yucatán,Tekit,"Hilo, aguja de mano, Aro y tela",es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0
+CDMX,hombre,,Telar de cintura,Tsotsil,Chiapas,Larráinzar,Hilos de algodón y lana.,es_una_t_cnica_antigua,1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0
+CDMX,mujer,,Deshilado,,Oaxaca,San José del Progreso,"TELA DE MANTA, TELA LINO, HILO DE ALGODON, AGUJA, AROS",es_una_t_cnica_antigua,1,0,0,1,0,1,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Trencilla mazahua,,México,San Felipe del Progreso,"Aguja lanera , lana de diferentes colores , tela de lana , ganchos para empuntar",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,1,0,0,0,1,0
+CDMX,mujer,,Cadeneta o cadenilla,,Oaxaca,Santiago Pinotepa Nacional,"Se utiliza hilo seda.aguja.telar de cintura,liston para bordar los animalitos que es la flora y fauna de la region e",es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,1,1,0,0,0,0
+CDMX,mujer,,Telar de cintura,,Michoacán de Ocampo,Pátzcuaro,"Lana, algodón",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0
+CDMX,hombre,,Lomillo,Mazateco,Oaxaca,Huautla de Jiménez,Hilos de algodón y cuadrille,es_una_t_cnica_nueva,0,0,0,1,0,1,0,0,0,0,0,0,0,0,1,0
+CDMX,hombre,,Telar de cintura,Zapoteco,Oaxaca,San Pablo Villa de Mitla,"Hilos de lana, grana cochinilla, machetes, malcates, cardadores, enjulios uy agujas",es_una_t_cnica_antigua,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0
+CDMX,hombre,,Bordado libre en maquina de pedal,Maya Yucateco,Yucatán,Izamal,Maquina  de pedal,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+CDMX,mujer,,Telar de cintura,Amuzgo,Guerrero,Ometepec,Uso algodón hilado a mano para teñir con corteza,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0
+CDMX,mujer,,Telar de cintura,Purépecha,Michoacán de Ocampo,Uruapan,"Algodón, lana, acrilan, intes naturales",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0
+CDMX,hombre,,Punto de cruz,Amuzgo,Guerrero,Ometepec,Hilos de algodón natural,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0
+CDMX,mujer,,Punto de cruz,Purépecha,Michoacán de Ocampo,Coeneo,,es_una_t_cnica_antigua,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0
+CDMX,hombre,,Pepenado,Náhuatl,Puebla,Cuetzalan del Progreso,Hilo de algodón hilado o mercerizado,es_una_t_cnica_antigua,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+CDMX,hombre,Bordado a mano,Hilván,Náhuatl,Puebla,Cuetzalan del Progreso,Hilo de algodón hilado o mercerizado,es_una_t_cnica_antigua,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+CDMX,hombre,,Telar de cintura,Náhuatl,Puebla,Cuetzalan del Progreso,Hilo de algodón hilado o mercerizado,es_una_t_cnica_antigua,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+CDMX,hombre,,Telar de cintura,Mixteco,Oaxaca,San Juan Colorado,"Algodón de tintes naturales, artificiales, madera, hueso, hoja de palmera, cinta o lazo,",es_una_t_cnica_antigua,1,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0
+CDMX,hombre,,Tinte natural y tejido,Huasteco,Veracruz de Ignacio de la Llave,Tantoyuca,"Hilo, aguja, maquina de coser, chatal, tela.",es_una_t_cnica_antigua,1,0,0,1,1,1,0,0,0,0,0,1,0,0,0,0
+CDMX,hombre,,Telar de cintura,Zapoteco,Oaxaca,San Pedro Cajonos,Produzco la matéria prima que son los gusanos de seda criolla,es_una_t_cnica_antigua,1,1,1,0,0,1,0,0,0,0,1,1,1,0,0,0
+CDMX,mujer,,Telar de cintura,,Michoacán de Ocampo,Paracho,Algodón 100%,es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,1,0,1,0,0,0
+CDMX,mujer,,Telar de cintura,Tsotsil,Chiapas,Pantelhó,,,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0
+CDMX,mujer,,Telar de cintura,Amuzgo,Guerrero,Xochistlahuaca,"Hilos de algodón, o tintes naturales para que sea un prenda antigua y tradicional",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,1,0,0,1,0
+CDMX,mujer,,Punto de cruz,Náhuatl,Veracruz de Ignacio de la Llave,Benito Juárez,,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Telar de cintura,Tseltal,Chiapas,Tenejapa,"Hilo de algodón,palos ,aros ,aguja,tela",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0
+CDMX,mujer,,Telar de cintura,,Puebla,,Hilos de algodón,es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0
+CDMX,hombre,,Telar de cintura,,Oaxaca,Santa María Tlahuitoltepec,Lana de borrego,es_una_t_cnica_antigua,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0
+CDMX,hombre,,Brocado,,Veracruz de Ignacio de la Llave,Cosoleacaque,Hilos de algodón,es_una_t_cnica_antigua,1,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0
+CDMX,hombre,,Punto de cruz,Zapoteco,Oaxaca,,,,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0
+CDMX,hombre,,Gasa fina y técnica de gasa,Náhuatl,Jalisco,Tepatitlán de Morelos,"Hilo de algodón ,lana  y seda",es_una_t_cnica_antigua,1,0,1,0,0,1,0,0,0,1,0,0,0,0,0,0
+CDMX,mujer,,Telar de pedal,Zapoteco,Oaxaca,Teotitlán del Valle,Lana de borrego,es_una_t_cnica_antigua,1,1,1,1,1,0,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,Bordado a mano,Hilván,Otomí,Querétaro,Amealco de Bonfil,"Cuadrille, manta, lino,hilos de algodón o estambre,",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0
+CDMX,mujer,,Punto de cruz,Otomí,Querétaro,Amealco de Bonfil,"Cuadrille, manta, lino,hilos de algodón o estambre,",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0
+CDMX,mujer,,Telar de cintura,Tseltal,Chiapas,Oxchuc,Algodón,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0
+CDMX,mujer,,Gasa fina y técnica de gasa,Purépecha,Michoacán de Ocampo,Paracho,"El telar de madera ,3arumos,1rodador ,1 varita o tatsukua 1 tejamanil  2 clavos y la Patakua o machete",es_una_t_cnica_antigua,1,1,1,1,0,0,0,0,0,0,1,0,0,1,0,0
+CDMX,mujer,,Telar de cintura,Tsotsil,Chiapas,Aldama,"Maderas, hilos.",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+CDMX,mujer,,Punto de cruz,Huichol,Jalisco,Mezquitic,"Manta cruda, cuadrille, manta lino, estambre de algodón",es_una_t_cnica_antigua,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0
+CDMX,mujer,,Telar de cintura,Tsotsil,Chiapas,,,,0,0,0,1,0,0,0,0,0,0,1,1,0,0,0,0
+CDMX,hombre,,Telar de cintura,Mixe,Oaxaca,San Juan Cotzocón,"Hilo de undimbre, vara de paso,hilo de control,machete de madera chica y grande, vara para enrollar tejidos , Templeton,cinturón para telar,espinas y agujas de Templeto...",es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,1,0,1,0,0,0
+CDMX,mujer,,Punto de cruz,Tarahumara,Chihuahua,Batopilas de Manuel Gómez Morín,"Telas popelina, manta, hilos",es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,1,0,0,0,0,0
+CDMX,hombre,,Contado,Náhuatl,Veracruz de Ignacio de la Llave,Cosoleacaque,Pero con el tiempo se dieron cuenta que servía para teñir en verde o azul claro,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+CDMX,hombre,,Punto de cruz,Náhuatl,Puebla,Hueyapan,"Leña, tinas de lámina galvanizada, aguja",es_una_t_cnica_antigua,1,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0
+CDMX,hombre,,Contabilidad y vuelta por hilo,,Guanajuato,Jerécuaro,Lana de borrego,es_una_t_cnica_antigua,1,1,0,0,1,1,0,0,0,0,0,1,0,0,1,0
+CDMX,mujer,,Labrado,,Tlaxcala,Tlaxcala,"Lana, telar de 2 o 4 pedales, tintes naturales",es_una_t_cnica_antigua,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+CDMX,hombre,,Telar de pedal,,Tlaxcala,Tlaxcala,Telar de 4 Pedales,es_una_t_cnica_antigua,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+CDMX,mujer,,Telar de cintura,Náhuatl,Veracruz de Ignacio de la Llave,Cosoleacaque,hilos de algodon,es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,0,1,1,0,1,0
+CDMX,mujer,,Telar de cintura,Purépecha,Michoacán de Ocampo,Uruapan,Lana y algodón,es_una_t_cnica_nueva,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+CDMX,mujer,,Telar de cintura,Náhuatl,Morelos,Hueyapan,Telar de madera  lana tintes naturales,es_una_t_cnica_antigua,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0
+CDMX,mujer,,Telar de cintura,,Michoacán de Ocampo,Aquila,"Ollas de barro, leña, paraguas y tecatas o astillas de dónde se extraen los colores",es_una_t_cnica_antigua,1,1,0,1,1,0,0,0,0,0,0,1,0,0,0,0
+CDMX,hombre,,Telar de cintura,Huave,Oaxaca,San Mateo del Mar,,es_una_t_cnica_antigua,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0
+CDMX,mujer,,Trenzado,Náhuatl,Puebla,Hueyapan,"Para el bordado solamente el aguja, y material,en el teñido pues ollas,y leña",es_una_t_cnica_antigua,1,0,1,0,0,0,0,0,0,1,1,0,0,0,0,1
+CDMX,mujer,,Puntada frontal,Náhuatl,Puebla,Hueyapan,"Para el bordado solamente el aguja, y material,en el teñido pues ollas,y leña",es_una_t_cnica_antigua,1,0,1,0,0,0,0,0,0,1,1,0,0,0,0,1
+CDMX,mujer,,Pepenado,Náhuatl,Puebla,Hueyapan,"Para el bordado solamente el aguja, y material,en el teñido pues ollas,y leña",es_una_t_cnica_antigua,1,0,1,0,0,0,0,0,0,1,1,0,0,0,0,1
+CDMX,mujer,,Puntada antigua,Náhuatl,Puebla,Hueyapan,"Para el bordado solamente el aguja, y material,en el teñido pues ollas,y leña",es_una_t_cnica_antigua,1,0,1,0,0,0,0,0,0,1,1,0,0,0,0,1
+CDMX,mujer,,Punto de cruz,Náhuatl,Puebla,Hueyapan,"Para el bordado solamente el aguja, y material,en el teñido pues ollas,y leña",es_una_t_cnica_antigua,1,0,1,0,0,0,0,0,0,1,1,0,0,0,0,1
+CDMX,mujer,,Cadeneta o cadenilla,Tsotsil,Chiapas,Chamula,Fuego es cocido,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0
+CDMX,hombre,,Contabilidad y vuelta por hilo,,México,Tianguistenco,"Lana, alpaca, seda, algodon",es_una_t_cnica_antigua,1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0
+CDMX,mujer,,Telar de cintura,Náhuatl,Puebla,Pahuatlán,"Hilos de algodón, lana teñida. Hilos de algodón, telas de lino, y manta.",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0
+CDMX,mujer,,Lomillo,,Tabasco,Centro,"Tela caneva, aguja caneva e hileras.",es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,1,1,1,0,0,0
+CDMX,mujer,,Telar de cintura,Náhuatl,Morelos,Hueyapan,"Borregos para sacar el hilo,palos para hacer el telar de cintura, y plantas para hacer el teñido.",es_una_t_cnica_antigua,0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,0
+CDMX,mujer,,Pepenado en pliegue,Otomí,Tlaxcala,Ixtenco,Manta aguja e hilo,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+CDMX,hombre,Telar de cintura,Tafetán,,Guanajuato,Victoria,"Sal, agua, fuego, recipiente, palo de madera, tintes o plantas, ácido.",es_una_t_cnica_antigua,0,1,0,0,1,0,0,0,0,0,0,0,1,0,0,0
+CDMX,mujer,,Telar de cintura,,Guerrero,Tlacoachistlahuaca,Hilos de algodón natural hilos Omega mercializado palos,es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0
+CDMX,mujer,,Punto de cruz,Purépecha,,,"Marquice o cuadrillé hilos de algodón, estambre y manta",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0
+CDMX,hombre,,Deshilado,Purépecha,Michoacán de Ocampo,Charapan,"Hilos, bola de hilaza número 3 blanca, bramante blanca (30 metros)",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,1,0,1,0
+CDMX,mujer,,Telar de cintura,Otomí,Hidalgo,Chilcuautla,Hilo de algodon numero 30  20  10,es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0
+CDMX,mujer,,Deshilado,Otomí,Querétaro,Tolimán,Anteriormente la popelina o manta. Ahora se innova usando lino.,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Telar de cintura,Otomí,Querétaro,Tolimán,Anteriormente la popelina o manta. Ahora se innova usando lino.,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Bordado de dos agujas,,,,"Manta de algodón,hilo ,tela de lana , lana y aguja",es_una_t_cnica_antigua,1,1,0,1,0,0,0,0,0,0,0,1,0,0,1,0
+CDMX,mujer,,Pata de gallo,Otomí,Hidalgo,Tulancingo de Bravo,,,0,0,0,1,0,0,0,0,0,0,1,1,1,0,1,1
+CDMX,mujer,,Relleno,Mazateco,Oaxaca,San Bartolomé Ayautla,"Ahuja, Tela manta, lino, telar, etamina, plumin, Hilo, Maquina de Coser",es_una_t_cnica_antigua,1,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0
+CDMX,hombre,,Contabilidad y vuelta por hilo,,Guanajuato,Jerécuaro,En lana de borrego,es_una_t_cnica_antigua,1,1,0,0,1,0,0,0,0,0,0,1,0,0,1,0
+CDMX,mujer,,Telar de cintura,Cora,Nayarit,Del Nayar,"Algodón, lana de borrego",es_una_t_cnica_antigua,0,0,0,1,1,1,0,0,0,0,0,0,1,0,0,0
+CDMX,mujer,,Punto de cruz,Náhuatl,Veracruz de Ignacio de la Llave,Zontecomatlán de López y Fuentes,,es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Telar de cintura,Chontal de Tabasco,Oaxaca,Putla Villa de Guerrero,"Hilos,espinas de maguey ,maderas delgadas ,machete de madera,mecates ,carrizos .",es_una_t_cnica_antigua,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0
+CDMX,hombre,,Puntada de satín,,Oaxaca,Santiago Niltepec,"Hilos de algodón y seda, telas industriales y añil",es_una_t_cnica_antigua,1,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0
+CDMX,hombre,,Telar de pedal,Tseltal,Chiapas,San Cristóbal de las Casas,Algodón y lana,es_una_t_cnica_antigua,1,0,0,1,0,0,0,1,0,0,0,1,1,0,1,0
+CDMX,mujer,,Deshilado,,Aguascalientes,Calvillo,Aro hilo aguja tijera descosedor,es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,0,1,0,0,0,0
+CDMX,mujer,,Deshilado,,Aguascalientes,Calvillo,Tela aro hilo agujas tijeras cintaDescosedor,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Telar de cintura,Náhuatl,Morelos,Hueyapan,Telar de madera lana los tintes naturales,es_una_t_cnica_antigua,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0
+CDMX,hombre,,Telar de pedal,,Tlaxcala,Chiautempan,"Lanas, algodón, vegetación para teñir",es_una_t_cnica_antigua,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+CDMX,mujer,,Punto de cruz,Maya Yucateco,Campeche,Hopelchén,,,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Punto de cruz,,Colima,Comala,Ninguna .,,0,0,0,1,0,0,0,0,0,0,1,0,0,1,0,0
+CDMX,mujer,,Telar de cintura,Purépecha,Michoacán de Ocampo,Pátzcuaro,"Hilo de lana negro y blanco, algodón, tela de marticé",es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0
+CDMX,mujer,,Contabilidad y vuelta por hilo,,Oaxaca,Santa María Zacatepec,"Tela industrial,  tejida de manera artesanal en telar de cintura y telar de pedal. Hilo, aro, aguja, tijera.",es_una_t_cnica_antigua,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0
+CDMX,mujer,,Punto de cruz,Tseltal,Chiapas,Oxchuc,"Hilo de algodón, estambre, hilaza",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,1,0,0,1,0,0
+CDMX,mujer,,Punto de cruz,Maya Yucateco,Quintana Roo,José María Morelos,"Tela de lino, hilo algodón y caneba",es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Brocado,Tseltal,Chiapas,Oxchuc,"Hilo de algodón, estambre, hilaza",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,1,0,0,1,0,0
+CDMX,mujer,,Telar de cintura,Tseltal,Chiapas,Oxchuc,"Hilo de algodón, estambre, hilaza",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,1,0,0,1,0,0
+CDMX,mujer,,Telar de cintura,Tsotsil,Chiapas,Larráinzar,Herramientas de madera tallado o pulido,es_una_t_cnica_antigua,1,1,1,1,0,1,0,0,0,0,0,0,0,0,1,0
+CDMX,hombre,,Cadeneta o cadenilla,Mixe,Oaxaca,San Juan Guichicovi,Hilos encajes telas de seda terciopelo etc,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0
+CDMX,mujer,,Prendas tradicional,Tarahumara,Chihuahua,Urique,"Tela ,manta, hielo, tijera,botones,plancha de carbón, aguja leña",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0
+CDMX,mujer,,Punto de cruz,,,,,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+CDMX,mujer,,Lomillo,,Tabasco,Centro,"Malla caneva, hilos de algodón industrializado o tenido y agujas caneva sin punta.",es_una_t_cnica_nueva,0,0,0,0,0,1,0,0,0,0,1,1,0,0,0,0
+CDMX,mujer,,Bordado libre en maquina de pedal,Mixe,Oaxaca,Santa María Tlahuitoltepec,"Manta , hilos,agujas, una maquina de coser",,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Cadeneta o cadenilla,Zapoteco,Oaxaca,Heroica Ciudad de Juchitán de Zaragoza,Tela e hilo seda rayón mercerizado,es_una_t_cnica_antigua,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0
+CDMX,mujer,,Cola de ratón,Otomí,Hidalgo,Tenango de Doria,"Manta, hilo vela, aro y aguja",es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0
+CDMX,mujer,,Telar de cintura,,Morelos,Hueyapan,"lana de borrego,tintes naturales",es_una_t_cnica_antigua,1,1,1,1,0,0,0,0,0,0,0,1,0,0,0,0
+CDMX,mujer,,Pata de gallo,Otomí,Hidalgo,Tenango de Doria,"Manta, hilo vela, aro y aguja",es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0
+CDMX,mujer,,Telar de cintura,,Oaxaca,San Pedro Amuzgos,"Hilo 162, hilo vela y algodón Coyuche y verde y blanco",es_una_t_cnica_nueva,1,0,0,1,0,1,0,0,0,0,1,0,1,1,0,0
+CDMX,mujer,,Telar de cintura,Totonaco,Veracruz de Ignacio de la Llave,Papantla,"Hilo de algodón,  algodón hilado a mano y comercial, agujas,tijeras,aros y ganchos.",es_una_t_cnica_antigua,1,1,1,0,0,0,1,0,0,1,0,1,1,0,0,0
+CDMX,mujer,,Punto de cruz,Náhuatl,Morelos,Hueyapan,Aguja hilos de lana teñidas,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Punto de cruz,,Durango,Mezquital,"Manta de algodón,estambre de acrilan",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Bordado de dos agujas,,,,Lana ilada hilo de algodón y tela en lienzo de lana y manta,es_una_t_cnica_antigua,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0
+CDMX,hombre,,Telar de cintura,,Puebla,Pantepec,Hilos de algodón o lana,es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0
+CDMX,mujer,,Punto de cruz,Náhuatl,Veracruz de Ignacio de la Llave,Chicontepec,manta y hilo,es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,1,0,1,0,0,0
+CDMX,mujer,,Telar de cintura,Amuzgo,Guerrero,,"Hilo Omega, algodón, hilo grueso.",es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0
+CDMX,mujer,,Telar de cintura,,Veracruz de Ignacio de la Llave,Cosoleacaque,"Hilos, maderas e instrumentos hechos por el artesano",es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0
+CDMX,hombre,,Talakaxtokgo da makan,Totonaco,Veracruz de Ignacio de la Llave,Papantla,"Hilo de algodón, manta cruda, manta blanca, rayón, lino",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,1,0,0,1,0
+CDMX,mujer,,Deshilado,Purépecha,Michoacán de Ocampo,Charapan,"Hilaza, hilo de algodón, tela de bramante",es_una_t_cnica_antigua,0,0,0,1,0,0,1,0,0,0,1,1,1,1,1,0
+CDMX,mujer,,Tejido de semilla,,Oaxaca,San Antonino Castillo Velasco,"Hilo, aguja,tela, aro",es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Bordado primavera,,Oaxaca,San Antonino Castillo Velasco,"Hilo, aguja,tela, aro",es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Bordado de dos agujas,Náhuatl,México,Villa de Allende,Manta aguja tela y lanas,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0
+CDMX,mujer,,Pepenado en pliegue,Otomí,Tlaxcala,Ixtenco,"Tela, hilo de algodón y chaquira calibrada.",es_una_t_cnica_antigua,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0
+CDMX,mujer,,Pepenado,Náhuatl,Puebla,San José Miahuatlán,"Cabeza de indio,aguja del número 6,hilo de algodón ,manta ,lino, rayon",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
+CDMX,mujer,,Bordado ch'ol tzeltal,Tseltal,Chiapas,Palenque,Telas hilos de tres hebras ajugas  aro,es_una_t_cnica_antigua,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0
+CDMX,hombre,,Tejido de fibra natural,Purépecha,Michoacán de Ocampo,Erongarícuaro,Palma,es_una_t_cnica_antigua,0,1,0,1,1,1,0,1,0,0,0,1,1,0,1,0
+CDMX,hombre,,Labrado,Náhuatl,Jalisco,Tuxpan,Lana y algodón,es_una_t_cnica_antigua,1,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0
+CDMX,mujer,,Relleno,Mazateco,Oaxaca,San Bartolomé Ayautla,"Tela : manta , lino , etamina, telar de pedal y de cintura. Hilo vela , hilos teñidos naturalmente,  hilos mercerizados, aguja capotera, carbon ,plumin, maquina de coser..",es_una_t_cnica_antigua,1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0
+CDMX,mujer,,Telar de cintura,,Oaxaca,San Pedro Cajonos,Seda del gusanito,es_una_t_cnica_antigua,1,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0
+CDMX,mujer,,Telar de cintura,Amuzgo,Guerrero,Xochistlahuaca,Hilos,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Otomí,Otomí,Hidalgo,Tenango de Doria,"Manta,hilo vela( algodón), aguja, bastidor; actualmente se ulizan diferentes tipos de tela",,0,0,0,1,0,1,0,0,0,0,1,0,1,0,0,0
+CDMX,mujer,,Telar de cintura,Tseltal,Chiapas,Oxchuc,Algodón,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0
+CDMX,mujer,,Bordados de chamula y larrainzar,Tsotsil,Chiapas,Villaflores,Hilo mish de algodón de colores,,0,0,0,1,1,1,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,Bordado a mano,Hilván,,Oaxaca,San Pedro Ixcatlán,Se usa manta dibujar el diceño ahuja hilos de algodón  aro.,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,1,0,1,1,0
+CDMX,mujer,,Punto de cruz,,Jalisco,Mezquitic,"AGUJA, HILO AGRILANA, MADEJA, HILO TEÑIDO, MATERIAL DE PALOS, MANTA DE MAGUEY",,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Punto de cruz,,Michoacán de Ocampo,Erongarícuaro,"Manta , hilos, aguja, aros y tijeras",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0
+CDMX,mujer,,Pima (nevome),Pima (Nevome),Chihuahua,Madera,"Manta, popelina, hilo cristal",es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Telar de cintura,Triqui,Oaxaca,Putla Villa de Guerrero,Algodón y lana,es_una_t_cnica_antigua,1,1,1,1,0,1,0,0,0,0,0,0,0,0,1,0
+CDMX,mujer,,Punto de cruz,Tepehuano del Sur,Durango,Mezquital,"Ixtle de maguey para hacer bolsa estambre, cuadrille, hilazaa",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Telar de cintura,Amuzgo,Oaxaca,San Pedro Amuzgos,Hilo tela de manta u otras tela más,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0
+CDMX,mujer,,Punto de cruz,Maya Yucateco,Campeche,Hopelchén,,,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,1
+CDMX,mujer,,Telar de cintura,,Veracruz de Ignacio de la Llave,Cosoleacaque,,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+CDMX,hombre,,Telar de cintura,Náhuatl,Veracruz de Ignacio de la Llave,Soledad Atzompa,Lana de burrego,es_una_t_cnica_antigua,1,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0
+CDMX,mujer,,Telar de cintura,,Oaxaca,San Juan Bautista Tuxtepec,Diferentes colores de hilos de algodón,es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,1,1,0,0,1,0
+CDMX,mujer,,Punto de cruz,Náhuatl,Puebla,Xochitlán de Vicente Suárez,Holi iris aguja y cuadrille,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,0
+CDMX,mujer,,Punto de cruz,Otomí,Puebla,Pahuatlán,"Cuadrille,estambres,hilos de algodón,popelina",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0
+CDMX,mujer,,Telar de cintura,,Chiapas,Zinacantán,Algodón y acrílico/estambre,es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,0,1,0,0,1,0
+CDMX,mujer,,Lomillo,Tseltal,Chiapas,Chilón,"Cuadrille, estambre y aguja",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0
+CDMX,mujer,,Telar de cintura,Tsotsil,Chiapas,Zinacantán,"Telar de cintura se emplea los siguientes materiales: hilo de algodón, hilera, tam pat (faja para sostener el telar) bix (bara que se usa para medir ancho de la prenda) comen (hilador)   Bordado a mano: manta aguja e hilos de colores",es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,0,0,0,0,1,0
+CDMX,mujer,,Telar de cintura,Mixteco,Oaxaca,Oaxaca de Juárez,Algodón,es_una_t_cnica_antigua,1,0,1,0,0,1,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Relleno,Zapoteco,Oaxaca,San Antonino Castillo Velasco,Hilos de seda,es_una_t_cnica_antigua,0,0,0,1,0,0,1,0,0,0,1,0,0,0,1,0
+CDMX,hombre,,Telar de pedal,Mixe,,,Algodón y lana,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,1,1,1,1,1,1,1
+CDMX,mujer,,Telar de cintura,Amuzgo,Guerrero,Tlacoachistlahuaca,Maderas,es_una_t_cnica_antigua,0,1,0,1,0,1,0,0,0,0,1,1,0,0,1,0
+CDMX,mujer,,Punto de cruz,,Michoacán de Ocampo,Nuevo Parangaricutiro,"Manta de telar de pedal, tela industrial, hilo de algodón",es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,1,1,0,0,0,0
+CDMX,mujer,Telar de cintura,Tafetán,Náhuatl,Veracruz de Ignacio de la Llave,Chalma,"Estambre, algodón",es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,0,0,1,0,0,0
+CDMX,hombre,,Telar de cintura,Náhuatl,Veracruz de Ignacio de la Llave,Texhuacán,"Plantas y sales ,telar de cintura",es_una_t_cnica_antigua,1,1,0,1,0,0,0,0,0,0,0,0,1,0,0,0
+CDMX,mujer,,Pata de gallo,Náhuatl,Guerrero,Chilapa de Álvarez,"Telar de Pedal se utiliza como  fondo. En bordado se utiliza hilo sea, hilo iris.",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0
+CDMX,hombre,,Telar de pedal,Zapoteco,México,Valle de Chalco Solidaridad,"Algodón, lana, ceda, algunas prendas teñidas con tintes naturales",es_una_t_cnica_antigua,1,1,1,0,1,1,0,1,0,0,1,1,0,0,0,1
+CDMX,mujer,,Sarape fino de saltillo,,Coahuila de Zaragoza,Saltillo,"Plantas , insectos y sales",es_una_t_cnica_antigua,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0
+CDMX,mujer,,Pata de gallo,Otomí,Hidalgo,Actopan,"Manta, lienzos de tela. Aguja, hilos de colores, bastidores. Plumon para marcar.",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,1,0,0,0
+CDMX,mujer,,Telar de cintura,Tsotsil,Chiapas,Chamula,"usamos lana, algodon e hilo naylon",es_una_t_cnica_antigua,1,0,0,1,0,1,0,0,0,0,0,1,0,0,0,0
+CDMX,hombre,,Telar de cintura,Zapoteco,Oaxaca,Santo Tomás Jalieza,Hilos de algodón seda algodón verde algodón coyuchi algodón blanco seda de filamento seda criolla,es_una_t_cnica_antigua,1,0,1,1,1,0,0,0,0,0,0,0,1,0,1,1
+CDMX,mujer,,Telar de cintura,,Oaxaca,San Francisco Cajonos,Técnica de teñido con plantas y otros y extracción del colorante,es_una_t_cnica_antigua,1,1,1,0,0,1,0,0,0,0,1,1,0,0,1,1
+CDMX,mujer,,Telar de cintura,Náhuatl,Puebla,Cuetzalan del Progreso,Hilos de algodón Omega o hilos de algodón natural coyuchi elaborados con malakate acrílico manta cuadriye,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0
+CDMX,mujer,,Relleno,,Tabasco,Centro,,,0,0,0,1,0,1,0,0,0,0,1,1,0,0,1,0
+CDMX,mujer,,Bordado libre en maquina de pedal,,Oaxaca,Santa María Tlahuitoltepec,"Hilo de algodón, la máquina de coser, diferentes colores de manta",es_una_t_cnica_antigua,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0
+CDMX,mujer,,Telar de cintura,Náhuatl,Ciudad de México,Tláhuac,"Urdidor,telar de cintura, hilos de algodón, estambre acrilan y lana.",es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0
+CDMX,mujer,,Punto de cruz,,Oaxaca,San Juan Bautista Valle Nacional,"Hacía hilos con algodón, para hilarlos hacían a través de un trompo de tierra después bordabacon dos colores diferentes que eran negros y rojos",es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,1,0,1,0,0,0
+CDMX,hombre,,Talakaxtokgo da makan,Totonaco,Veracruz de Ignacio de la Llave,Papantla,"Hilo de algodón mercerizado de colores, telas popelina, manta cruda, manta blanca, rayón, lino",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,0
+CDMX,mujer,,Telar de cintura,Náhuatl,Hidalgo,Acaxochitlán,"Lana, estambre",es_una_t_cnica_antigua,1,1,1,0,0,1,0,0,0,0,1,1,0,0,0,0
+CDMX,mujer,,Cadeneta o cadenilla,Seri,Sonora,Hermosillo,,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0
+CDMX,,,Telar de cintura,,Oaxaca,San Lucas Ojitlán,Hilos,es_una_t_cnica_antigua,1,0,0,0,0,0,0,0,0,1,0,1,0,0,1,0
+CDMX,hombre,,Cadeneta o cadenilla,,Oaxaca,Santa María Xadani,"Gancho o ganchillo e hilos Perle algodón telas terciopelo,manta,razo,y lino",es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0
+CDMX,mujer,,Tejido de fibra natural,Huasteco,Veracruz de Ignacio de la Llave,Tantoyuca,Maquina,es_una_t_cnica_antigua,1,0,0,0,0,1,0,0,0,0,1,0,1,1,1,1
+CDMX,mujer,,Telar de cintura,Tsotsil,Chiapas,Larráinzar,"Hilos en Omega, los palos para montar en tejido , agujas",es_una_t_cnica_nueva,0,0,0,1,1,1,0,0,0,0,0,1,0,0,0,0
+CDMX,mujer,,Cadeneta o cadenilla,Seri,Sonora,Hermosillo,,,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Punto de cruz,Náhuatl,Veracruz de Ignacio de la Llave,Chicontepec,Manta cruda e hilos de algodón,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0
+CDMX,mujer,,Cadeneta o cadenilla,Seri,Sonora,Hermosillo,,,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0
+CDMX,hombre,,Trenzado,,Michoacán de Ocampo,Tzintzuntzan,La barita de trigo y el trigo artesanias de panikua,es_una_t_cnica_antigua,1,1,1,1,0,1,0,0,0,0,1,1,0,0,0,0
+CDMX,mujer,,Telar de cintura,Tsotsil,Chiapas,Larráinzar,,es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0
+CDMX,mujer,,Cadeneta o cadenilla,,Tabasco,Centro,Hilo y aguja,es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,1,1,0,0,0,0
+CDMX,mujer,,Telar de cintura,Mixe,Oaxaca,San Juan Cotzocón,"Lo principal son las maderas (cada madera lleva su nombre), hilos de algodón ya sea en cono o en madejas, agujas, tijeras",es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0
+CDMX,mujer,,Telar de cintura,Huave,Oaxaca,San Mateo del Mar,Hilo de algodón y ceda,es_una_t_cnica_antigua,1,0,0,1,0,1,0,0,0,0,0,1,1,0,0,0
+CDMX,mujer,,Punto de cruz,Maya Yucateco,Campeche,Hecelchakán,,es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,0,0,1,1,0,0
+CDMX,mujer,,Telar de cintura,Otomí,Hidalgo,Chilcuautla,"Hilo de algodón, plantas, animales y palos para trabajar",es_una_t_cnica_antigua,1,1,1,1,0,0,0,0,0,0,1,1,1,0,0,0
+CDMX,hombre,,Telar de cintura,,Oaxaca,Santa María Zacatepec,Hilos de algodón,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+CDMX,hombre,,Telar de cintura,Náhuatl,Puebla,Cuetzalan del Progreso,"Hilo de algodón, machetes, enjulios, lanzaderas",es_una_t_cnica_antigua,1,0,0,1,0,1,0,0,0,0,0,1,0,0,0,0
+CDMX,mujer,,Telar de cintura,Amuzgo,Guerrero,Ometepec,Hilo de algodón,es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0
+CDMX,mujer,,Telar de cintura,Náhuatl,Veracruz de Ignacio de la Llave,Chicontepec,Hilo de algodón coyuchi o blanco hilado en malacate,es_una_t_cnica_antigua,1,0,0,1,0,1,0,0,0,0,0,1,0,0,0,0
+CDMX,mujer,,Pata de gallo,Náhuatl,Guerrero,Chilapa de Álvarez,,es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0
+CDMX,mujer,Bordado a mano,Hilván,Chinanteco,Oaxaca,San Felipe Usila,"telar de cintura, etamina, hilo vela mercerizado",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,0
+CDMX,mujer,,Punto de cruz,Chinanteco,Oaxaca,San Felipe Usila,"telar de cintura, etamina, hilo vela mercerizado",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,0
+CDMX,mujer,,Telar de cintura,,Oaxaca,Santo Tomás Jalieza,Algodón,es_una_t_cnica_antigua,0,0,0,1,0,0,0,1,0,0,0,0,0,0,1,0
+CDMX,hombre,,Telar de pedal,Zapoteco,Oaxaca,Teotitlán del Valle,"Seda, lana y alpaca",es_una_t_cnica_antigua,1,1,1,0,1,0,1,0,0,0,0,0,0,0,0,0
+CDMX,mujer,,Telar de cintura,Tsotsil,Chiapas,Venustiano Carranza,"Hilos de algodón mercerizado calibre 30/2, artisela e hilaza de algodón",es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,0,0,0,0,1,1
+CDMX,mujer,,Telar de cintura,Náhuatl,Puebla,Huauchinango,Lana y algodón,es_una_t_cnica_antigua,1,1,1,1,1,1,0,0,0,0,0,0,1,1,0,0
+CDMX,mujer,,Telar de cintura,Náhuatl,Puebla,Cuetzalan del Progreso,Algodón,es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,0,1,1,1,0,0
+CDMX,mujer,,Telar de pedal,Mixe,Oaxaca,Santa María Tlahuitoltepec,Hilo de algodón lana manta,es_una_t_cnica_antigua,1,0,0,0,0,1,0,0,1,0,0,1,1,0,0,0
+CDMX,mujer,,Telar de cintura,Tsotsil,Chiapas,Venustiano Carranza,"Hilos de algodon,artisela,hilasa y estambre",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+CDMX,mujer,Bordado a mano,Hilván,Náhuatl,Veracruz de Ignacio de la Llave,Xalapa,"Tela de algodón, lino, hilo de algodón y agujas",es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0
+CDMX,mujer,,Punto de cruz,Náhuatl,Veracruz de Ignacio de la Llave,Xalapa,"Tela de algodón, lino, hilo de algodón y agujas",es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0
+CDMX,mujer,,Telar de cintura,Tsotsil,Chiapas,Venustiano Carranza,"Hilos de algodón, seda, hilazas, estambres",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Telar de cintura,Náhuatl,Veracruz de Ignacio de la Llave,Tlaquilpa,"Lana de borrego del lado más delgado, aguja, pintura como cochinilla, añil, palo de Brasil, flor del monte (amoso)",es_una_t_cnica_antigua,1,1,1,1,0,0,0,0,0,0,1,0,0,1,0,0
+CDMX,mujer,,Semilla,Cochimí,Oaxaca,,"Manta, hilo.",es_una_t_cnica_antigua,1,0,0,1,0,1,0,0,0,0,1,1,0,0,1,0
+CDMX,mujer,,Telar de cintura,Náhuatl,Morelos,Hueyapan,"Borregos , telar de cintura plantas tintorerías",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Telar de cintura,Amuzgo,Guerrero,Xochistlahuaca,,es_una_t_cnica_antigua,1,1,0,0,0,0,0,0,0,1,0,0,0,1,0,0
+CDMX,mujer,,Telar de cintura,,Veracruz de Ignacio de la Llave,Tlaquilpa,"Lana, malacate,  maderas para el telar , jarro, cuchara de madera, botes, cubetas",es_una_t_cnica_antigua,1,0,1,1,0,0,0,0,0,0,1,0,0,0,0,0
+CDMX,hombre,,Punto de cruz,Purépecha,Michoacán de Ocampo,Los Reyes,Manta de telar de pedal e hilo de algodón,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0
+CDMX,mujer,,Pata de gallo,Otomí,Hidalgo,Tenango de Doria,"Manta, hilos, plumón para pintar a mano alzada, aguja, y batidos,",es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0
+CDMX,mujer,,Costilla de ratón,Otomí,Hidalgo,Tenango de Doria,"Manta, hilos, plumón para pintar a mano alzada, aguja, y batidos,",es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0
+CDMX,mujer,,Punto de cruz,Náhuatl,Veracruz de Ignacio de la Llave,Chicontepec,Aguja hilo tela lino y manta,es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,Bordado a mano,Hilván,Náhuatl,Puebla,,Tela de algodón,es_una_t_cnica_antigua,0,0,0,0,0,1,0,0,0,0,0,1,1,0,0,1
+CDMX,mujer,,Telar de cintura,Náhuatl,Puebla,Tochimilco,Lana de borrego,es_una_t_cnica_antigua,1,1,1,0,0,0,1,0,0,0,1,0,0,0,1,0
+CDMX,hombre,,Telar de cintura,,Oaxaca,San Francisco Cajonos,"Tintes naturales, malacate, ruecas y torno eléctrico para hilado, gusanos de seda la principal materia prima, así como los árboles de morera para alimento de los gusanos de seda.",es_una_t_cnica_antigua,1,1,1,1,1,1,1,0,0,0,0,1,0,0,0,0
+CDMX,mujer,,Telar de cintura,Tseltal,Chiapas,San Juan Cancuc,"Hilo de algodón natural, hilo de algodón industrial e hilo de lana",es_una_t_cnica_antigua,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+CDMX,mujer,,Bordado de dos agujas,,México,Villa de Allende,"Tela, manta, aguja, hilos, lana",es_una_t_cnica_antigua,1,1,0,1,0,0,0,0,0,0,0,0,1,0,0,0
+CDMX,mujer,,Telar de pedal,,Querétaro,Colón,Lana natural 100% de borrego,es_una_t_cnica_antigua,1,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0
+CDMX,mujer,,Telar de cintura,Tsotsil,Chiapas,Chenalhó,"Hilo de algodón, lana, telar y palos para enrollar el hilo",es_una_t_cnica_antigua,1,0,1,1,0,0,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Bordado tenango,Otomí,Hidalgo,Tenango de Doria,"Aguja, hilo, telas de diferentes texturas y material, bastidor",es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,0,0,0,0,1,0
+CDMX,mujer,,Pepenado,Otomí,Hidalgo,Tenango de Doria,"Aguja, hilo, telas de diferentes texturas y material, bastidor",es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,0,0,0,0,1,0
+CDMX,hombre,,Telar colonial,Náhuatl,Tlaxcala,Contla de Juan Cuamatzi,Lana y algodón técnica de tejido plano en telar de madera,es_una_t_cnica_antigua,1,0,0,1,1,0,0,1,0,0,0,0,0,0,1,0
+CDMX,hombre,,Lomillo,,Chiapas,Tuxtla Gutiérrez,"Telas tejidas en telar de cintura o pedal, Manta industrial y manta tejida",es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+CDMX,mujer,,Relleno,Mazateco,Oaxaca,Huautla de Jiménez,Hilos de algodón,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,0
+CDMX,mujer,Bordado a mano,Hilván,Mazateco,Oaxaca,Huautla de Jiménez,Hilos de algodón,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,0
+CDMX,mujer,,Punto de cruz,Mazateco,Oaxaca,Huautla de Jiménez,Hilos de algodón,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,0
+CDMX,hombre,,Pepenado,,Oaxaca,Tlacolula de Matamoros,,es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0
+CDMX,mujer,,Tlajkitilistli,Náhuatl,Veracruz de Ignacio de la Llave,Chicontepec,Hilo de algodón,es_una_t_cnica_nueva,1,0,0,1,0,1,1,0,0,0,0,1,0,0,0,0

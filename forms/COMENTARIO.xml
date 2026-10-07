@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:orx="http://openrosa.org/xforms" xmlns:odk="http://www.opendatakit.org/xforms">
+  <h:head>
+    <h:title>ATLAS_TEXTILES_COMENTARIO</h:title>
+    <model odk:xforms-version="1.0.0">
+      <instance>
+        <ahscjRqjSViUsEL5tpmFFp id="ahscjRqjSViUsEL5tpmFFp">
+          <start/>
+          <end/>
+          <Indique_su_nombre_opcional/>
+          <Indique_su_correo_el_ctronico/>
+          <Escriba_su_comentario/>
+          <meta>
+            <instanceID/>
+          </meta>
+        </ahscjRqjSViUsEL5tpmFFp>
+      </instance>
+      <bind nodeset="/ahscjRqjSViUsEL5tpmFFp/start" jr:preload="timestamp" type="dateTime" jr:preloadParams="start"/>
+      <bind nodeset="/ahscjRqjSViUsEL5tpmFFp/end" jr:preload="timestamp" type="dateTime" jr:preloadParams="end"/>
+      <bind nodeset="/ahscjRqjSViUsEL5tpmFFp/Indique_su_nombre_opcional" type="string" required="false()"/>
+      <bind nodeset="/ahscjRqjSViUsEL5tpmFFp/Indique_su_correo_el_ctronico" type="string" required="false()"/>
+      <bind nodeset="/ahscjRqjSViUsEL5tpmFFp/Escriba_su_comentario" type="string" required="false()"/>
+      <bind nodeset="/ahscjRqjSViUsEL5tpmFFp/meta/instanceID" type="string" readonly="true()" jr:preload="uid"/>
+    </model>
+  </h:head>
+  <h:body>
+    <input ref="/ahscjRqjSViUsEL5tpmFFp/Indique_su_nombre_opcional">
+      <label>Indique su nombre (opcional)</label>
+    </input>
+    <input ref="/ahscjRqjSViUsEL5tpmFFp/Indique_su_correo_el_ctronico">
+      <label>Indique su correo eléctronico</label>
+    </input>
+    <input ref="/ahscjRqjSViUsEL5tpmFFp/Escriba_su_comentario">
+      <label>Escriba su comentario</label>
+    </input>
+  </h:body>
+</h:html>

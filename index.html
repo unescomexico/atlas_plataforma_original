@@ -3,7 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Atlas Nacional de Técnicas del Arte Textil — Taller Participativo con artesanas y artesanos de México">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://raw.githubusercontent.com; frame-src 'self' https://ee.kobotoolbox.org; form-action 'self' https://ee.kobotoolbox.org; worker-src 'self' blob:; upgrade-insecure-requests">
+<meta name="description" content="Atlas de Técnicas del Arte Textil — información construida a partir de testimonios de artesanas y artesanos">
+<meta name="theme-color" content="#8B0440">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Atlas Textil">
 <title>Atlas de Técnicas del Arte Textil</title>
 
 <!-- Fonts -->
@@ -12,16 +19,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
 
 <!-- Leaflet -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous" referrerpolicy="no-referrer">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <!-- Chart.js (para el reporte) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" data-security-review="version-pinned"></script>
 
 <!-- Exportación: html2pdf (PDF) y docx (Word) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js" crossorigin="anonymous" referrerpolicy="no-referrer" data-security-review="version-pinned"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" data-security-review="version-pinned"></script>
 
 <!-- App styles -->
 <link rel="stylesheet" href="styles.css">
@@ -41,22 +48,119 @@
 </div>
 
 <!-- ═══════════════════════════════════════
+     INTRODUCCIÓN AL ATLAS — se muestra en cada carga
+════════════════════════════════════════ -->
+<div class="atlas-intro-overlay open" id="atlas-intro-overlay" role="dialog" aria-modal="true" aria-labelledby="atlas-intro-title">
+  <div class="atlas-intro-card atlas-intro-card-photo">
+    <button class="atlas-intro-close" type="button" onclick="closeAtlasIntro()" aria-label="Cerrar introducción">✕</button>
+    <div class="atlas-intro-progress" aria-hidden="true">
+      <span class="atlas-intro-dot active" data-intro-dot="0"></span>
+      <span class="atlas-intro-dot" data-intro-dot="1"></span>
+      <span class="atlas-intro-dot" data-intro-dot="2"></span>
+      <span class="atlas-intro-dot" data-intro-dot="3"></span>
+    </div>
+
+    <section class="atlas-intro-slide active" data-intro-slide="0">
+      <div class="atlas-intro-photo-wrap">
+        <img class="atlas-intro-photo" src="assets/intro/intro_01.webp" alt="Participantes del Encuentro Nacional de Arte Textil Original reunidos durante el ejercicio del Atlas">
+      </div>
+      <div class="atlas-intro-copy atlas-intro-copy-intro">
+        <div class="atlas-intro-kicker">Introducción</div>
+        <h2 id="atlas-intro-title">Atlas de Técnicas del Arte Textil</h2>
+        <h3 class="atlas-intro-subtitle">El arte textil como memoria, técnica e identidad</h3>
+        <div class="atlas-intro-text-flow">
+          <p>El textil es un fenómeno universal. Sus primeros indicios se remontan a tiempos muy antiguos y su presencia atraviesa distintas sociedades y territorios. La investigación arqueológica ha contribuido a comprender su desarrollo a través del estudio de imágenes conservadas en murales, cerámicas y códices, así como del análisis de materiales, la reconstrucción de formas de producción, el estudio de herramientas como las fusayolas y los testimonios de quienes mantienen vivas estas prácticas.</p>
+          <p>Sin embargo, el estudio del arte textil antiguo enfrenta un desafío particular: gran parte de los textiles no ha sobrevivido debido al carácter perecedero de sus materias primas, a las condiciones ambientales y a la pérdida de registros. Esta ausencia de evidencia permite comprender que el desarrollo del textil y de sus técnicas decorativas no responde necesariamente a un proceso lineal. La falta de un registro material no implica por sí misma la ausencia de una práctica, sino que forma parte de los procesos de conservación y pérdida a los que están sujetos los materiales y las sociedades.</p>
+          <p>En la elaboración de este instrumento se construyó una clasificación de la producción textil con el acompañamiento de personas expertas en la materia, quienes definieron tres dimensiones principales: el textil, el tejido y el bordado, de acuerdo con sus características fundamentales. El primero puede entenderse como cualquier producto constituido por filamentos de fibras; el tejido como una estructura específica resultado del entrelazamiento de hilos; y el bordado como una intervención que puede incorporarse posteriormente y cumplir una función tanto estructural como decorativa. Silvia Terán ha señalado que el punto de hilván constituye un punto de partida para el desarrollo de diversas técnicas decorativas, al ser una de las formas más antiguas utilizadas para unir piezas.</p>
+          <p>A lo largo de la historia, la producción textil ha experimentado importantes transformaciones. Un momento particularmente significativo ocurrió con la llegada del virreinato, cuando las concepciones religiosas, morales y culturales impuestas influyeron en las formas en que los pueblos originarios utilizaban y portaban sus piezas. Algunas técnicas se transformaron, mientras que otras continuaron bajo nuevas condiciones. A ello se suman fenómenos como la migración, el intercambio y el sincretismo, que hacen imposible comprender las técnicas textiles como prácticas aisladas o exclusivas de una sola región.</p>
+          <p>Dentro de la producción del arte textil pueden reconocerse múltiples factores que dan forma a una sociedad y a sus prácticas. Entre ellos se encuentran el contexto y las formas de vida, el estilo, la dimensión semiótica, las habilidades de quienes elaboran las piezas, así como la recolección, preparación y manejo de los recursos disponibles. La continuidad de estas prácticas culturales constituye un punto de partida fundamental para comprender cómo funcionan las comunidades y cómo construyen, transmiten y transforman sus conocimientos.</p>
+          <p>Por ello, incluso cuando una misma práctica puede encontrarse en diferentes partes del mundo, sus formas de manufactura no son necesariamente iguales. Cada comunidad desarrolla variantes particulares de una tradición tecnológica, construidas a partir de su historia, su territorio y los conocimientos transmitidos entre generaciones. En estas diferencias reside también una parte esencial de la identidad cultural.</p>
+          <p>Registrar estas prácticas es imprescindible. Dejar constancia de las técnicas y de quienes las realizan permite conservar una parte de la memoria material que, de otro modo, puede quedar fragmentada o desaparecer. Cada pieza establece un vínculo entre el sujeto y su cultura material, y cada decisión tomada durante su manufactura revela algo más que una solución práctica: expresa conocimientos tecnológicos y culturales, habilidades motrices, experiencias y formas particulares de relacionarse con los materiales y con el entorno.</p>
+          <p>Este Atlas nace con el propósito de dejar un muestrario de las técnicas textiles y de las personas que las mantienen vivas. Es un esfuerzo por registrar, documentar y poner en valor el arte textil, facilitando el acceso a una cultura material inmensa y muy diversa. Al mismo tiempo, busca contribuir a su protección frente a las crisis sociales que amenazan la transmisión de conocimientos y la continuidad de estas prácticas.</p>
+          <p>Más que un registro de objetos, este Atlas es un registro de saberes, técnicas y personas. Una aproximación a la riqueza del arte textil mexicano y a las historias que se encuentran entre sus puntadas y sus formas de hacer.</p>
+          <p class="atlas-intro-lead atlas-intro-lead-after">El Atlas nació en el marco de <strong>Original, Encuentro Nacional de Arte Textil</strong>, como un ejercicio participativo para reconocer y documentar la diversidad de técnicas textiles presentes en México.</p>
+          <p class="atlas-intro-closing">No busca ser un inventario definitivo. Reúne una muestra abierta que puede crecer con nuevos registros y experiencias, poniendo en el centro las voces de quienes practican y transmiten estos saberes.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="atlas-intro-slide" data-intro-slide="1">
+      <div class="atlas-intro-photo-wrap">
+        <img class="atlas-intro-photo" src="assets/intro/intro_02.webp" alt="Participantes registrando información durante el ejercicio del Atlas">
+      </div>
+      <div class="atlas-intro-copy atlas-intro-copy-compact">
+        <div class="atlas-intro-kicker">Escuchar y registrar</div>
+        <h2>Método de registro</h2>
+        <h3 class="atlas-intro-subtitle atlas-intro-subtitle-card">Una ficha construida para recoger cada técnica</h3>
+        <div class="atlas-intro-text-flow atlas-intro-text-flow-short">
+          <p>Durante Original se realizaron entrevistas con una <strong>Ficha de Registro de Técnicas Textiles</strong>. En ella, artesanas y artesanos compartieron información sobre sus técnicas, materiales, lugares de práctica, prendas, significados y formas de aprendizaje y transmisión.</p>
+          <p>La plataforma recupera ese trabajo de registro y lo presenta de forma accesible para consulta pública, manteniendo la diversidad de voces y la riqueza de la información compartida durante el proceso.</p>
+        </div>
+        <div class="atlas-intro-stat-panel" aria-label="Panorama del Atlas">
+          <div class="atlas-intro-stat-card"><strong data-intro-stat="registros">—</strong><span>Registros de técnicas</span></div>
+          <div class="atlas-intro-stat-card"><strong data-intro-stat="estados">—</strong><span>Estados</span></div>
+          <div class="atlas-intro-stat-card"><strong data-intro-stat="tecnicas">—</strong><span>Técnicas</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="atlas-intro-slide" data-intro-slide="2">
+      <div class="atlas-intro-photo-wrap">
+        <img class="atlas-intro-photo" src="assets/intro/intro_03.webp" alt="Ejercicio de cartografía participativa del Atlas con notas colocadas sobre un mapa de México">
+      </div>
+      <div class="atlas-intro-copy atlas-intro-copy-compact atlas-intro-copy-map">
+        <div class="atlas-intro-map-text">
+          <div class="atlas-intro-kicker">Ubicar los saberes</div>
+          <h2>Mapeo colectivo</h2>
+          <h3 class="atlas-intro-subtitle atlas-intro-subtitle-card">También se construyó un mapa de manera conjunta</h3>
+          <div class="atlas-intro-text-flow atlas-intro-text-flow-short">
+            <p>El levantamiento se acompañó con un ejercicio de <strong>cartografía participativa</strong>: las personas colocaron en un mapa las técnicas que iban registrando. El ejercicio permitió observar la diversidad geográfica de los saberes compartidos y propició el intercambio entre regiones.</p>
+            <p>La plataforma retoma esa lógica: las comunidades y los registros de técnicas son el centro, mientras que estados, lenguas y ecosistemas ayudan a leer su contexto territorial.</p>
+          </div>
+        </div>
+        <div class="atlas-intro-map-illustration">
+          <img src="assets/intro/map-illustrative.png" alt="Mapa ilustrativo de México con notas adhesivas de colores">
+        </div>
+      </div>
+    </section>
+
+    <section class="atlas-intro-slide" data-intro-slide="3">
+      <div class="atlas-intro-photo-wrap">
+        <img class="atlas-intro-photo" src="assets/intro/intro_04.webp" alt="Artesana participando en el Encuentro Nacional de Arte Textil Original">
+      </div>
+      <div class="atlas-intro-copy atlas-intro-copy-compact">
+        <div class="atlas-intro-kicker">Explora la información</div>
+        <h2>Plataforma</h2>
+        <h3 class="atlas-intro-subtitle atlas-intro-subtitle-card">Del registro al Atlas interactivo</h3>
+        <div class="atlas-intro-text-flow atlas-intro-text-flow-short">
+          <p>Después del encuentro, los registros fueron revisados y organizados para facilitar su consulta. Aquí puedes recorrerlos por <strong>Estado, Lengua o Ecosistema</strong>, combinar filtros, consultar fichas y explorar cómo se relacionan las técnicas dentro de su clasificación.</p>
+        </div>
+        <div class="atlas-intro-steps atlas-intro-steps-wide">
+          <div><span>1</span><p>Elige una forma de explorar el territorio.</p></div>
+          <div><span>2</span><p>Combina uno o varios filtros.</p></div>
+          <div><span>3</span><p>Abre las fichas para conocer la información compartida en cada registro.</p></div>
+        </div>
+        <p class="atlas-intro-small">Puedes cerrar esta introducción en cualquier momento y seguir consultando el Atlas.</p>
+      </div>
+    </section>
+
+    <div class="atlas-intro-actions">
+      <button class="atlas-intro-secondary" id="atlas-intro-prev" type="button" onclick="atlasIntroPrev()" disabled>Anterior</button>
+      <button class="atlas-intro-primary" id="atlas-intro-next" type="button" onclick="atlasIntroNext()">Siguiente</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
      HEADER
 ════════════════════════════════════════ -->
 <header class="header">
   <div class="header-inner">
     <div class="header-wordmark">
       <h1>Atlas de <span class="word-highlight">Técnicas</span> del Arte Textil</h1>
-      <p>Ejercicio Participativo con artesanas y artesanos de México participantes en Original</p>
-    </div>
-    <div class="header-divider"></div>
-    <div class="header-stats">
-      <div class="hstat" data-stat="registros"><div class="hstat-num">—</div><div class="hstat-lbl">Registros</div></div>
-      <div class="hstat" data-stat="estados"><div class="hstat-num">—</div><div class="hstat-lbl">Estados</div></div>
-      <div class="hstat" data-stat="tecnicas"><div class="hstat-num">—</div><div class="hstat-lbl">Técnicas</div></div>
     </div>
     <div class="header-logos" aria-label="Secretaría de Cultura · Original · UNESCO">
-      <img src="atlas_plataforma_logos.png" alt="Secretaría de Cultura · Original · UNESCO" />
+      <img src="assets/atlas_plataforma_logos_cropped.png" alt="Secretaría de Cultura · Original · UNESCO" />
     </div>
   </div>
 </header>
@@ -67,11 +171,13 @@
 <nav class="nav-tabs">
   <button class="nav-tab active" data-tab="mapa">Mapa interactivo</button>
   <button class="nav-tab" data-tab="catalogo">Catálogo de técnicas</button>
-  <button class="nav-tab" data-tab="red">Red de técnicas</button>
   <button class="nav-tab" data-tab="arbol">Clasificación</button>
+  <button class="nav-tab" data-tab="galeria">Galería</button>
+  <button class="nav-tab" data-tab="red">Red de técnicas</button>
   <button class="nav-tab" data-tab="reporte">Reporte</button>
   <button class="nav-tab nav-tab-contribuir" data-tab="contribuir">Contribuir</button>
-  <button class="nav-tab nav-tab-info" onclick="openInfo()">Acerca del Atlas</button>
+  <button class="nav-tab nav-tab-info nav-tab-info-first" type="button" onclick="reopenAtlasIntro()">Info</button>
+  <button class="nav-tab nav-tab-info" type="button" onclick="openInfo()">Acerca del Atlas</button>
 </nav>
 
 <!-- ═══════════════════════════════════════
@@ -82,45 +188,144 @@
   <aside class="map-filter-sidebar" id="map-filter-sidebar">
     <div class="map-filter-panel">
       <div class="map-filter-header">
-        <span class="map-filter-title">Filtrar técnicas</span>
-        <button class="map-filter-clear" id="map-filter-clear" onclick="clearMapFilter()">Limpiar</button>
-      </div>
-      <div class="map-filter-levels" id="map-filter-levels">
-        <!-- Nivel 0: búsqueda libre -->
-        <div class="map-filter-level">
-          <div class="map-filter-level-label">Buscar</div>
-          <input class="map-filter-search" type="text" id="map-filter-search" placeholder="Técnica, categoría…" autocomplete="off">
-          <div class="map-filter-autocomplete" id="map-filter-autocomplete"></div>
-        </div>
-        <!-- Nivel 1: CAT-N-1 -->
-        <div class="map-filter-level">
-          <div class="map-filter-level-label">Categoría</div>
-          <div class="map-filter-chips" id="map-chips-cat1"></div>
-        </div>
-        <!-- Nivel 2: CAT-N-2 (condicional) -->
-        <div class="map-filter-level" id="map-level-cat2" style="display:none">
-          <div class="map-filter-level-label">Subcategoría</div>
-          <div class="map-filter-chips" id="map-chips-cat2"></div>
-        </div>
-        <!-- Nivel 3: CAT-N-3 (condicional) -->
-        <div class="map-filter-level" id="map-level-cat3" style="display:none">
-          <div class="map-filter-level-label">Tipo</div>
-          <div class="map-filter-chips" id="map-chips-cat3"></div>
-        </div>
-        <!-- Nivel 4: CAT-N-4 (condicional) -->
-        <div class="map-filter-level" id="map-level-cat4" style="display:none">
-          <div class="map-filter-level-label">Variante</div>
-          <div class="map-filter-chips" id="map-chips-cat4"></div>
-        </div>
-        <!-- Técnicas (resultado) -->
-        <div class="map-filter-level" id="map-level-tecs" style="display:none">
-          <div class="map-filter-level-label" id="map-tecs-label">Técnicas</div>
-          <div class="map-filter-chips" id="map-chips-tecs"></div>
+        <span class="map-filter-title" id="map-filter-title">Explorar</span>
+        <div class="map-filter-actions">
+          <button class="map-filter-mobile-toggle" id="map-filter-mobile-toggle" type="button" onclick="toggleMapFiltersCollapse()" aria-expanded="true" aria-label="Ocultar filtros" title="Ocultar filtros"><span aria-hidden="true">⌃</span></button>
+          <button class="map-filter-clear" id="map-filter-clear" onclick="clearMapFilter()">Limpiar</button>
         </div>
       </div>
-      <!-- Resultado activo -->
+
+      <div class="map-driver-switch" role="tablist" aria-label="Forma de explorar el mapa">
+        <button class="map-driver-btn active" data-map-driver="estado" type="button">Estado</button>
+        <button class="map-driver-btn" data-map-driver="lengua" type="button">Lengua</button>
+        <button class="map-driver-btn" data-map-driver="ecosistema" type="button">Ecosistema</button>
+      </div>
+
+      <div class="map-filter-body" id="map-filter-body">
+      <!-- Filtros territoriales propios de cada enfoque -->
+      <div class="map-driver-filter active" id="map-filter-driver-estado">
+        <details class="filter-dropdown" id="map-state-dropdown">
+          <summary>
+            <span class="filter-dropdown-label">Estados</span>
+            <span class="filter-dropdown-value" id="map-state-summary">Todos</span>
+            <span class="filter-dropdown-chevron">⌄</span>
+          </summary>
+          <div class="filter-checkbox-list" id="map-state-checkboxes"></div>
+        </details>
+        <details class="filter-dropdown map-material-level" id="map-estado-material-dropdown">
+          <summary>
+            <span class="filter-dropdown-label">Materiales</span>
+            <span class="filter-dropdown-value" id="map-estado-material-summary">Todas las categorías</span>
+            <span class="filter-dropdown-chevron">⌄</span>
+          </summary>
+          <div class="filter-checkbox-list" id="map-estado-material-chips"></div>
+        </details>
+      </div>
+
+      <div class="map-driver-filter" id="map-filter-driver-lengua">
+        <details class="filter-dropdown" id="map-language-dropdown">
+          <summary>
+            <span class="filter-dropdown-label">Lenguas</span>
+            <span class="filter-dropdown-value" id="map-language-summary">Todas</span>
+            <span class="filter-dropdown-chevron">⌄</span>
+          </summary>
+          <div class="filter-dropdown-search-wrap">
+            <input class="map-filter-search" type="text" id="map-language-search" placeholder="Buscar lengua…" autocomplete="off">
+          </div>
+          <div class="filter-checkbox-list" id="map-language-chips"></div>
+        </details>
+        <details class="filter-dropdown map-material-level" id="map-lengua-material-dropdown">
+          <summary>
+            <span class="filter-dropdown-label">Materiales</span>
+            <span class="filter-dropdown-value" id="map-lengua-material-summary">Todas las categorías</span>
+            <span class="filter-dropdown-chevron">⌄</span>
+          </summary>
+          <div class="filter-checkbox-list" id="map-lengua-material-chips"></div>
+        </details>
+      </div>
+
+      <div class="map-driver-filter" id="map-filter-driver-ecosistema">
+        <div class="map-filter-level">
+          <div class="map-filter-level-label">Capa territorial</div>
+          <div class="ecosystem-source-switch">
+            <button type="button" class="ecosystem-source-btn active" data-ecosystem-source="ecorregiones">Ecorregiones</button>
+            <button type="button" class="ecosystem-source-btn" data-ecosystem-source="usv">Vegetación y ecosistemas</button>
+          </div>
+        </div>
+        <details class="filter-dropdown" id="map-ecosystem-unit-dropdown">
+          <summary>
+            <span class="filter-dropdown-label">Unidades territoriales</span>
+            <span class="filter-dropdown-value" id="map-ecosystem-summary">Todas</span>
+            <span class="filter-dropdown-chevron">⌄</span>
+          </summary>
+          <div class="filter-checkbox-list" id="map-ecosystem-unit-chips"></div>
+        </details>
+        <details class="filter-dropdown map-material-level" id="map-ecosistema-material-dropdown">
+          <summary>
+            <span class="filter-dropdown-label">Materiales</span>
+            <span class="filter-dropdown-value" id="map-ecosistema-material-summary">Todas las categorías</span>
+            <span class="filter-dropdown-chevron">⌄</span>
+          </summary>
+          <div class="filter-checkbox-list" id="map-ecosistema-material-chips"></div>
+        </details>
+      </div>
+
+      <!-- Filtros comunes: funcionan igual en Estado, Lengua y Ecosistema -->
+      <div class="map-common-filters">
+        <div class="map-common-filters-title">Técnicas y clasificación</div>
+
+        <details class="filter-dropdown" id="map-level-cat1">
+          <summary>
+            <span class="filter-dropdown-label">Categoría</span>
+            <span class="filter-dropdown-value" id="map-cat1-summary">Todas</span>
+            <span class="filter-dropdown-chevron">⌄</span>
+          </summary>
+          <div class="filter-checkbox-list" id="map-chips-cat1"></div>
+        </details>
+
+        <details class="filter-dropdown" id="map-level-cat2">
+          <summary>
+            <span class="filter-dropdown-label">Subcategoría</span>
+            <span class="filter-dropdown-value" id="map-cat2-summary">Todas</span>
+            <span class="filter-dropdown-chevron">⌄</span>
+          </summary>
+          <div class="filter-checkbox-list" id="map-chips-cat2"></div>
+        </details>
+
+        <details class="filter-dropdown" id="map-level-cat3">
+          <summary>
+            <span class="filter-dropdown-label">Tipo</span>
+            <span class="filter-dropdown-value" id="map-cat3-summary">Todos</span>
+            <span class="filter-dropdown-chevron">⌄</span>
+          </summary>
+          <div class="filter-checkbox-list" id="map-chips-cat3"></div>
+        </details>
+
+        <details class="filter-dropdown" id="map-level-cat4">
+          <summary>
+            <span class="filter-dropdown-label">Variante</span>
+            <span class="filter-dropdown-value" id="map-cat4-summary">Todas</span>
+            <span class="filter-dropdown-chevron">⌄</span>
+          </summary>
+          <div class="filter-checkbox-list" id="map-chips-cat4"></div>
+        </details>
+
+        <details class="filter-dropdown" id="map-level-tecs">
+          <summary>
+            <span class="filter-dropdown-label">Técnicas</span>
+            <span class="filter-dropdown-value" id="map-tecs-summary">Todas</span>
+            <span class="filter-dropdown-chevron">⌄</span>
+          </summary>
+          <div class="filter-dropdown-search-wrap">
+            <input class="map-filter-search" type="text" id="map-filter-search" placeholder="Buscar técnica…" autocomplete="off">
+          </div>
+          <div class="filter-checkbox-list filter-technique-list" id="map-chips-tecs"></div>
+        </details>
+      </div>
+
       <div class="map-filter-active" id="map-filter-active" style="display:none">
         <span id="map-filter-active-text"></span>
+      </div>
       </div>
     </div>
   </aside>
@@ -129,39 +334,27 @@
   <div class="map-panel">
     <div id="map"></div>
 
-    <!-- Toggle de capa Comunidades (centroides de municipios) -->
-    <div class="map-layer-toggle" id="map-layer-toggle">
-      <label class="map-layer-checkbox">
-        <input type="checkbox" id="comunidades-toggle">
-        <span class="map-layer-checkbox-track"></span>
-        <span class="map-layer-checkbox-label">Comunidades</span>
-      </label>
-    </div>
 
-    <div class="map-legend">
-      <h4>Técnicas por estado</h4>
-      <div class="legend-item"><div class="legend-dot" style="background:#FCBC52FF"></div><span>20 o más</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:#A4D984FF"></div><span>10 – 19</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:#F588AFFF"></div><span>1 – 9</span></div>
+    <div class="map-legend" id="map-legend">
+      <h4 id="map-legend-title">Técnicas por estado</h4>
+      <div id="map-legend-body">
+        <div class="legend-item"><div class="legend-dot" style="background:#FCBC52FF"></div><span>20 o más</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#A4D984FF"></div><span>10 – 19</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#F588AFFF"></div><span>1 – 9</span></div>
+      </div>
     </div>
   </div>
 
-  <!-- ━━━ Columna 3: Panel lateral derecho (estados + técnicas) ━━━ -->
-  <div class="side-panel">
+  <!-- ━━━ Columna 3: perfiles territoriales construidos desde los testimonios ━━━ -->
+  <div class="side-panel territory-profile-panel">
     <div class="panel-header">
-      <div class="panel-title" id="panel-title">Estados de la República</div>
-      <div class="panel-subtitle" id="panel-subtitle">Selecciona un estado para ver sus técnicas</div>
+      <div class="panel-title" id="panel-title">Estados</div>
+      <div class="panel-subtitle" id="panel-subtitle"></div>
     </div>
-    <!-- Lista de estados (siempre visible) -->
-    <div class="states-list-wrap">
-      <div class="states-list-label">Estados</div>
-      <div class="states-list" id="states-list"></div>
-    </div>
-    <!-- Técnicas del estado seleccionado -->
     <div class="panel-body" id="panel-body">
       <div class="welcome-state">
-        <h3>Explora el mapa</h3>
-        <p>Cada estado está coloreado según el número de técnicas textiles documentadas. Selecciona uno arriba o haz clic en el mapa.</p>
+        <h3>Preparando los perfiles del Atlas</h3>
+        <p>En cuanto carguen los datos, aquí aparecerá el carrusel territorial del enfoque activo.</p>
       </div>
     </div>
   </div>
@@ -182,6 +375,47 @@
     </div>
     <div class="catalog-results" id="catalog-results">Cargando…</div>
     <div class="tecnicas-grid" id="tecnicas-grid"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     VIEW: GALERÍA
+════════════════════════════════════════ -->
+<div id="view-galeria" class="view">
+  <div class="gallery-view">
+    <div class="gallery-header">
+      <div>
+        <div class="gallery-kicker">Archivo fotográfico del Atlas</div>
+        <h2>Galería</h2>
+        <p>Explora las fotografías vinculadas con los registros de técnicas. La clasificación proviene de la columna <strong>Notas/Clasificación</strong> del archivo curatorial.</p>
+      </div>
+      <div class="gallery-count" id="gallery-count">Cargando…</div>
+    </div>
+    <div class="gallery-toolbar" id="gallery-toolbar" role="group" aria-label="Clasificar fotografías">
+      <button class="gallery-filter active" type="button" data-gallery-category="Todas">Todas</button>
+      <button class="gallery-filter" type="button" data-gallery-category="Vista general">Vista general</button>
+      <button class="gallery-filter" type="button" data-gallery-category="Retratos">Retratos</button>
+      <button class="gallery-filter" type="button" data-gallery-category="Detalles">Detalles</button>
+      <button class="gallery-filter" type="button" data-gallery-category="Usos y costumbres">Usos y costumbres</button>
+    </div>
+    <div class="gallery-secondary-filters" aria-label="Filtros de galería">
+      <label class="gallery-select-wrap">
+        <span>Técnica</span>
+        <select id="gallery-technique-filter">
+          <option value="">Todas las técnicas</option>
+        </select>
+      </label>
+      <label class="gallery-select-wrap">
+        <span>Estado</span>
+        <select id="gallery-state-filter">
+          <option value="">Todos los estados</option>
+        </select>
+      </label>
+      <button class="gallery-reset-filters" id="gallery-reset-filters" type="button">Limpiar filtros</button>
+    </div>
+    <div class="gallery-grid" id="gallery-grid">
+      <div class="gallery-loading">Cargando fotografías…</div>
+    </div>
   </div>
 </div>
 
@@ -237,8 +471,12 @@
 <div id="view-arbol" class="view">
   <div class="arbol-view">
     <div class="arbol-header">
+      <div class="arbol-kicker">Cómo se organizan las técnicas</div>
       <h2>Clasificación de técnicas</h2>
-      <p>Explora las técnicas según la clasificación elaborada por expertas y expertos en textiles mexicanos, organizada en cuatro niveles jerárquicos.</p>
+      <p>Explora la relación entre categorías y subcategorías mediante un diagrama de llaves interactivo. Abre o cierra cada llave, selecciona cualquier grupo y consulta las técnicas registradas dentro de él.</p>
+      <div class="arbol-guide" aria-label="Niveles de clasificación">
+        <span>Categoría</span><b>→</b><span>Subcategoría</span><b>→</b><span>Técnicas</span>
+      </div>
     </div>
     <div class="arbol-container" id="arbol-container">
       <div class="arbol-loading">Cargando clasificación…</div>
@@ -444,6 +682,14 @@
   </div>
 </div>
 
+<!-- Modal bibliográfico de categorías y subcategorías -->
+<div class="taxonomy-biblio-overlay" id="taxonomy-biblio-overlay" aria-hidden="true">
+  <div class="taxonomy-biblio-modal" role="dialog" aria-modal="true" aria-labelledby="taxonomy-biblio-modal-title">
+    <button type="button" class="taxonomy-biblio-modal-close" id="taxonomy-biblio-modal-close" aria-label="Cerrar">✕</button>
+    <div class="taxonomy-biblio-modal-body" id="taxonomy-biblio-modal-body"></div>
+  </div>
+</div>
+
 <!-- ═══════════════════════════════════════
      LIGHTBOX
 ════════════════════════════════════════ -->
@@ -452,7 +698,10 @@
   <button class="lightbox-nav lightbox-prev" id="lightbox-prev" onclick="_lbCurrent=(_lbCurrent-1+_lbImages.length)%_lbImages.length;_renderLightbox()">&#8249;</button>
   <button class="lightbox-nav lightbox-next" id="lightbox-next" onclick="_lbCurrent=(_lbCurrent+1)%_lbImages.length;_renderLightbox()">&#8250;</button>
   <div class="lightbox-counter" id="lightbox-counter"></div>
-  <img id="lightbox-img" src="" alt="">
+  <div class="lightbox-content">
+    <div class="lightbox-image-wrap"><img id="lightbox-img" src="" alt=""></div>
+    <aside class="lightbox-credit" id="lightbox-credit" aria-live="polite"></aside>
+  </div>
 </div>
 
 
@@ -471,7 +720,9 @@
 </div>
 
 <!-- Scripts — NO atlas_data.js: los datos se leen desde los CSV -->
+<script src="atlas_info_embedded.js"></script>
 <script src="main.js"></script>
+<script src="map_drivers.js"></script>
 
 <!-- ═══════════════════════════════════════
      OVERLAY — ACERCA DEL ATLAS
@@ -479,7 +730,7 @@
 <div class="info-overlay" id="info-overlay" onclick="closeInfo(event)">
   <div class="info-modal">
     <button class="info-close" onclick="closeInfo()">✕</button>
-    <iframe class="info-iframe" src="atlas_textil_v2.html" title="Acerca del Atlas" loading="lazy"></iframe>
+    <iframe class="info-iframe" id="atlas-info-iframe" src="about:blank" title="Acerca del Atlas" loading="lazy" referrerpolicy="no-referrer"></iframe>
   </div>
 </div>
 
@@ -489,7 +740,7 @@
 <div class="info-overlay" id="kobo-overlay" onclick="closeKobo(event)">
   <div class="info-modal">
     <button class="info-close" onclick="closeKobo()">✕</button>
-    <iframe class="info-iframe" id="kobo-iframe" src="" title="Formulario" loading="lazy"></iframe>
+    <iframe class="info-iframe" id="kobo-iframe" src="" title="Formulario" loading="lazy" sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe>
   </div>
 </div>
 
@@ -512,17 +763,121 @@ function closeKobo(e) {
   document.body.style.overflow = '';
 }
 
+let atlasInfoLoaded = false;
 function openInfo() {
-  document.getElementById('info-overlay').classList.add('open');
+  const overlay = document.getElementById('info-overlay');
+  const frame = document.getElementById('atlas-info-iframe');
+  overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
+
+  if (!atlasInfoLoaded && frame) {
+    if (typeof window.ATLAS_INFO_HTML === 'string' && window.ATLAS_INFO_HTML.length > 1000) {
+      frame.srcdoc = window.ATLAS_INFO_HTML;
+      atlasInfoLoaded = true;
+    } else {
+      frame.srcdoc = `<!doctype html><html lang="es"><meta charset="utf-8"><style>body{font-family:system-ui,sans-serif;padding:40px;color:#2a1e24;background:#fff8f5}p{line-height:1.6}</style><body><h2>Acerca del Atlas</h2><p>No se pudo inicializar el contenido integrado. Recarga la plataforma e intenta nuevamente.</p></body></html>`;
+    }
+  }
 }
 function closeInfo(e) {
   if (e && e.target !== document.getElementById('info-overlay')) return;
   document.getElementById('info-overlay').classList.remove('open');
   document.body.style.overflow = '';
 }
+
+let atlasIntroIndex = 0;
+
+function reopenAtlasIntro() {
+  atlasIntroIndex = 0;
+  document.getElementById('atlas-intro-overlay')?.classList.add('open');
+  renderAtlasIntro();
+}
+
+function refreshMapViewport(options = {}) {
+  const refit = Boolean(options.refit);
+  const attempts = [0, 80, 220, 500];
+  attempts.forEach(delay => {
+    setTimeout(() => {
+      if (typeof map === 'undefined' || !map || !map.invalidateSize) return;
+      const el = document.getElementById('map');
+      if (!el || el.clientWidth < 40 || el.clientHeight < 40) return;
+      map.invalidateSize({ animate: false, pan: false });
+      if (refit && delay === attempts[attempts.length - 1]) {
+        try { map.fitBounds([[14.5, -118.4], [32.7, -86.7]], { animate: false }); } catch (e) {}
+      }
+    }, delay);
+  });
+}
+
+function toggleMapFiltersCollapse(forceState) {
+  const sidebar = document.getElementById('map-filter-sidebar');
+  const btn = document.getElementById('map-filter-mobile-toggle');
+  if (!sidebar || !btn) return;
+  const collapsed = typeof forceState === 'boolean' ? forceState : !sidebar.classList.contains('mobile-collapsed');
+  sidebar.classList.toggle('mobile-collapsed', collapsed);
+  btn.setAttribute('aria-expanded', String(!collapsed));
+  const label = collapsed ? 'Mostrar filtros' : 'Ocultar filtros';
+  btn.setAttribute('aria-label', label);
+  btn.setAttribute('title', label);
+  const icon = btn.querySelector('span');
+  if (icon) icon.textContent = collapsed ? '⌄' : '⌃';
+  refreshMapViewport();
+}
+
+function renderAtlasIntro() {
+  document.body.classList.add('atlas-intro-open');
+  const slides = [...document.querySelectorAll('[data-intro-slide]')];
+  const dots = [...document.querySelectorAll('[data-intro-dot]')];
+  slides.forEach((el, i) => el.classList.toggle('active', i === atlasIntroIndex));
+  dots.forEach((el, i) => el.classList.toggle('active', i === atlasIntroIndex));
+  const prev = document.getElementById('atlas-intro-prev');
+  const next = document.getElementById('atlas-intro-next');
+  if (prev) prev.disabled = atlasIntroIndex === 0;
+  if (next) next.textContent = atlasIntroIndex === slides.length - 1 ? 'Explorar el Atlas' : 'Siguiente';
+}
+function atlasIntroNext() {
+  const total = document.querySelectorAll('[data-intro-slide]').length;
+  if (atlasIntroIndex >= total - 1) { closeAtlasIntro(); return; }
+  atlasIntroIndex += 1;
+  renderAtlasIntro();
+}
+function atlasIntroPrev() {
+  atlasIntroIndex = Math.max(0, atlasIntroIndex - 1);
+  renderAtlasIntro();
+}
+function closeAtlasIntro() {
+  document.getElementById('atlas-intro-overlay')?.classList.remove('open');
+  document.body.classList.remove('atlas-intro-open');
+  refreshMapViewport({ refit: true });
+}
+
+window.addEventListener('resize', () => refreshMapViewport());
+window.addEventListener('orientationchange', () => refreshMapViewport());
+window.addEventListener('pageshow', () => refreshMapViewport());
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) refreshMapViewport();
+});
+
+// ResizeObserver resuelve el caso móvil en el que Leaflet se inicializa antes
+// de que el contenedor adopte sus dimensiones finales.
+window.addEventListener('DOMContentLoaded', () => {
+  const mapEl = document.getElementById('map');
+  const panelEl = document.querySelector('.map-panel');
+  if ('ResizeObserver' in window && (mapEl || panelEl)) {
+    const ro = new ResizeObserver(() => refreshMapViewport());
+    if (mapEl) ro.observe(mapEl);
+    if (panelEl) ro.observe(panelEl);
+    window._atlasMapResizeObserver = ro;
+  }
+  // En móvil inicia plegado; en escritorio inicia abierto.
+  setTimeout(() => toggleMapFiltersCollapse(window.innerWidth <= 960), 0);
+});
+
+renderAtlasIntro();
+
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
+    closeAtlasIntro();
     document.getElementById('info-overlay').classList.remove('open');
     closeKobo();
     document.body.style.overflow = '';
