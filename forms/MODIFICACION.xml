@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:orx="http://openrosa.org/xforms" xmlns:odk="http://www.opendatakit.org/xforms">
+  <h:head>
+    <h:title>ATLAS_TEXTIL_MODIFICACION</h:title>
+    <model odk:xforms-version="1.0.0">
+      <instance>
+        <az446Yf5kkbN9qWgFFpPoT id="az446Yf5kkbN9qWgFFpPoT">
+          <start/>
+          <end/>
+          <Indique_su_nombre_opcional/>
+          <Escriba_su_correo_el_ctronico/>
+          <_A_que_t_cnica_o_asp_ner_una_contribuci_n/>
+          <Describa_su_contribuci_n_a_continuaci_n/>
+          <Agregue_documentaci_i_lo_desea_opcional/>
+          <meta>
+            <instanceID/>
+          </meta>
+        </az446Yf5kkbN9qWgFFpPoT>
+      </instance>
+      <bind nodeset="/az446Yf5kkbN9qWgFFpPoT/start" jr:preload="timestamp" type="dateTime" jr:preloadParams="start"/>
+      <bind nodeset="/az446Yf5kkbN9qWgFFpPoT/end" jr:preload="timestamp" type="dateTime" jr:preloadParams="end"/>
+      <bind nodeset="/az446Yf5kkbN9qWgFFpPoT/Indique_su_nombre_opcional" type="string" required="false()"/>
+      <bind nodeset="/az446Yf5kkbN9qWgFFpPoT/Escriba_su_correo_el_ctronico" type="string" required="true()"/>
+      <bind nodeset="/az446Yf5kkbN9qWgFFpPoT/_A_que_t_cnica_o_asp_ner_una_contribuci_n" type="string" required="true()"/>
+      <bind nodeset="/az446Yf5kkbN9qWgFFpPoT/Describa_su_contribuci_n_a_continuaci_n" type="string" required="true()"/>
+      <bind nodeset="/az446Yf5kkbN9qWgFFpPoT/Agregue_documentaci_i_lo_desea_opcional" type="binary" required="false()"/>
+      <bind nodeset="/az446Yf5kkbN9qWgFFpPoT/meta/instanceID" type="string" readonly="true()" jr:preload="uid"/>
+    </model>
+  </h:head>
+  <h:body>
+    <input ref="/az446Yf5kkbN9qWgFFpPoT/Indique_su_nombre_opcional">
+      <label>Indique su nombre (opcional)</label>
+    </input>
+    <input ref="/az446Yf5kkbN9qWgFFpPoT/Escriba_su_correo_el_ctronico">
+      <label>Escriba su correo eléctronico</label>
+    </input>
+    <input ref="/az446Yf5kkbN9qWgFFpPoT/_A_que_t_cnica_o_asp_ner_una_contribuci_n">
+      <label>¿A que técnica o aspecto del Atlas desea proponer una contribución?</label>
+    </input>
+    <input ref="/az446Yf5kkbN9qWgFFpPoT/Describa_su_contribuci_n_a_continuaci_n">
+      <label>Describa su contribución a continuación</label>
+    </input>
+    <upload mediatype="application/*" ref="/az446Yf5kkbN9qWgFFpPoT/Agregue_documentaci_i_lo_desea_opcional">
+      <label>Agregue documentación adicional si lo desea (opcional)</label>
+    </upload>
+  </h:body>
+</h:html>

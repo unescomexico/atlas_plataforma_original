@@ -3,11 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; upgrade-insecure-requests">
 <title>Reporte de Registros — Atlas Textil ORIGINAL</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" data-security-review="version-pinned"></script>
 
 <style>
 :root {
@@ -172,6 +174,7 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 1000; display: flex
   <div class="intro-divider"></div>
   <p class="intro-lead">La propuesta del <strong>Atlas De Técnicas De Artes Textiles En ORIGINAL</strong> surgió ante la necesidad de reconocer, documentar y fortalecer la diversidad de técnicas textiles que existen en México, muchas de las cuales están en riesgo por la falta de registro, la desvalorización cultural y el debilitamiento de los procesos de transmisión intergeneracional.</p>
   <p class="intro-lead">Impulsada en el marco del Encuentro Nacional de Artes Textiles ORIGINAL, esta iniciativa representa una oportunidad para promover formas <strong>participativas de consulta y registro</strong> que contribuyan a la salvaguardia de técnicas artesanales en todo el país, aprovechando la amplia convocatoria del evento.</p>
+  <p class="intro-lead"><strong>La fuente principal de la información presentada en el Atlas son los testimonios compartidos por las artesanas y los artesanos participantes.</strong> Las fichas, descripciones, materiales, contextos y referencias territoriales sistematizan lo que las personas entrevistadas comunicaron durante el ejercicio de registro.</p>
   <div class="callout">Este atlas no pretende ser exhaustivo, sino representar una muestra de la diversidad técnica del arte textil en México. Su estructura permanece abierta y podrá enriquecerse con futuras experiencias, registros y actividades.</div>
 </div>
 
@@ -404,8 +407,8 @@ function abreviarEstado(s) {
 async function loadAndRender() {
   try {
     const [resTec, resRec] = await Promise.all([
-      fetch('data_by_technique_id.csv'),
-      fetch('data_by_record_id.csv'),
+      fetch('data/data_by_technique_id.csv'),
+      fetch('data/data_by_record_id.csv'),
     ]);
     if (!resTec.ok) throw new Error('No se pudieron cargar los datos del Atlas');
     if (!resRec.ok) throw new Error('No se pudieron cargar los datos del Atlas');
