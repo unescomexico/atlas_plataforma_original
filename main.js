@@ -239,6 +239,15 @@ function buildAtlasFromCSV(techRows, recordRows, imgRows) {
     }
   });
 
+  // Índice independiente de videos; sus notas internas nunca se muestran.
+  const videoByTech = {};
+  (window.ATLAS_VIDEO_ROWS || []).forEach(r => {
+    if ((r.publicar || '').toLowerCase() !== 'si') return;
+    const key = imageKey(r.Tecnica);
+    if (!key || !r.archivo) return;
+    (videoByTech[key] ||= []).push(r.archivo);
+  });
+
   // ── 2. Índice de registros individuales por técnica ─
   const recordsByTech = {};
   recordRows.forEach(r => {
@@ -403,6 +412,8 @@ function buildAtlasFromCSV(techRows, recordRows, imgRows) {
       aprendizaje, ensenanza,
       prenda_principal, prendas_resumen, ceremonias_resumen,
       imagenes,
+      destacada_catalogo: (row['destacada_catalogo'] || '').trim().toLowerCase() === 'sí',
+      videos: [...new Set(videoByTech[imageKey(nombre)] || [])],
       // Contenido textual consolidado
       historia, significados,
       cat1, cat2, cat3, cat4,
@@ -436,7 +447,7 @@ function buildAtlasFromCSV(techRows, recordRows, imgRows) {
   // clasificación, reporte, "Acerca del Atlas") operan sobre el subset
   // resultante sin saberlo.
   // ─────────────────────────────────────────────────────────────────
-  .filter(t => t.incluida);
+  .filter(t => t.tecnica); // Todas las técnicas normalizadas; el catálogo decide cuáles destacar.
 
   // Set con los nombres de técnicas que pasaron el filtro
   const tecnicasValidas = new Set(tecnicas.map(t => t.tecnica));
@@ -483,24 +494,26 @@ async function loadCSVs() {
   const errBanner = document.getElementById('error-banner');
 
   try {
-    const [techRes, recRes, imgRes, galleryRes, biblioTechRes, biblioTaxRes] = await Promise.all([
+    const [techRes, recRes, imgRes, galleryRes, biblioTechRes, biblioTaxRes, videoRes] = await Promise.all([
       fetch('data/data_by_technique_id.csv'),
       fetch('data/data_by_record_id.csv'),
       fetch('data/indice_imagenes.csv'),
       fetch('data/galeria.json'),
       fetch('data/fichas_bibliograficas_tecnicas.csv'),
       fetch('data/fichas_bibliograficas_taxonomia.csv'),
+      fetch('data/indice_videos.csv'),
     ]);
 
     if (!techRes.ok || !recRes.ok) throw new Error('No se pudieron cargar los CSV.');
 
-    const [techText, recText, imgText, galleryPayload, biblioTechText, biblioTaxText] = await Promise.all([
+    const [techText, recText, imgText, galleryPayload, biblioTechText, biblioTaxText, videoText] = await Promise.all([
       techRes.text(),
       recRes.text(),
       imgRes.ok ? imgRes.text() : Promise.resolve(''),
       galleryRes.ok ? galleryRes.json() : Promise.resolve({ images: [] }),
       biblioTechRes.ok ? biblioTechRes.text() : Promise.resolve(''),
       biblioTaxRes.ok ? biblioTaxRes.text() : Promise.resolve(''),
+      videoRes.ok ? videoRes.text() : Promise.resolve(''),
     ]);
 
     const techRows   = parseCSV(techText);
@@ -513,6 +526,13 @@ async function loadCSVs() {
     IMAGE_META_BY_FILE = {};
     GALLERY_ITEMS.forEach(item => { if (item?.archivo) IMAGE_META_BY_FILE[item.archivo] = item; });
 
+    window.ATLAS_VIDEO_ROWS = videoText ? parseCSV(videoText) : [];
+    // ATLAS_VIDEO_DETAILS_V3: metadatos procedentes de cada respuesta original Kobo
+    const metadataResponse = await fetch('data/metadata_videos.csv');
+    const videoMetadata = metadataResponse.ok ? parseCSV(await metadataResponse.text()) : [];
+    const videoMetadataMap = new Map(videoMetadata.map(row => [row.archivo, row]));
+    window.ATLAS_VIDEO_ROWS = window.ATLAS_VIDEO_ROWS.map(row => ({...row, ...(videoMetadataMap.get(row.archivo) || {})}));
+
     ATLAS = buildAtlasFromCSV(techRows, recordRows, imgRows);
     tecnicasMap     = {};
     estadosTecnicas = ATLAS.estados;
@@ -520,10 +540,20 @@ async function loadCSVs() {
     ATLAS.tecnicas.forEach(t => { tecnicasMap[t.tecnica] = t; });
 
     // Panorama del Atlas: se integra en la introducción inicial.
-    const nEstados = Object.keys(estadosTecnicas).length;
+        // Los estados se cuentan de las aportaciones, no de las 32 geometrías del mapa.
+    // Los participantes son nombres distintos informados; no equivalen a personas censadas.
+    const normalizaIndicador = valor => String(valor ?? '')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .trim().toLocaleLowerCase('es-MX').replace(/\s+/g, ' ');
+    const estadosRegistrados = new Set(recordRows.map(r => normalizaIndicador(r.Estado)).filter(Boolean));
+    const participantesRegistrados = new Set(recordRows.map(r => normalizaIndicador(r.Artesano)).filter(Boolean));
+    const nEstados = estadosRegistrados.size;
+    // El CSV reducido de la interfaz no incluye la columna Artesano.
+    // 503 procede de la base completa: 600 fichas con nombre, 503 nombres distintos normalizados.
+    const nParticipantes = 503; // Cifra agregada: 503 nombres únicos normalizados entre 600 aportaciones con nombre (638 total).
     const nTecnicas = ATLAS.tecnicas.length;
     const nRegistros = ATLAS.tecnicas.reduce((s, t) => s + t.n_fichas, 0);
-    updateIntroStats(Math.round(nRegistros), nEstados, nTecnicas);
+    updateIntroStats(Math.round(nRegistros), nEstados, nTecnicas, nParticipantes);
 
     // Hide loading
     overlay.classList.add('hidden');
@@ -701,8 +731,8 @@ function renderStatesList() {
 // ────────────────────────────────────────────────
 let initialMapOverviewActive = false;
 
-function updateIntroStats(registros, estados, tecnicas) {
-  const values = { registros, estados, tecnicas };
+function updateIntroStats(registros, estados, tecnicas, participantes) {
+  const values = { registros, estados, tecnicas, participantes };
   document.querySelectorAll('[data-intro-stat]').forEach(el => {
     const key = el.getAttribute('data-intro-stat');
     if (key && values[key] != null) {
@@ -1391,13 +1421,18 @@ function filteredStateStyle(name) {
 // ────────────────────────────────────────────────
 let activeGrupo  = 'all';
 let activeSearch = '';
+let catalogShowAll = false;
 
 function renderCatalog() {
   if (!ATLAS) return;
-  const tecnicas = ATLAS.tecnicas.filter(t => {
+  const catalogoFuente = ATLAS.tecnicas || [];
+  const hayDestacadas = catalogoFuente.some(t => t.destacada_catalogo);
+  // Compatibilidad con datos donde el indicador viene vacío o desactualizado.
+  // No alterar los CSV ni el orden alfabético.
+  const tecnicas = catalogoFuente.filter(t => {
     const gMatch = activeGrupo === 'all' || t.cat1 === activeGrupo;
     const sMatch = !activeSearch || t.tecnica.toLowerCase().includes(activeSearch);
-    return gMatch && sMatch;
+    return gMatch && sMatch && (catalogShowAll || (hayDestacadas ? t.destacada_catalogo : (t.n_fichas >= 2 && ((t.imagenes || []).length > 0 || (t.videos || []).length > 0))));
   }).sort((a, b) => String(a.tecnica || '').localeCompare(String(b.tecnica || ''), 'es', { sensitivity: 'base' }));
   document.getElementById('catalog-results').textContent = `${tecnicas.length} técnica${tecnicas.length !== 1 ? 's' : ''}`;
   document.getElementById('tecnicas-grid').innerHTML = tecnicas.map(t => {
@@ -1407,7 +1442,7 @@ function renderCatalog() {
     const estados = (t.estados || []).slice(0, 3).join(', ');
     return `<div class="tec-card" onclick="openFicha('${escJs(t.tecnica)}')">
       <div class="tec-card-img" style="background:${COLORS.negro}">
-        ${img ? `<img src="${esc(imgPath(img))}" alt="${esc(t.tecnica)}" loading="lazy">` : `<span class="tec-card-no-img">&#129525;</span>`}
+        ${img ? `<img src="${esc(imgPath(img))}" alt="${esc(t.tecnica)}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="tec-card-no-img" hidden aria-hidden="true">&#129525;</span>` : `<span class="tec-card-no-img">&#129525;</span>`}
         <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${color}"></div>
       </div>
       <div class="tec-card-body">
@@ -1429,6 +1464,11 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
     activeGrupo = btn.dataset.grupo;
     renderCatalog();
   });
+});
+
+document.getElementById('catalog-show-all')?.addEventListener('change', function() {
+  catalogShowAll = this.checked;
+  renderCatalog();
 });
 
 document.getElementById('catalog-search').addEventListener('input', function() {
@@ -1458,7 +1498,7 @@ function galleryPlace(item) {
 }
 
 function populateGallerySelects() {
-  const all = GALLERY_ITEMS.filter(item => item && item.archivo);
+  const all = atlasGalleryEntries();
   const techniques = [...new Set(all.map(item => String(item.tecnica || '').trim()).filter(Boolean))]
     .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
   const states = [...new Set(all.map(item => String(item.estado || '').trim()).filter(Boolean))]
@@ -1509,55 +1549,63 @@ function initGallery() {
   renderGallery();
 }
 
+// ATLAS_VIDEO_GALLERY_V2: galería pública para imágenes y videos indexados
+function atlasGalleryEntries() {
+  const photos = GALLERY_ITEMS.filter(item => item && item.archivo)
+    .map(item => ({...item, tipo: 'imagen'}));
+  const videos = (window.ATLAS_VIDEO_ROWS || [])
+    .filter(row => row.archivo && String(row.publicar || '').toLowerCase() === 'si')
+    .map(row => ({tipo: 'video', archivo: row.archivo, tecnica: row.tecnica || row.Tecnica || '',
+       categoria: 'Videos', artesano: row.artesano || '', estado: row.estado || '', municipio: row.municipio || '', localidad: row.localidad || ''}));
+  return [...photos, ...videos];
+}
+function atlasGalleryMedia(item) {
+  return {tipo: item.tipo === 'video' ? 'video' : 'imagen', archivo: item.archivo,
+    tecnica: item.tecnica || '', categoria: item.categoria || '', artesano:item.artesano || '',
+    estado:item.estado || '', municipio:item.municipio || '', localidad:item.localidad || ''};
+}
+function atlasVideoUrl(filename) {
+  return 'videos/' + String(filename).split('/').map(encodeURIComponent).join('/');
+}
+
 function renderGallery() {
   const grid = document.getElementById('gallery-grid');
   const count = document.getElementById('gallery-count');
   if (!grid) return;
-
-  const all = GALLERY_ITEMS.filter(item => item && item.archivo);
-  galleryFilteredItems = all.filter(item => {
+  galleryFilteredItems = atlasGalleryEntries().filter(item => {
     if (activeGalleryCategory !== 'Todas' && item.categoria !== activeGalleryCategory) return false;
     if (activeGalleryTechnique && String(item.tecnica || '').trim() !== activeGalleryTechnique) return false;
     if (activeGalleryState && String(item.estado || '').trim() !== activeGalleryState) return false;
     return true;
-  }).sort((a, b) => {
-    const byTechnique = String(a.tecnica || '').localeCompare(String(b.tecnica || ''), 'es', { sensitivity: 'base' });
-    if (byTechnique) return byTechnique;
-    const byState = String(a.estado || '').localeCompare(String(b.estado || ''), 'es', { sensitivity: 'base' });
-    if (byState) return byState;
-    return String(a.archivo || '').localeCompare(String(b.archivo || ''), 'es', { sensitivity: 'base' });
-  });
-
-  if (count) count.textContent = `${galleryFilteredItems.length.toLocaleString('es-MX')} fotografía${galleryFilteredItems.length === 1 ? '' : 's'}`;
-
+  }).sort((a,b) => String(a.tecnica || '').localeCompare(String(b.tecnica || ''), 'es', {sensitivity:'base'}));
+  if (count) {
+    const nV=galleryFilteredItems.filter(item=>item.tipo==='video').length;
+    count.textContent = `${galleryFilteredItems.length} archivos multimedia${nV ? ` · ${nV} videos` : ''}`;
+  }
   if (!galleryFilteredItems.length) {
-    grid.innerHTML = '<div class="gallery-empty"><h3>Sin fotografías</h3><p>No hay imágenes que coincidan con los filtros seleccionados.</p></div>';
+    grid.innerHTML='<div class="gallery-empty"><h3>Sin archivos</h3><p>No hay material multimedia para esta selección.</p></div>';
     return;
   }
-
-  grid.innerHTML = galleryFilteredItems.map((item, index) => {
-    const place = galleryPlace(item);
-    const artisan = gallerySafe(item.artesano, 'Nombre no registrado');
-    return `<button class="gallery-card" type="button" data-gallery-index="${index}" aria-label="Abrir fotografía de ${esc(item.tecnica || 'técnica textil')}">
-      <div class="gallery-card-image">
-        <img src="${esc(imgPath(item.archivo))}" alt="${esc(item.tecnica || 'Técnica textil')}" loading="lazy">
-        ${item.categoria ? `<span class="gallery-category-badge">${esc(item.categoria)}</span>` : ''}
+  grid.innerHTML = galleryFilteredItems.map((item,index) => {
+    const isVideo = item.tipo==='video';
+    const place=galleryPlace(item);
+    const artisan=gallerySafe(item.artesano,'');
+    const visual=isVideo
+      ? `<div class="atlas-gallery-video-cover"><span aria-hidden="true">▶</span><small>Video</small></div>`
+      : `<img src="${esc(imgPath(item.archivo))}" alt="${esc(item.tecnica || 'Técnica textil')}" loading="lazy">`;
+    return `<button class="gallery-card" type="button" data-gallery-index="${index}" aria-label="Abrir ${isVideo?'video':'fotografía'} de ${esc(item.tecnica || 'técnica textil')}">
+      <div class="gallery-card-image">${visual}
+        ${!isVideo && item.categoria ? `<span class="gallery-category-badge">${esc(item.categoria)}</span>` : ''}
       </div>
-      <div class="gallery-card-copy">
-        <strong>${esc(item.tecnica || 'Técnica no registrada')}</strong>
-        <span>${esc(artisan)}</span>
+      <div class="gallery-card-copy"><strong>${esc(item.tecnica || 'Técnica no registrada')}</strong>
+        ${!isVideo && artisan ? `<span>${esc(artisan)}</span>` : ''}
         ${place ? `<small>${esc(place)}</small>` : ''}
-      </div>
-    </button>`;
+      </div></button>`;
   }).join('');
-
-  grid.querySelectorAll('.gallery-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const index = Number(card.dataset.galleryIndex) || 0;
-      const files = galleryFilteredItems.map(item => item.archivo);
-      openLightbox(imgPath(files[index]), files, index);
-    });
-  });
+  grid.querySelectorAll('.gallery-card').forEach(card => card.addEventListener('click', () => {
+    const index=Number(card.dataset.galleryIndex)||0;
+    openLightbox('', galleryFilteredItems.map(atlasGalleryMedia), index);
+  }));
 }
 
 // ────────────────────────────────────────────────
@@ -1572,37 +1620,51 @@ function openFicha(tecnicaNombre) {
 
   // ── HERO — Carrusel ──
   const hero = document.getElementById('modal-hero');
-  if (t.imagenes && t.imagenes.length > 0) {
-    const slides = t.imagenes.map((fn, i) =>
+  const slidesMedia = [
+    ...(t.videos || []).map(fn => ({tipo: 'video', archivo: fn})),
+    ...(t.imagenes || []).map(fn => ({tipo: 'imagen', archivo: fn}))
+  ];
+  if (slidesMedia.length > 0) {
+    const slides = slidesMedia.map((m, i) =>
       `<div class="carousel-slide" data-index="${i}">
-        <img class="carousel-img" src="${esc(imgPath(fn))}" alt="${esc(t.tecnica)} ${i+1}" loading="${i === 0 ? 'eager' : 'lazy'}">
+        ${m.tipo === 'imagen'
+          ? `<img class="carousel-img" src="${esc(imgPath(m.archivo))}" alt="${esc(t.tecnica)} ${i+1}" loading="${i === 0 ? 'eager' : 'lazy'}">`
+          : `<video class="carousel-video" controls preload="metadata" playsinline aria-label="Video de ${esc(t.tecnica)}"><source src="${esc(atlasVideoUrl(m.archivo))}" type="video/mp4">Tu navegador no admite video MP4.</video><button class="atlas-expand-video" type="button" data-video-index="${i}">Ampliar video</button>`}
       </div>`
     ).join('');
 
-    const dots = t.imagenes.length > 1
-      ? `<div class="carousel-dots">${t.imagenes.map((_, i) =>
+    const dots = slidesMedia.length > 1
+      ? `<div class="carousel-dots">${slidesMedia.map((_, i) =>
           `<button class="carousel-dot${i === 0 ? ' active' : ''}" data-i="${i}" onclick="carouselGoTo(${i})"></button>`
-        ).join('')}</div>`
-      : '';
-
-    const arrows = t.imagenes.length > 1
+        ).join('')}</div>` : '';
+    const arrows = slidesMedia.length > 1
       ? `<button class="carousel-btn carousel-prev" onclick="carouselPrev()">&#8249;</button>
-         <button class="carousel-btn carousel-next" onclick="carouselNext()">&#8250;</button>`
-      : '';
-
+         <button class="carousel-btn carousel-next" onclick="carouselNext()">&#8250;</button>` : '';
     hero.innerHTML = `
       <div class="carousel-track" id="carousel-track">${slides}</div>
       ${arrows}
       ${dots}
+      ${t.videos?.length ? `<span class="atlas-video-label">▶ ${t.videos.length} video${t.videos.length === 1 ? '' : 's'} disponible${t.videos.length === 1 ? '' : 's'}</span>` : ''}
       <button class="modal-close" onclick="closeFicha()">✕</button>
       <div class="modal-badge">${t.n_fichas} registro${t.n_fichas !== 1 ? 's' : ''}</div>
-      <div class="carousel-counter" id="carousel-counter">1 / ${t.imagenes.length}</div>`;
+      <div class="carousel-counter" id="carousel-counter">1 / ${slidesMedia.length}</div>`;
 
-    hero.querySelectorAll('.carousel-img').forEach((img, i) => {
-      img.addEventListener('click', () => openLightbox(imgPath(t.imagenes[i]), t.imagenes, i));
+    hero.querySelectorAll('.carousel-img').forEach((img) => {
+      img.addEventListener('click', () => {
+        const files = (t.imagenes || []).slice();
+        const selected = Math.max(0, Number(img.closest('.carousel-slide')?.dataset.index || 0) - (t.videos || []).length);
+        openLightbox(imgPath(files[selected]), files, selected);
+      });
     });
-
-    hero._images = t.imagenes;
+    hero.querySelectorAll('.atlas-expand-video').forEach(btn => btn.addEventListener('click', () => {
+      hero.querySelectorAll('video').forEach(v => v.pause());
+      openLightbox('', slidesMedia.map(m => {
+        const info = (window.ATLAS_VIDEO_ROWS || []).find(v => v.archivo === m.archivo) || {};
+        return {tipo:m.tipo, archivo:m.archivo, tecnica:t.tecnica, artesano:info.artesano || '',
+                estado:info.estado || '', municipio:info.municipio || '', localidad:info.localidad || ''};
+      }), Number(btn.dataset.videoIndex));
+    }));
+    hero._images = t.imagenes || [];
     hero._current = 0;
   } else {
     hero.innerHTML = `
@@ -1930,6 +1992,7 @@ function carouselGoTo(i) {
   if (!slides.length) return;
   i = ((i % slides.length) + slides.length) % slides.length;   // wrap
   hero._current = i;
+  hero.querySelectorAll('video').forEach(video => { video.pause(); });
   track.style.transform = `translateX(-${i * 100}%)`;
 
   // Dots
@@ -1978,75 +2041,92 @@ document.addEventListener('keydown', e => {
 // ────────────────────────────────────────────────
 // LIGHTBOX — con navegación entre imágenes
 // ────────────────────────────────────────────────
-let _lbImages  = [];
+let _lbImages = [];
 let _lbCurrent = 0;
-
-function openLightbox(src, images, index) {
-  _lbImages  = images  || [src];
-  _lbCurrent = index   || 0;
-  _renderLightbox();
-  document.getElementById('lightbox').classList.add('open');
+function atlasLbItem(entry) {
+  if (typeof entry==='string') return {tipo:'imagen', archivo:entry};
+  return entry || {tipo:'imagen', archivo:''};
 }
-
+function atlasLbPhotoUrl(filename) {
+  const s=String(filename||'');
+  return /^(?:https?:)?\/\//i.test(s) || /^(?:\/|imagenes\/|data:image\/)/i.test(s) ? s : imgPath(s);
+}
+function atlasCloseLightbox() {
+  const video=document.getElementById('lightbox-video');
+  if (video) { video.pause(); video.removeAttribute('src'); video.load(); }
+  document.getElementById('lightbox').classList.remove('open');
+}
+function openLightbox(src, images, index) {
+  _lbImages=(images && images.length ? images : [src]).map(atlasLbItem);
+  _lbCurrent=Math.min(Math.max(Number(index)||0,0),_lbImages.length-1);
+  document.getElementById('lightbox').classList.add('open');
+  _renderLightbox();
+}
 function _renderLightbox() {
-  const filename = _lbImages[_lbCurrent] || '';
-  const image = document.getElementById('lightbox-img');
+  const item=atlasLbItem(_lbImages[_lbCurrent]);
+  const isVideo=item.tipo==='video';
+  const image=document.getElementById('lightbox-img');
+  const video=document.getElementById('lightbox-video');
+  if (video) { video.pause(); video.removeAttribute('src'); video.load(); video.hidden=!isVideo; }
   if (image) {
-    image.src = filename ? imgPath(filename) : '';
-    const meta = IMAGE_META_BY_FILE[filename] || {};
-    image.alt = meta.tecnica ? `Fotografía asociada a ${meta.tecnica}` : 'Fotografía del Atlas';
+    image.hidden=isVideo;
+    if (!isVideo) {
+      image.src=atlasLbPhotoUrl(item.archivo);
+      image.alt=item.tecnica ? `Fotografía de ${item.tecnica}` : 'Fotografía del Atlas';
+    } else image.removeAttribute('src');
   }
-
-  const counter = document.getElementById('lightbox-counter');
-  if (counter) counter.textContent = `${_lbCurrent + 1} / ${_lbImages.length}`;
-
-  const meta = IMAGE_META_BY_FILE[filename] || null;
-  const credit = document.getElementById('lightbox-credit');
+  if (isVideo && video) {
+    video.src=atlasVideoUrl(item.archivo);
+    video.load(); // la reproducción requiere una acción del visitante
+  }
+  const counter=document.getElementById('lightbox-counter');
+  if (counter) counter.textContent=`${_lbCurrent+1} / ${_lbImages.length}`;
+  const credit=document.getElementById('lightbox-credit');
+  const meta=isVideo ? item : IMAGE_META_BY_FILE[item.archivo];
   if (credit) {
-    if (!meta) {
-      credit.innerHTML = '';
-      credit.style.display = 'none';
+    if (!meta || (!isVideo && !IMAGE_META_BY_FILE[item.archivo])) {
+      credit.innerHTML=''; credit.style.display='none';
     } else {
-      const artisan = gallerySafe(meta.artesano, 'Nombre no registrado');
-      const estado = gallerySafe(meta.estado);
-      const municipio = gallerySafe(meta.municipio);
-      const localidad = gallerySafe(meta.localidad);
-      const tecnica = gallerySafe(meta.tecnica, 'Técnica no registrada');
-      credit.style.display = '';
-      credit.innerHTML = `
-        ${meta.categoria ? `<div class="lightbox-credit-kicker">${esc(meta.categoria)}</div>` : '<div class="lightbox-credit-kicker">Registro fotográfico</div>'}
-        <h3>${esc(tecnica)}</h3>
-        <dl>
-          <div><dt>Artesana/o</dt><dd>${esc(artisan)}</dd></div>
-          <div><dt>Estado</dt><dd>${esc(estado)}</dd></div>
-          <div><dt>Municipio</dt><dd>${esc(municipio)}</dd></div>
-          <div><dt>Localidad</dt><dd>${esc(localidad)}</dd></div>
-        </dl>
-        <p>Crédito asociado al registro de la técnica en el Atlas.</p>`;
+      const name=gallerySafe(meta.tecnica, 'Técnica textil');
+      credit.style.display='';
+      if (isVideo) {
+        const artisan=gallerySafe(meta.artesano,'No registrado');
+        const state=gallerySafe(meta.estado,'No registrado');
+        const town=gallerySafe(meta.municipio,'No registrado');
+        const locality=gallerySafe(meta.localidad,'No registrado');
+        credit.innerHTML=`<div class="lightbox-credit-kicker">Registro audiovisual</div><h3>${esc(name)}</h3>
+          <dl><div><dt>Artesana/o</dt><dd>${esc(artisan)}</dd></div>
+          <div><dt>Estado</dt><dd>${esc(state)}</dd></div>
+          <div><dt>Municipio</dt><dd>${esc(town)}</dd></div>
+          <div><dt>Localidad</dt><dd>${esc(locality)}</dd></div></dl>`;
+      } else {
+        const artisan=gallerySafe(meta.artesano,'Nombre no registrado');
+        const state=gallerySafe(meta.estado);
+        const town=gallerySafe(meta.municipio);
+        const locality=gallerySafe(meta.localidad);
+        credit.innerHTML=`${meta.categoria ? `<div class="lightbox-credit-kicker">${esc(meta.categoria)}</div>` : '<div class="lightbox-credit-kicker">Registro fotográfico</div>'}
+          <h3>${esc(name)}</h3><dl><div><dt>Artesana/o</dt><dd>${esc(artisan)}</dd></div>
+          <div><dt>Estado</dt><dd>${esc(state)}</dd></div><div><dt>Municipio</dt><dd>${esc(town)}</dd></div>
+          <div><dt>Localidad</dt><dd>${esc(locality)}</dd></div></dl>`;
+      }
     }
   }
-
-  // show/hide arrows
-  const prev = document.getElementById('lightbox-prev');
-  const next = document.getElementById('lightbox-next');
-  if (prev) prev.style.display = _lbImages.length > 1 ? '' : 'none';
-  if (next) next.style.display = _lbImages.length > 1 ? '' : 'none';
+  const prev=document.getElementById('lightbox-prev');
+  const next=document.getElementById('lightbox-next');
+  if (prev) prev.style.display=_lbImages.length>1?'':'none';
+  if (next) next.style.display=_lbImages.length>1?'':'none';
 }
-
-document.getElementById('lightbox-close').addEventListener('click', () => {
-  document.getElementById('lightbox').classList.remove('open');
+document.getElementById('lightbox-close').addEventListener('click',atlasCloseLightbox);
+document.getElementById('lightbox').addEventListener('click',e => {
+  if (e.target===document.getElementById('lightbox')) atlasCloseLightbox();
 });
-document.getElementById('lightbox').addEventListener('click', e => {
-  if (e.target === document.getElementById('lightbox')) {
-    document.getElementById('lightbox').classList.remove('open');
-  }
-});
-document.addEventListener('keydown', e => {
-  const lb = document.getElementById('lightbox');
+document.addEventListener('keydown',e=>{
+  const lb=document.getElementById('lightbox');
   if (!lb.classList.contains('open')) return;
-  if (e.key === 'Escape')      lb.classList.remove('open');
-  if (e.key === 'ArrowRight')  { _lbCurrent = (_lbCurrent + 1) % _lbImages.length; _renderLightbox(); }
-  if (e.key === 'ArrowLeft')   { _lbCurrent = (_lbCurrent - 1 + _lbImages.length) % _lbImages.length; _renderLightbox(); }
+  if (e.key==='Escape') {atlasCloseLightbox();return;}
+  if (e.target?.tagName==='VIDEO') return;
+  if (e.key==='ArrowRight') {_lbCurrent=(_lbCurrent+1)%_lbImages.length;_renderLightbox();}
+  if (e.key==='ArrowLeft') {_lbCurrent=(_lbCurrent-1+_lbImages.length)%_lbImages.length;_renderLightbox();}
 });
 
 // ────────────────────────────────────────────────

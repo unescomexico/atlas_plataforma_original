@@ -1,25 +1,25 @@
-archivo_descargado,Tecnica,status
+﻿archivo_descargado,Tecnica,status
 006-Merida-Bordado_Ch_ol_Tzeltal.webp,Bordado ch'ol tzeltal,ok
 007-Merida-Macizo.webp,Macizo,ok
-011-Merida-Cadeneta_o_cadenilla.webp,Cadeneta o cadenilla,ok
-015-Merida-Pepenado.webp,Pepenado,ok
-018-Merida-Cadeneta_o_cadenilla.webp,Cadeneta o cadenilla,ok
-019-Merida-Cadeneta_o_cadenilla.webp,Cadeneta o cadenilla,ok
+011-Merida-Cadeneta_o_cadenilla.webp,Cadenilla,ok
+015-Merida-Pepenado.webp,Hilvanado,ok
+018-Merida-Cadeneta_o_cadenilla.webp,Cadenilla,ok
+019-Merida-Cadeneta_o_cadenilla.webp,Cadenilla,ok
 020-Merida-Telar_de_cintura.webp,Telar de cintura,ok
 026-Merida-Luchbilltaaval.webp,Luchbilltaaval,ok
-027-Merida-Tafetan.webp,Tafetán,ok
+027-Merida-Tafetan.webp,Tejido tafetán,ok
 030-Merida-Macizo.webp,Macizo,ok
-031-Merida-Taasuun_ekeep.webp,Tääsuun ekëëp,ok
+031-Merida-Taasuun_ekeep.webp,Delineado (a máquina de pedal),ok
 034-Merida-Telar_de_cintura.webp,Telar de cintura,ok
-037-Merida-Hilvan.webp,Hilván,ok
+037-Merida-Hilvan.webp,Hilvanado,ok
 040-Merida-Punto_de_Cruz.webp,Punto de cruz,ok
 057-Merida-Punto_de_Cruz.webp,Punto de cruz,ok
 043-Merida-Telar_de_cintura.webp,Telar de cintura,ok
-044-Merida-Tafetan.webp,Tafetán,ok
+044-Merida-Tafetan.webp,Tejido tafetán,ok
 045-Merida-Tejido_de_fibra_natural.webp,Tejido de fibra natural,ok
 048-Merida-Telar_de_cintura.webp,Telar de cintura,ok
 049-Merida-Punto_de_Cruz.webp,Punto de cruz,ok
-050-Merida-Punto_confite.webp,Punto confite,ok
+050-Merida-Punto_confite.webp,Confite,ok
 051-Merida-Punto_de_Cruz.webp,Punto de cruz,ok
 058-Merida-Telar_de_cintura.webp,Telar de cintura,ok
 062-Merida-Macizo.webp,Macizo,ok
@@ -30,41 +30,38 @@ archivo_descargado,Tecnica,status
 081-Merida-Telar_de_cintura.webp,Telar de cintura,ok
 082-Merida-Punto_de_Cruz.webp,Punto de cruz,ok
 085-Merida-Telar_de_cintura.webp,Telar de cintura,ok
-255-CDMX-Hilvan.webp,Hilván,ok
+255-CDMX-Hilvan.webp,Hilvanado,ok
 086-Merida-Telar_de_cintura.webp,Telar de cintura,ok
-087-Merida-Sapo.webp,Sapo,ok
 088-Merida-Punto_de_Cruz.webp,Punto de cruz,ok
 090-Merida-Telar_de_cintura.webp,Telar de cintura,ok
-091-Merida-Hilvan.webp,Hilván,ok
-092-Merida-Hilvan.webp,Hilván,ok
-095-Merida-Hilo_contado.webp,Hilo contado,ok
+091-Merida-Hilvan.webp,Hilvanado,ok
+092-Merida-Hilvan.webp,Hilvanado,ok
+095-Merida-Hilo_contado.webp,Punto de cruz,ok
 097-Merida-Telar_de_cintura.webp,Telar de cintura,ok
-098-Merida-Pepenado.webp,Pepenado,ok
+098-Merida-Pepenado.webp,Hilvanado,ok
 099-Merida-Bordado_Ch_ol_Tzeltal.webp,Bordado ch'ol tzeltal,ok
 100-Merida-Punto_de_Cruz.webp,Punto de cruz,ok
 101-Merida-Punto_de_Cruz.webp,Punto de cruz,ok
 104-Merida-Punto_de_Cruz.webp,Punto de cruz,ok
-105-Merida-Hilo_contado.webp,Hilo contado,ok
+105-Merida-Hilo_contado.webp,Punto de cruz,ok
 108-Merida-Telar_de_cintura.webp,Telar de cintura,ok
 110-Merida-Telar_de_cintura.webp,Telar de cintura,ok
 162-Merida-Macizo.webp,Macizo,ok
-112-Merida-Hilvan.webp,Hilván,ok
+112-Merida-Hilvan.webp,Hilvanado,ok
 113-Merida-Telar_de_cintura.webp,Telar de cintura,ok
-114-Merida-Telar_de_cintura.webp,Telar de cintura,ok
 115-Merida-Telar_de_cintura.webp,Telar de cintura,ok
 116-Merida-Punto_de_Cruz.webp,Punto de cruz,ok
-117-Merida-Deshilado.webp,Deshilado,ok
 118-Merida-Punto_de_Cruz.webp,Punto de cruz,ok
-119-Merida-Gasa_fina_y_tecnica_de_gasa.webp,Gasa fina y técnica de gasa,ok
+119-Merida-Gasa_fina_y_tecnica_de_gasa.webp,Gasa,ok
 120-Merida-Macizo.webp,Macizo,ok
 121-Merida-Telar_de_cintura.webp,Telar de cintura,ok
 122-Merida-Punto_de_Cruz.webp,Punto de cruz,ok
-123-Merida-Hilo_contado.webp,Hilo contado,ok
+123-Merida-Hilo_contado.webp,Punto de cruz,ok
 124-Merida-Punto_de_Cruz.webp,Punto de cruz,ok
-127-Merida-Pata_de_gallo.webp,Pata de gallo,ok
+127-Merida-Pata_de_gallo.webp,Relleno cruzado,ok
 129-Merida-Telar_de_cintura.webp,Telar de cintura,ok
 131-Merida-Punto_de_Cruz.webp,Punto de cruz,ok
-134-Merida-Deshilado.webp,Deshilado,ok
+134-Merida-Deshilado.webp,Deshilado y zurcido,ok
 137-Merida-Telar_de_cintura.webp,Telar de cintura,ok
 138-Merida-Relleno.webp,Relleno,ok
 141-Merida-Telar_de_cintura.webp,Telar de cintura,ok
@@ -79,32 +76,31 @@ archivo_descargado,Tecnica,status
 158-Merida-Brocado.webp,Brocado,ok
 159-Merida-Punto_de_Cruz.webp,Punto de cruz,ok
 160-Merida-Brocado.webp,Brocado,ok
-163-Merida-Cadeneta_o_cadenilla.webp,Cadeneta o cadenilla,ok
+163-Merida-Cadeneta_o_cadenilla.webp,Cadenilla,ok
 164-Merida-Telar_de_cintura.webp,Telar de cintura,ok
 167-Merida-Rayado.webp,Rayado,ok
 168-Merida-Brocado.webp,Brocado,ok
 169-Merida-Brocado.webp,Brocado,ok
-170-Merida-Urdido.webp,Urdido,ok
+170-Merida-Urdido.webp,Tejido anillado,ok
 171-Merida-Brocado.webp,Brocado,ok
 173-Merida-Telar_de_cintura.webp,Telar de cintura,ok
-177-Merida-Urdido.webp,Urdido,ok
-178-Merida-Bordado_de_chaquira.webp,Bordado de chaquira,ok
+177-Merida-Urdido.webp,Tejido anillado,ok
+178-Merida-Bordado_de_chaquira.webp,Bordado con chaquiras,ok
 180-Merida-Brocado.webp,Brocado,ok
-182-Merida-Hilvan.webp,Hilván,ok
+182-Merida-Hilvan.webp,Hilvanado,ok
 184-Merida-Brocado.webp,Brocado,ok
 185-Merida-Brocado.webp,Brocado,ok
 186-Merida-Brocado.webp,Brocado,ok
 187-Merida-Punto_de_Cruz.webp,Punto de cruz,ok
-188-Merida-Gasa_fina_y_tecnica_de_gasa.webp,Gasa fina y técnica de gasa,ok
+188-Merida-Gasa_fina_y_tecnica_de_gasa.webp,Gasa,ok
 189-Merida-Telar_de_pedal.webp,Telar de pedal,ok
-191-Merida-Gasa_fina_y_tecnica_de_gasa.webp,Gasa fina y técnica de gasa,ok
-005-Tijuana-Punto_de_Cruz.webp,Punto de cruz,ok
+191-Merida-Gasa_fina_y_tecnica_de_gasa.webp,Gasa,ok
 195-Merida-Punto_de_Cruz.webp,Punto de cruz,ok
-201-Merida-Cadeneta_o_cadenilla.webp,Cadeneta o cadenilla,ok
-202-Merida-Bordado_de_chaquira.webp,Bordado de chaquira,ok
-205-Merida-Discontinuo.webp,Discontinuo,ok
-006-Tijuana-Nexuy.webp,Nëxuy,ok
-007-Tijuana-Cadeneta_o_cadenilla.webp,Cadeneta o cadenilla,ok
+201-Merida-Cadeneta_o_cadenilla.webp,Cadenilla,ok
+202-Merida-Bordado_de_chaquira.webp,Bordado con chaquiras,ok
+205-Merida-Discontinuo.webp,Brocado de tramas discontinuas,ok
+006-Tijuana-Nexuy.webp,Delineado (a máquina de pedal),ok
+007-Tijuana-Cadeneta_o_cadenilla.webp,Cadenilla,ok
 009-Tijuana-Telar_de_pedal.webp,Telar de pedal,ok
 010-Tijuana-Lomillo.webp,Lomillo,ok
 011-Tijuana-Punto_de_Cruz.webp,Punto de cruz,ok
@@ -112,32 +108,31 @@ archivo_descargado,Tecnica,status
 015-Tijuana-Punto_de_Cruz.webp,Punto de cruz,ok
 016-Tijuana-Punto_de_Cruz.webp,Punto de cruz,ok
 018-Tijuana-Telar_de_cintura.webp,Telar de cintura,ok
-019-Tijuana-Labrado.webp,Labrado,ok
-021-Tijuana-Punto_de_Cruz.webp,Punto de cruz,ok
+019-Tijuana-Labrado.webp,Labrado de urdimbre,ok
 116-Tijuana-Telar_de_cintura.webp,Telar de cintura,ok
-022-Tijuana-Labrado.webp,Labrado,ok
-023-Tijuana-Pata_de_gallo.webp,Pata de gallo,ok
+022-Tijuana-Labrado.webp,Labrado de urdimbre,ok
+023-Tijuana-Pata_de_gallo.webp,Relleno cruzado,ok
 024-Tijuana-Punto_de_Cruz.webp,Punto de cruz,ok
 025-Tijuana-Telar_de_pedal.webp,Telar de pedal,ok
-026-Tijuana-Trencilla.webp,Trencilla,ok
+026-Tijuana-Trencilla.webp,Lomillo,ok
 027-Tijuana-Puntada_de_satin.webp,Puntada de satín,ok
-028-Tijuana-Deshilado.webp,Deshilado,ok
+028-Tijuana-Deshilado.webp,Deshilado y zurcido,ok
 029-Tijuana-Telar_de_cintura.webp,Telar de cintura,ok
 058-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
-031-Tijuana-Croche.webp,Croché,ok
-032-Tijuana-Bordado_de_chaquira.webp,Bordado de chaquira,ok
-033-Tijuana-Piteado.webp,Piteado,ok
+031-Tijuana-Croche.webp,Crochet,ok
+032-Tijuana-Bordado_de_chaquira.webp,Bordado con chaquiras,ok
+033-Tijuana-Piteado.webp,Relleno con pita,ok
 035-Tijuana-Telar_de_pedal.webp,Telar de pedal,ok
-045-Tijuana-Hilvan.webp,Hilván,ok
+045-Tijuana-Hilvan.webp,Hilvanado,ok
 039-Tijuana-Punto_de_Cruz.webp,Punto de cruz,ok
 040-Tijuana-Telar_de_pedal.webp,Telar de pedal,ok
-041-Tijuana-Bordado_de_chaquira.webp,Bordado de chaquira,ok
+041-Tijuana-Bordado_de_chaquira.webp,Bordado con chaquiras,ok
 042-Tijuana-Telar_de_cintura.webp,Telar de cintura,ok
-043-Tijuana-Pepenado.webp,Pepenado,ok
+043-Tijuana-Pepenado.webp,Hilvanado,ok
 047-Tijuana-Telar_de_cintura.webp,Telar de cintura,ok
 049-Tijuana-Telar_de_cintura.webp,Telar de cintura,ok
-050-Tijuana-Bordado_con_dos_agujas.webp,Bordado con dos agujas,ok
-052-Tijuana-Deshilado.webp,Deshilado,ok
+050-Tijuana-Bordado_con_dos_agujas.webp,Pespunteado,ok
+052-Tijuana-Deshilado.webp,Deshilado y zurcido,ok
 054-Tijuana-Telar_de_cintura.webp,Telar de cintura,ok
 057-Tijuana-Punto_de_Cruz.webp,Punto de cruz,ok
 065-Tijuana-Macizo.webp,Macizo,ok
@@ -149,44 +144,43 @@ archivo_descargado,Tecnica,status
 070-Tijuana-Telar_de_cintura.webp,Telar de cintura,ok
 079-Tijuana-Telar_de_pedal.webp,Telar de pedal,ok
 072-Tijuana-Telar_de_cintura.webp,Telar de cintura,ok
-073-Tijuana-Croche.webp,Croché,ok
-074-Tijuana-Hilvan.webp,Hilván,ok
+073-Tijuana-Croche.webp,Crochet,ok
+074-Tijuana-Hilvan.webp,Hilvanado,ok
 090-Tijuana-Punto_de_Cruz.webp,Punto de cruz,ok
 076-Tijuana-Telar_de_pedal.webp,Telar de pedal,ok
 077-Tijuana-Telar_de_pedal.webp,Telar de pedal,ok
 078-Tijuana-Telar_de_pedal.webp,Telar de pedal,ok
 080-Tijuana-Luchbilltaaval.webp,Luchbilltaaval,ok
 081-Tijuana-Telar_de_cintura.webp,Telar de cintura,ok
-082-Tijuana-Cadeneta_o_cadenilla.webp,Cadeneta o cadenilla,ok
-083-Tijuana-Bordado_con_dos_agujas.webp,Bordado con dos agujas,ok
+082-Tijuana-Cadeneta_o_cadenilla.webp,Cadenilla,ok
+083-Tijuana-Bordado_con_dos_agujas.webp,Pespunteado,ok
 085-Tijuana-Telar_de_cintura.webp,Telar de cintura,ok
-086-Tijuana-Pepenado.webp,Pepenado,ok
+086-Tijuana-Pepenado.webp,Hilvanado,ok
 088-Tijuana-Telar_de_cintura.webp,Telar de cintura,ok
 092-Tijuana-Telar_de_cintura.webp,Telar de cintura,ok
 093-Tijuana-Brocado.webp,Brocado,ok
 035-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
 098-Tijuana-Telar_de_cintura.webp,Telar de cintura,ok
-099-Tijuana-Trencilla.webp,Trencilla,ok
+099-Tijuana-Trencilla.webp,Lomillo,ok
 115-Tijuana-Relleno.webp,Relleno,ok
 101-Tijuana-Lomillo.webp,Lomillo,ok
-103-Tijuana-Hilvan.webp,Hilván,ok
 104-Tijuana-Telar_de_cintura.webp,Telar de cintura,ok
-105-Tijuana-Cadeneta_o_cadenilla.webp,Cadeneta o cadenilla,ok
+105-Tijuana-Cadeneta_o_cadenilla.webp,Cadenilla,ok
 106-Tijuana-Punto_de_Cruz.webp,Punto de cruz,ok
 107-Tijuana-Punto_de_Cruz.webp,Punto de cruz,ok
-108-Tijuana-Cadeneta_o_cadenilla.webp,Cadeneta o cadenilla,ok
+108-Tijuana-Cadeneta_o_cadenilla.webp,Cadenilla,ok
 109-Tijuana-Punto_de_Cruz.webp,Punto de cruz,ok
 110-Tijuana-Telar_de_pedal.webp,Telar de pedal,ok
-113-Tijuana-Hilvan.webp,Hilván,ok
+113-Tijuana-Hilvan.webp,Hilvanado,ok
 114-Tijuana-Brocado.webp,Brocado,ok
-117-Tijuana-Hilvan.webp,Hilván,ok
+117-Tijuana-Hilvan.webp,Hilvanado,ok
 119-Tijuana-Telar_de_cintura.webp,Telar de cintura,ok
 120-Tijuana-Telar_de_cintura.webp,Telar de cintura,ok
 123-Tijuana-Telar_de_pedal.webp,Telar de pedal,ok
 124-Tijuana-Telar_de_cintura.webp,Telar de cintura,ok
-010-CDMX-Costilla_de_raton.webp,Costilla de ratón,ok
-127-Tijuana-Hilvan.webp,Hilván,ok
-003-CDMX-Contabilidad_y_vuelta_por_hilo.webp,Contabilidad y vuelta por hilo,ok
+010-CDMX-Costilla_de_raton.webp,Espiguilla,ok
+127-Tijuana-Hilvan.webp,Hilvanado,ok
+003-CDMX-Contabilidad_y_vuelta_por_hilo.webp,Punto vertical,ok
 007-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 011-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 013-CDMX-Brocado.webp,Brocado,ok
@@ -195,10 +189,10 @@ archivo_descargado,Tecnica,status
 019-CDMX-Relleno.webp,Relleno,ok
 022-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 023-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
-024-CDMX-Deshilado.webp,Deshilado,ok
+024-CDMX-Deshilado.webp,Deshilado y zurcido,ok
 032-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
-026-CDMX-Trencilla_Mazahua.webp,Trencilla mazahua,ok
-027-CDMX-Cadeneta_o_cadenilla.webp,Cadeneta o cadenilla,ok
+026-CDMX-Trencilla_Mazahua.webp,Punto lomillo,ok
+027-CDMX-Cadeneta_o_cadenilla.webp,Cadenilla,ok
 028-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 029-CDMX-Lomillo.webp,Lomillo,ok
 030-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
@@ -206,7 +200,7 @@ archivo_descargado,Tecnica,status
 034-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 039-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 040-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
-041-CDMX-Tinte_natural_y_tejido.webp,Tinte natural y tejido,ok
+041-CDMX-Tinte_natural_y_tejido.webp,Tejido tafetán,ok
 042-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 043-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 044-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
@@ -214,17 +208,16 @@ archivo_descargado,Tecnica,status
 046-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 047-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 048-CDMX-Brocado.webp,Brocado,ok
-050-CDMX-Gasa_fina_y_tecnica_de_gasa.webp,Gasa fina y técnica de gasa,ok
+050-CDMX-Gasa_fina_y_tecnica_de_gasa.webp,Gasa,ok
 051-CDMX-Telar_de_pedal.webp,Telar de pedal,ok
 053-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
-055-CDMX-Gasa_fina_y_tecnica_de_gasa.webp,Gasa fina y técnica de gasa,ok
+055-CDMX-Gasa_fina_y_tecnica_de_gasa.webp,Gasa,ok
 056-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 057-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
-059-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
-060-CDMX-Contado.webp,Contado,ok
+060-CDMX-Contado.webp,Labrado de urdimbre,ok
 061-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
-062-CDMX-Contabilidad_y_vuelta_por_hilo.webp,Contabilidad y vuelta por hilo,ok
-064-CDMX-Labrado.webp,Labrado,ok
+062-CDMX-Contabilidad_y_vuelta_por_hilo.webp,Punto vertical,ok
+064-CDMX-Labrado.webp,Labrado de urdimbre,ok
 065-CDMX-Telar_de_pedal.webp,Telar de pedal,ok
 066-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 068-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
@@ -232,77 +225,68 @@ archivo_descargado,Tecnica,status
 070-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 071-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 076-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
-079-CDMX-Cadeneta_o_cadenilla.webp,Cadeneta o cadenilla,ok
+079-CDMX-Cadeneta_o_cadenilla.webp,Cadenilla,ok
 080-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 085-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
-086-CDMX-Pepenado_en_pliegue.webp,Pepenado en pliegue,ok
-087-CDMX-Tafetan.webp,Tafetán,ok
-088-CDMX-Contabilidad_y_vuelta_por_hilo.webp,Contabilidad y vuelta por hilo,ok
+086-CDMX-Pepenado_en_pliegue.webp,Hilvano fruncido o hilvanado plegado,ok
+087-CDMX-Tafetan.webp,Tejido tafetán,ok
 140-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 089-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
-090-CDMX-Deshilado.webp,Deshilado,ok
+090-CDMX-Deshilado.webp,Deshilado y zurcido,ok
 091-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 093-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
-094-CDMX-Bordado_de_dos_agujas.webp,Bordado de dos agujas,ok
-095-CDMX-Pata_de_gallo.webp,Pata de gallo,ok
+094-CDMX-Bordado_de_dos_agujas.webp,Pespunteado,ok
+095-CDMX-Pata_de_gallo.webp,Relleno cruzado,ok
 096-CDMX-Relleno.webp,Relleno,ok
 099-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 101-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 103-CDMX-Puntada_de_satin.webp,Puntada de satín,ok
-104-CDMX-Telar_de_pedal.webp,Telar de pedal,ok
-108-CDMX-Deshilado.webp,Deshilado,ok
-109-CDMX-Deshilado.webp,Deshilado,ok
+108-CDMX-Deshilado.webp,Deshilado y zurcido,ok
+109-CDMX-Deshilado.webp,Deshilado y zurcido,ok
 110-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
-165-CDMX-Labrado.webp,Labrado,ok
+165-CDMX-Labrado.webp,Labrado de urdimbre,ok
 111-CDMX-Telar_de_pedal.webp,Telar de pedal,ok
 112-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
 113-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
 114-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
-115-CDMX-Contabilidad_y_vuelta_por_hilo.webp,Contabilidad y vuelta por hilo,ok
+115-CDMX-Contabilidad_y_vuelta_por_hilo.webp,Punto vertical,ok
 141-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
-118-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 119-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
-120-CDMX-Cadeneta_o_cadenilla.webp,Cadeneta o cadenilla,ok
-121-CDMX-Prendas_tradicional.webp,Prendas tradicional,ok
-129-CDMX-Pata_de_gallo.webp,Pata de gallo,ok
+120-CDMX-Cadeneta_o_cadenilla.webp,Cadenilla,ok
+129-CDMX-Pata_de_gallo.webp,Relleno cruzado,ok
 124-CDMX-Lomillo.webp,Lomillo,ok
 125-CDMX-Bordado_libre_en_maquina_de_pedal.webp,Bordado libre en maquina de pedal,ok
-126-CDMX-Cadeneta_o_cadenilla.webp,Cadeneta o cadenilla,ok
+126-CDMX-Cadeneta_o_cadenilla.webp,Cadenilla,ok
 138-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 130-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 131-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 134-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
 137-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
-143-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 145-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
 146-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
-148-CDMX-Talakaxtokgo_da_makan.webp,Talakaxtokgo da makan,ok
-149-CDMX-Deshilado.webp,Deshilado,ok
-157-CDMX-Tejido_de_fibra_natural.webp,Tejido de fibra natural,ok
-152-CDMX-Bordado_de_dos_agujas.webp,Bordado de dos agujas,ok
-153-CDMX-Pepenado_en_pliegue.webp,Pepenado en pliegue,ok
-155-CDMX-Pepenado.webp,Pepenado,ok
+149-CDMX-Deshilado.webp,Deshilado y zurcido,ok
+152-CDMX-Bordado_de_dos_agujas.webp,Pespunteado,ok
+153-CDMX-Pepenado_en_pliegue.webp,Hilvano fruncido o hilvanado plegado,ok
+155-CDMX-Pepenado.webp,Hilvanado,ok
 156-CDMX-Bordado_Ch_ol_Tzeltal.webp,Bordado ch'ol tzeltal,ok
 158-CDMX-Relleno.webp,Relleno,ok
-159-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 161-CDMX-Otomi.webp,Otomí,ok
 163-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 164-CDMX-Bordados_de_chamula_y_larrainzar.webp,Bordados de chamula y larrainzar,ok
-168-CDMX-Hilvan.webp,Hilván,ok
+168-CDMX-Hilvan.webp,Hilvanado,ok
 169-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
 171-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
-172-CDMX-Pima_Nevome.webp,Pima (nevome),ok
+172-CDMX-Pima_Nevome.webp,Relleno,ok
 176-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 177-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
 179-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 181-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 182-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
-199-CDMX-Tafetan.webp,Tafetán,ok
+199-CDMX-Tafetan.webp,Tejido tafetán,ok
 183-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
 185-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 187-CDMX-Lomillo.webp,Lomillo,ok
 188-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
-190-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
 191-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
 192-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 193-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
@@ -315,22 +299,21 @@ archivo_descargado,Tecnica,status
 209-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 212-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 213-CDMX-Bordado_libre_en_maquina_de_pedal.webp,Bordado libre en maquina de pedal,ok
-215-CDMX-Pata_de_gallo.webp,Pata de gallo,ok
 216-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 217-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
 218-CDMX-Talakaxtokgo_da_makan.webp,Talakaxtokgo da makan,ok
 219-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
-221-CDMX-Cadeneta_o_cadenilla.webp,Cadeneta o cadenilla,ok
-223-CDMX-Cadeneta_o_cadenilla.webp,Cadeneta o cadenilla,ok
+221-CDMX-Cadeneta_o_cadenilla.webp,Cadenilla,ok
+223-CDMX-Cadeneta_o_cadenilla.webp,Cadenilla,ok
 224-CDMX-Tejido_de_fibra_natural.webp,Tejido de fibra natural,ok
 225-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
-226-CDMX-Cadeneta_o_cadenilla.webp,Cadeneta o cadenilla,ok
+226-CDMX-Cadeneta_o_cadenilla.webp,Cadenilla,ok
 228-CDMX-Relleno.webp,Relleno,ok
 231-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
-233-CDMX-Cadeneta_o_cadenilla.webp,Cadeneta o cadenilla,ok
-302-CDMX-Pepenado.webp,Pepenado,ok
+233-CDMX-Cadeneta_o_cadenilla.webp,Cadenilla,ok
+302-CDMX-Pepenado.webp,Hilvanado,ok
 269-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
-236-CDMX-Trenzado.webp,Trenzado,ok
+236-CDMX-Trenzado.webp,Esterilla,ok
 237-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 238-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 241-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
@@ -344,27 +327,71 @@ archivo_descargado,Tecnica,status
 251-CDMX-Telar_de_pedal.webp,Telar de pedal,ok
 257-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 260-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
-262-CDMX-Cadeneta_o_cadenilla.webp,Cadeneta o cadenilla,ok
+262-CDMX-Cadeneta_o_cadenilla.webp,Cadenilla,ok
 263-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 265-CDMX-Telar_de_pedal.webp,Telar de pedal,ok
 266-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 270-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 272-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
-273-CDMX-Semilla.webp,Semilla,ok
+273-CDMX-Semilla.webp,Relleno,ok
 274-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 275-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 276-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
-277-CDMX-Pata_de_gallo.webp,Pata de gallo,ok
+277-CDMX-Pata_de_gallo.webp,Relleno cruzado,ok
 280-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
-282-CDMX-Hilvan.webp,Hilván,ok
+282-CDMX-Hilvan.webp,Hilvanado,ok
 283-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 284-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
 285-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
-287-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
 289-CDMX-Telar_de_pedal.webp,Telar de pedal,ok
 290-CDMX-Telar_de_cintura.webp,Telar de cintura,ok
-293-CDMX-Pepenado.webp,Pepenado,ok
-294-CDMX-Telar_colonial.webp,Telar colonial,ok
+293-CDMX-Pepenado.webp,Hilvanado,ok
 295-CDMX-Lomillo.webp,Lomillo,ok
 299-CDMX-Punto_de_Cruz.webp,Punto de cruz,ok
 304-CDMX-Tlajkitilistli.webp,Tlajkitilistli,ok
+KBO-Tijuana-Tejido_de_horquilla-604515916-attZxpEgeSpXUTTym4fJJqCJ.webp,Tejido de horquilla,ok
+KBO-Tijuana-Tenerife-604516428-attJ6ZycRUzmnvQSRPJobxGS.webp,Tenerife,ok
+KBO-Tijuana-Hazme_si_puedes-604516593-attpHJMdqXxMhMHc8CA34Dpw.webp,Hazme si puedes,ok
+KBO-Merida-Renacimiento-583377194-attY62Bq9ezEyvibzuC7gzHU.webp,Renacimiento,ok
+KBO-Merida-Enrollado-583377705-attTn2n49L6RVC7ZBFCyyubQ.webp,Enrollado,ok
+KBO-Merida-Zigzag-583378953-attdR47eBw8m5cRAXtzTsXpj.webp,Zigzag,ok
+KBO-Merida-Flor_de_palma-583378958-attYabFyqjGaJqvJvba9MyGY.webp,Flor de palma,ok
+KBO-Merida-Rejilla-583379155-attkje2MDqJ2f546UvH7zFdr.webp,Rejilla,ok
+KBO-Merida-Zarga-583381051-att8DKfnhAUAyc63cBxmhe5w.webp,Zarga,ok
+KBO-Merida-Canahuate-583381915-attLTASxSQW54Z9GnsaLbdPH.webp,Canahuate,ok
+KBO-Merida-Sombreado-583386235-attKHF5c8QSnxYDPMWAv39LM.webp,Sombreado,ok
+KBO-Merida-Rococo-584190002-attv2U9cvaDawuWG8aV6uQi5.webp,Rococó,ok
+KBO-Merida-Bordado_mazahua-584196639-attXZVpzi4PEBxizQkN4SyLM.webp,Bordado mazahua,ok
+KBO-Merida-Tejido_cerrado-584226970-attZy5dg8J6KcyJh56vrmEeV.webp,Tejido cerrado,ok
+KBO-Merida-Pinitos-584315445-att7ns2fyp8nsmrYbJ7W4DRq.webp,Pinitos,ok
+KBO-Merida-Petatillo-584317240-att7LgMD5XbnZBtz3uoztM3F.webp,Petatillo,ok
+KBO-CDMX-Aplique-617322848-attU7MmC9Qmya8Hu7Vz4tFX5.webp,Apliqué,ok
+KBO-CDMX-Bordado_mazahua-617325156-attKYF66v3LTBqNDW2gA2QJT.webp,Bordado mazahua,ok
+KBO-CDMX-Piquitos-617329260-attc4mvNj9CR7a8KN2t78A8k.webp,Piquitos,ok
+KBO-CDMX-Sueter_de_lana-617330251-attU7W2atwm7wFPe4ZpYNWLk.webp,Suéter de lana,ok
+KBO-CDMX-Tejido_en_curva_y_brocado-617342335-attsaau3PNteUQEqsjamxNyo.webp,Tejido en curva y brocado,ok
+KBO-CDMX-Bordado_elevado_de_contado-617343114-attPHKN6U8euCSACY8AEV3eQ.webp,Bordado elevado de contado,ok
+KBO-CDMX-Malla_o_red-617344494-attuLXJKbHpVYxvpoEGF7qKq.webp,Malla o red,ok
+KBO-CDMX-Empuntado-617346433-attu5tc4MtBFr5vydgKzFwbX.webp,Empuntado,ok
+KBO-CDMX-Tejido_de_ojitos-617346715-att36zQf7eMP2cycT2jjBkxg.webp,Tejido de ojitos,ok
+KBO-CDMX-Recorte_de_cuadros-617346954-attbBPYEwshkFjVkkSwN6mGy.webp,Recorte de cuadros,ok
+KBO-CDMX-Plisada-617347799-attHV24caGRBnW7vqYLZ4q9D.webp,Plisada,ok
+KBO-CDMX-Trenza_alzadas-617349582-attcHCUCdu4W6psNU2Awrk33.webp,Trenza alzadas,ok
+KBO-CDMX-Bordado_sobre_tela_y_cesteria-617349886-attZE9sjgkZUTBuokDTBwidH.webp,Bordado sobre tela y cesteria,ok
+KBO-CDMX-Bordados_en_chaquira-617350315-attQP8Q2JkiMxPUX66Wq2j7M.webp,Bordados en chaquira,ok
+KBO-CDMX-Tintes_naturales-617350759-att2rAWSpqr4znbsQ35t2jR4.webp,Tintes naturales,ok
+KBO-CDMX-Mananita-617351016-attXxzUXv6s48DZCjkEuvfxc.webp,Mañanita,ok
+KBO-CDMX-Randa_de_aguja-617351376-atttpvQ7gH3ptegT8QJ2cbKW.webp,Randa de aguja,ok
+KBO-CDMX-Anudado-617353445-att2XsQc85DMogS4vnpp9QCN.webp,Anudado,ok
+KBO-CDMX-Tejido_en_bastidor_de_madera-617353520-attHwiZBnZvJ7u5jcn8aK8Ex.webp,Tejido en bastidor de madera,ok
+KBO-CDMX-Animalitos_de_lana-617356816-atteLHyjeWvTHq4oZvvGtD6a.webp,Animalitos de lana,ok
+KBO-CDMX-Ivan_bordado-617357069-attFApg6tPUWkF8uiWA986cf.webp,Ivan bordado,ok
+KBO-CDMX-Bordado_camisas_de_lavor-617361075-att8HbhhQgv82XSma9DSRnBB.webp,Bordado camisas de lavor,ok
+KBO-CDMX-Punto_atras-617361323-attbebeRCWwjgUe9g3a4sRPV.webp,Punto atrás,ok
+KBO-CDMX-Randa_de_aguja-617361552-attn4enwZn6cCZsyLmB259dM.webp,Randa de aguja,ok
+KBO-CDMX-Horquilla-617362463-attMxvQuKc7DhYHbsgDcx2UW.webp,Horquilla,ok
+KBO-CDMX-Bordado_mazahua-617365085-attoFfstFZAwfzHupdURu5UQ.webp,Bordado mazahua,ok
+KBO-CDMX-Ojitos-617369473-attxwEuz8t98QTSm94img2fe.webp,Ojitos,ok
+KBO-CDMX-Puntada_lineal_continua-617373658-attoUYEfdLF94cSmkw2ARi2V.webp,Puntada lineal continua,ok
+KBO-CDMX-Tlapial-617380772-attjVrCpPgnAdswWw8BiEuVT.webp,Tlapial,ok
+KBO-CDMX-Bordado_a_mano_con_puntada_lineal_continua-617382580-attQ8SHKFwWADiPYRG4YcTUh.webp,Bordado a mano con puntada lineal continua,ok

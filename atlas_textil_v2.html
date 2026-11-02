@@ -160,12 +160,12 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 1000; display: flex
 <div id="progress-bar"></div>
 
 <nav>
-  <a class="nav-tab active" href="#metodologia">Metodología</a>
-  <a class="nav-tab" href="#participacion">Participación</a>
-  <a class="nav-tab" href="#distribucion">Distribución</a>
-  <a class="nav-tab" href="#tecnicas">Técnicas</a>
-  <a class="nav-tab" href="#tenido">Teñido</a>
-  <a class="nav-tab" href="#transmision">Transmisión</a>
+  <button type="button" class="nav-tab active" data-target="metodologia">Metodología</button>
+  <button type="button" class="nav-tab" data-target="participacion">Participación</button>
+  <button type="button" class="nav-tab" data-target="distribucion">Distribución</button>
+  <button type="button" class="nav-tab" data-target="tecnicas">Técnicas</button>
+  <button type="button" class="nav-tab" data-target="tenido">Teñido</button>
+  <button type="button" class="nav-tab" data-target="transmision">Transmisión</button>
 </nav>
 
 <div id="intro">
@@ -781,7 +781,7 @@ window.addEventListener('scroll', () => {
     const el = document.getElementById(id);
     if (el && el.getBoundingClientRect().top < 120) current = id;
   }
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.getAttribute('href')==='#'+current));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.target===current));
 });
 
 const observer = new IntersectionObserver(entries => {
@@ -790,6 +790,22 @@ const observer = new IntersectionObserver(entries => {
 document.querySelectorAll('.section-block').forEach(s => observer.observe(s));
 
 loadAndRender();
+</script>
+
+<script>/* ATLAS_ACERCA_NAV_BUTTONS_V2 */
+(() => {
+  const nav = document.querySelector('nav');
+  if (!nav) return;
+  nav.addEventListener('click', event => {
+    const button = event.target.closest('button.nav-tab[data-target]');
+    if (!button || !nav.contains(button)) return;
+    event.preventDefault();
+    const section = document.getElementById(button.dataset.target);
+    if (!section) return;
+    section.scrollIntoView({behavior:'smooth', block:'start'});
+    nav.querySelectorAll('.nav-tab').forEach(el => el.classList.toggle('active',el === button));
+  });
+})();
 </script>
 </body>
 </html>

@@ -5433,3 +5433,89 @@ body.atlas-intro-open { overflow: hidden; }
   .registration-guidance-actions { flex-direction: column-reverse; }
   .registration-guidance-btn { width: 100%; }
 }
+
+/* Reproducción de videos en el carrusel de ficha */
+.carousel-video { display:block; width:100%; height:100%; object-fit:contain; background:#000; }
+
+
+/* Corrección multimedia: identificador de videos en el carrusel */
+.atlas-video-label { position:absolute; top:12px; left:12px; z-index:6; background:rgba(26,16,24,.85); color:white; padding:7px 12px; border-radius:20px; font-size:.8rem; pointer-events:none; }
+.carousel-video { display:block; width:100%; height:100%; object-fit:contain; background:#000; }
+
+
+/* Videos en fichas y galería */
+.atlas-gallery-video-cover{width:100%;height:100%;min-height:170px;background:linear-gradient(135deg,#33212e,#775064);color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.atlas-gallery-video-cover span{font-size:3rem;line-height:1}
+.atlas-gallery-video-cover small{font-size:.75rem;text-transform:uppercase;letter-spacing:.12em}
+.atlas-expand-video{position:absolute;right:12px;bottom:55px;z-index:5;background:rgba(30,20,28,.9);color:white;border:1px solid rgba(255,255,255,.5);padding:8px 12px;border-radius:22px;cursor:pointer}
+.carousel-slide{position:relative}
+.lightbox-image-wrap video{display:block;max-width:100%;max-height:calc(100vh - 105px);width:100%;height:auto;background:#000;border-radius:8px}
+.lightbox-image-wrap video[hidden],.lightbox-image-wrap img[hidden]{display:none!important}
+
+
+/* ATLAS_VIDEO_DETAILS_V3: ficha idéntica para foto y video y diseño adaptativo */
+#lightbox .lightbox-credit{overflow-y:auto;max-height:calc(100dvh - 88px)}
+#lightbox .lightbox-image-wrap{min-width:0}
+#lightbox-video{display:block;width:100%;max-width:100%;max-height:min(76dvh,850px);object-fit:contain;background:#080508}
+#lightbox-video[hidden]{display:none!important}
+@media(max-width:767px){
+  #lightbox .lightbox-credit{max-height:none;overflow:visible;width:100%;box-sizing:border-box}
+  #lightbox .lightbox-image-wrap{width:100%;max-width:100%;min-height:0}
+  #lightbox-video{width:100%;max-height:55dvh;aspect-ratio:16/9}
+}
+
+/* Filtro de técnicas destacadas: compacto y accesible */
+.catalog-toolbar { position:relative; flex-wrap:wrap; }
+.catalog-all-switch { margin-left:auto; display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-size:12px; white-space:nowrap; color:inherit; user-select:none; }
+.catalog-all-switch input { position:absolute; opacity:0; width:1px; height:1px; }
+.catalog-switch-track { display:inline-block; position:relative; width:31px; height:18px; flex:none; background:#a49a9c; border-radius:12px; transition:background .2s; }
+.catalog-switch-track::after { content:''; position:absolute; top:3px; left:3px; width:12px; height:12px; border-radius:50%; background:white; transition:transform .2s; }
+.catalog-all-switch input:checked + .catalog-switch-track { background:#9d064a; }
+.catalog-all-switch input:checked + .catalog-switch-track::after { transform:translateX(13px); }
+.catalog-all-switch input:focus-visible + .catalog-switch-track { outline:2px solid #245fc0; outline-offset:3px; }
+@media(max-width:700px){ .catalog-all-switch{ width:100%; justify-content:flex-end; margin:4px 0 0; white-space:normal; } }
+
+/* ATLAS_INTRO_4_STATS_2026 */
+.atlas-intro-slide[data-intro-slide="1"] .atlas-intro-stat-panel { gap: 9px; }
+.atlas-intro-slide[data-intro-slide="1"] .atlas-intro-stat-card { min-height: 84px; padding-top: 12px; padding-bottom: 12px; }
+@media (max-width:760px) { .atlas-intro-slide[data-intro-slide="1"] .atlas-intro-stat-panel { grid-template-columns: repeat(2, minmax(0,1fr)); } .atlas-intro-slide[data-intro-slide="1"] .atlas-intro-stat-card { min-height: 72px; } }
+
+/* ATLAS_LEYENDAS_INTERACTIVAS_V1 */
+.map-legend { width:min(288px, calc(100vw - 24px)); max-height:min(49vh,390px); overflow:hidden; }
+.atlas-legend-scroll { max-height:min(29vh,240px); overflow-y:auto; padding-right:5px; overscroll-behavior:contain; }
+.atlas-legend-row { display:flex; width:100%; gap:9px; align-items:center; padding:5px 3px; font-size:.73rem; color:rgba(255,248,245,.92); text-align:left; }
+.atlas-legend-swatch {flex:0 0 12px;height:12px;border-radius:3px;border:1px solid rgba(255,255,255,.35);}
+button.atlas-legend-action { background:none; border:0; cursor:pointer; font:inherit; }
+button.atlas-legend-action:hover,button.atlas-legend-action:focus-visible {background:rgba(255,255,255,.13);border-radius:4px;outline-offset:1px;}
+.atlas-legend-scroll + .map-legend-note {max-width:none; margin-top:8px;}
+.atlas-language-popup { min-width:195px; font-family:inherit; }
+.atlas-language-popup strong {display:block;margin-bottom:5px;font-size:1rem;}
+.atlas-language-popup div {font-size:.78rem;margin-bottom:10px;}
+.atlas-language-popup button {border:0;border-radius:5px;background:#90083c;color:white;padding:8px 11px;cursor:pointer;font:inherit;font-size:.8rem;}
+@media(max-width:650px){.map-legend{max-height:37vh;width:min(244px,calc(100vw - 22px));}.atlas-legend-scroll{max-height:19vh;}}
+
+
+/* ATLAS_LEYENDAS_VISIBLES_V2 */
+.map-panel {position:relative;}
+#map-legend.map-legend {position:absolute;right:12px;bottom:50px;left:auto;z-index:950;display:flex;flex-direction:column;box-sizing:border-box;width:min(300px,calc(100% - 24px));max-width:300px;max-height:min(66vh,560px);overflow:visible;padding:12px 14px;box-shadow:0 10px 30px rgba(0,0,0,.25);}
+#map-legend-title {flex:0 0 auto;}
+#map-legend-body {display:flex;flex-direction:column;min-height:0;overflow:hidden;}
+#map-legend-body .atlas-legend-scroll {display:block;flex:1 1 auto;min-height:54px;max-height:min(43vh,380px);overflow-y:auto;overscroll-behavior:contain;}
+#map-legend-body .atlas-legend-row {min-height:27px;}
+#map-legend-body .map-legend-note {font-size:.69rem;line-height:1.4;margin-top:7px;}
+@media(max-width:700px){#map-legend.map-legend {right:8px;bottom:42px;width:min(242px,calc(100% - 16px));max-height:42vh;}#map-legend-body .atlas-legend-scroll{max-height:25vh;}}
+
+/* ATLAS_POPUPS_SIMPLIFICADOS_V2 */
+.atlas-territory-popup strong,.atlas-language-popup strong{display:block;font-size:1rem;margin:0 0 5px;}
+.atlas-territory-popup div,.atlas-language-popup div{font-size:.82rem;margin:0;}
+.atlas-state-photo{margin:12px 0 16px;overflow:hidden;border-radius:10px;background:#f7f1ee;}
+.atlas-state-photo img{display:block;width:100%;height:175px;object-fit:cover;}
+.atlas-state-photo figcaption{padding:7px 10px;font-size:.72rem;color:#685a56;}
+@media(max-width:650px){.atlas-state-photo img{height:155px;}}
+
+/* ATLAS_FOTO_ESTADO_HOVER_LENGUA_V1 */
+.atlas-state-photo img[data-atlas-state-photo]{cursor:zoom-in;}
+.atlas-state-photo img[data-atlas-state-photo]:focus-visible{outline:3px solid #a40445;outline-offset:-3px;}
+.atlas-state-photo{margin-bottom:14px;}
+.atlas-language-hover-tooltip.leaflet-tooltip{background:#24151b;color:white;border:0;border-radius:5px;box-shadow:0 3px 12px #0003;padding:5px 9px;pointer-events:none;}
+.atlas-language-hover-tooltip.leaflet-tooltip-top:before{border-top-color:#24151b;}

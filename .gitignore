@@ -1,2 +1,23 @@
-
-data_source/
+# Respaldos y trabajo temporal
+respaldo_*/
+**/respaldo_*/
+*.bak
+*.bak_*
+*.backup
+*.tmp
+*.log
+__pycache__/
+.pytest_cache/
+.DS_Store
+Thumbs.db
+*.env
+.env*
+!.env.example
+*.pem
+*.key
+*_private.json
+# Salidas locales de compilación y descargas Kobo
+_site/
+dist/
+01_KOBO_ORIGINALES/
+03_ATLAS_MULTIMEDIA_NUEVA/

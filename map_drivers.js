@@ -359,6 +359,7 @@ async function ensureEcosystemLayer(source) {
   if (!res.ok) throw new Error(`No se pudo cargar ${file}`);
   const data = await res.json();
   ecosystemData[source] = data;
+  updateLegend();
   const layer = L.geoJSON(data, {
     pane: 'atlasTerritoryPane',
     style: feature => ecosystemStyle(feature, source),
@@ -366,7 +367,21 @@ async function ensureEcosystemLayer(source) {
       const code = ecosystemFeatureCode(feature, source);
       const name = ecosystemFeatureName(feature, source);
       featureLayer.bindTooltip(`<b>${esc(name)}</b>`, { className: 'leaflet-tooltip-atlas', sticky: true });
-      featureLayer.on('click', () => selectEcosystem(code));
+      featureLayer.on('click', (ev) => {
+        selectEcosystem(code);
+        const type=source==='usv'?'uso_suelo':'ecorregion';
+        const profile=territoryProfileData?.[type]?.[String(code)];
+        const count=profile?.summary?.n_registros;
+        const wrap=document.createElement('div');wrap.className='atlas-territory-popup';
+        const label=document.createElement('strong');label.textContent=name;
+        wrap.append(label);
+        if(count !== undefined && count !== null && Number.isFinite(Number(count))){
+          const sub=document.createElement('div'); const n=Number(count);
+          sub.textContent=`${n.toLocaleString('es-MX')} aportación${n===1?'':'es'} asociada${n===1?'':'s'}`;
+          wrap.append(sub);
+        }
+        L.popup({maxWidth:270}).setLatLng(ev.latlng).setContent(wrap).openOn(map);
+      });
     },
   });
   ecosystemLayers[source] = layer;
@@ -897,32 +912,97 @@ onStateClick = function(name, layer, feat) {
 };
 
 // ---------- Legend ----------
+// ATLAS_LEYENDAS_INTERACTIVAS_V1
+function atlasLegendRow(color, label, onClick) {
+  const row = document.createElement(onClick ? 'button' : 'div');
+  row.className = 'atlas-legend-row' + (onClick ? ' atlas-legend-action' : '');
+  if (onClick) { row.type = 'button'; row.addEventListener('click', onClick); }
+  const dot = document.createElement('span'); dot.className='atlas-legend-swatch';
+  // Colors are derived from the actual rendered layer, never from a second palette.
+  dot.style.backgroundColor = color;
+  const txt = document.createElement('span'); txt.textContent=label;
+  row.append(dot,txt);
+  return row;
+}
+function atlasLegendNote(container, message) {
+  const el=document.createElement('p');el.className='map-legend-note';el.textContent=message;container.appendChild(el);
+}
+function atlasLegendList(container, entries) {
+  const list=document.createElement('div');list.className='atlas-legend-scroll';
+  entries.forEach(e=>list.appendChild(atlasLegendRow(e.color,e.name,e.onClick)));
+  container.appendChild(list);
+}
 function updateLegend() {
   const title = document.getElementById('map-legend-title');
   const body = document.getElementById('map-legend-body');
   if (!title || !body) return;
-  if (activeMapDriver === 'estado') {
-    title.textContent = 'Técnicas por estado';
-    body.innerHTML = `
-      <div class="legend-item"><div class="legend-dot" style="background:#FCBC52"></div><span>20 o más</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:#A4D984"></div><span>10 – 19</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:#F588AF"></div><span>1 – 9</span></div>
-      <div class="map-legend-note">Puedes seleccionar varios estados. Las comunidades permanecen en primer plano.</div>`;
-  } else if (activeMapDriver === 'lengua') {
-    const languages = languageCloudData.filter(x => selectedLanguageIds.has(x.id));
-    title.textContent = languages.length === 1 ? languages[0].name : languages.length > 1 ? `${languages.length} lenguas` : 'Lenguas indígenas';
-    if (languages.length) {
-      const shown = languages.slice(0,5).map(language => `<div class="legend-item"><div class="legend-dot" style="background:${language.color}"></div><span>${esc(language.name)}</span></div>`).join('');
-      body.innerHTML = `${shown}${languages.length>5?`<div class="map-legend-note">+ ${languages.length-5} lengua${languages.length-5!==1?'s':''} seleccionada${languages.length-5!==1?'s':''}</div>`:''}<div class="map-legend-note">Las comunidades se incluyen si caen dentro de la presencia aproximada de cualquiera de las lenguas seleccionadas.</div>`;
-    } else {
-      body.innerHTML = `<div class="map-legend-note">${languageCloudData.length} lenguas específicas se representan con colores únicos. Puedes seleccionar varias a la vez.</div>`;
-    }
-  } else {
-    title.textContent = activeEcosystemSource === 'usv' ? 'Uso del suelo y vegetación' : 'Ecorregiones';
-    body.innerHTML = `<div class="map-legend-note">Selecciona una o varias unidades desde el menú desplegable. Solo se mostrarán sus territorios y las comunidades ubicadas dentro de ellos.</div><div class="map-legend-note">Las categorías de materiales filtran las comunidades, no la capa ecológica.</div>`;
+  body.replaceChildren();
+  if (activeMapDriver==='estado') {
+    title.textContent='Técnicas por estado';
+    atlasLegendList(body,[
+      {color:'#FCBC52',name:'20 o más'},
+      {color:'#A4D984',name:'10 – 19'},
+      {color:'#F588AF',name:'1 – 9'}
+    ]);
+    atlasLegendNote(body,'Selecciona estados para consultar sus registros.');
+    return;
   }
+  if (activeMapDriver==='lengua') {
+    title.textContent='Lenguas indígenas';
+    const selected=selectedLanguageIds.size>0;
+    const entries=languageCloudData.filter(x=>!selected||selectedLanguageIds.has(x.id))
+      .slice().sort((a,b)=>a.name.localeCompare(b.name,'es'));
+    atlasLegendList(body,entries.map(lang=>({
+      color:lang.color,name:lang.name,
+      onClick:()=>{selectLanguage(lang.id);}
+    })));
+    atlasLegendNote(body,selected ? 'Selecciona un nombre para cambiar el filtro. Los colores representan lenguas, no técnicas exclusivas de una lengua.' :
+      'Selecciona un color o pulsa cerca de un punto para consultar y filtrar su lengua.');
+    return;
+  }
+  const source=activeEcosystemSource;
+  title.textContent=source==='usv'?'Vegetación y ecosistemas':'Ecorregiones';
+  const features=ecosystemData[source]?.features||[];
+  // One swatch per actual unit; use the same ecosystemColor used by polygons.
+  const entries=new Map();
+  features.forEach((f,index)=>{
+    const code=ecosystemFeatureCode(f,source);
+    if(!code||entries.has(code))return;
+    entries.set(code, {code,name:ecosystemFeatureName(f,source),color:ecosystemColor(f,source,index)});
+  });
+  const selection=selectedEcosystemCodes.size>0;
+  atlasLegendList(body,[...entries.values()]
+    .filter(e=>!selection||selectedEcosystemCodes.has(e.code))
+    .sort((a,b)=>a.name.localeCompare(b.name,'es'))
+    .map(e=>({color:e.color,name:e.name,onClick:()=>selectEcosystem(e.code)})));
+  atlasLegendNote(body,'Selecciona un color o una región del mapa para filtrar los territorios.');
 }
-
+// En la nube de lenguas los puntos se dibujan en canvas, sin eventos individuales.
+// Resolvemos el clic sobre el mapa al punto representado más cercano en pantalla.
+function atlasClickLanguageCloud(ev) {
+  if (activeMapDriver!=='lengua'||!languageCloudData.length||!map)return;
+  const center=map.latLngToContainerPoint(ev.latlng);
+  let nearest=null, minDistance=12*12;
+  const entries=selectedLanguageIds.size ? languageCloudData.filter(l=>selectedLanguageIds.has(l.id)) : languageCloudData;
+  for(const lang of entries){
+    for(const pair of lang.coords||[]){
+      const p=map.latLngToContainerPoint([pair[1],pair[0]]);
+      const dx=p.x-center.x,dy=p.y-center.y,d=dx*dx+dy*dy;
+      if(d<minDistance){minDistance=d;nearest=lang;}
+    }
+  }
+  if(!nearest)return;
+  const wrap=document.createElement('div');wrap.className='atlas-language-popup';
+  const label=document.createElement('strong');label.textContent=nearest.name;
+  const sub=document.createElement('div');
+  const profile=territoryProfileData?.lengua?.[String(nearest.id)];
+  const count=profile?.summary?.n_registros;
+  sub.textContent=Number.isFinite(Number(count)) && count !== undefined && count !== null
+    ? `${Number(count).toLocaleString('es-MX')} aportación${Number(count)===1?'':'es'} asociada${Number(count)===1?'':'s'}`
+    : 'Lengua representada en esta zona';
+  wrap.append(label,sub);
+  L.popup({maxWidth:270}).setLatLng(ev.latlng).setContent(wrap).openOn(map);
+}
 // ---------- Driver switching ----------
 function styleStateContext() {
   if (!geojsonLayer) return;
@@ -1049,6 +1129,8 @@ function initMapDriverEnhancements() {
   mapDriversEnhancementsStarted = true;
 
   document.querySelectorAll('[data-map-driver]').forEach(btn => btn.addEventListener('click', () => setMapDriver(btn.dataset.mapDriver)));
+  map.on('click', atlasClickLanguageCloud);
+  atlasBindLanguageHover();
   document.querySelectorAll('[data-ecosystem-source]').forEach(btn => btn.addEventListener('click', () => setEcosystemSource(btn.dataset.ecosystemSource)));
   const languageSearch = document.getElementById('map-language-search');
   if (languageSearch) languageSearch.addEventListener('input', () => { languageSearchText = languageSearch.value || ''; renderLanguageChips(); });
@@ -1186,6 +1268,28 @@ function territoryInterpretationNote(type) {
   return 'Aquí se reúnen los registros de técnicas de comunidades ubicadas dentro de esta categoría de uso del suelo y vegetación.';
 }
 
+// ATLAS_POPUPS_SIMPLIFICADOS_V2
+function atlasStatePhoto(profile) {
+  if (!profile || typeof tecnicasMap === 'undefined') return '';
+  const raw=String(profile?.summary?.tecnicas_principales || '');
+  // Se utilizan las técnicas que el perfil documenta; no se atribuye la foto a un
+  // municipio concreto si el índice solo la asocia con la técnica.
+  const keys=Object.keys(tecnicasMap||{});
+  const canon=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  const photos=[];
+  for(const item of raw.split(';').map(x=>x.trim()).filter(Boolean)) {
+    const name=item.replace(/\s+\(\d+\)\s*$/,'').trim();
+    const matched=keys.find(k=>canon(k)===canon(name));
+    const tech=matched && tecnicasMap[matched];
+    for(const f of tech?.imagenes||[]) {
+      if(!photos.includes(f)) photos.push(f);
+    }
+  }
+  if(!photos.length)return '';
+  const photo=photos[Math.floor(Math.random()*photos.length)];
+  const url=typeof imgPath==='function'?imgPath(photo):'imagenes/'+encodeURIComponent(photo);
+  return `<figure class="atlas-state-photo"><img data-atlas-state-photo="${encodeURIComponent(photo)}" tabindex="0" role="button" title="Ver información de la fotografía" loading="lazy" src="${esc(url)}" alt="Fotografía de una técnica documentada en ${esc(profile.name||'este estado')}" onerror="this.closest('figure').remove()"></figure>`;
+}
 function territoryProfileCard(profile, type) {
   const s = profile?.summary || {};
   const registros = Number(s.n_registros || 0);
@@ -1208,6 +1312,8 @@ function territoryProfileCard(profile, type) {
       <div class="territory-profile-kicker">Perfil del Atlas · ${esc(territoryTypeLabel(type))}</div>
       <h3>${esc(profile.name || '')}</h3>
       ${type === 'lengua' && profile.pueblo ? `<div class="territory-profile-pueblo">Pueblo de referencia: ${esc(profile.pueblo)}</div>` : ''}
+
+      ${type === 'estado' ? atlasStatePhoto(profile) : ''}
 
       <div class="territory-profile-stats">
         <div><strong>${registros.toLocaleString('es-MX')}</strong><span>registros de técnicas</span></div>
@@ -1377,3 +1483,70 @@ queueMicrotask(() => {
     console.error('No se pudo completar el arranque territorial tardío:', error);
   }
 });
+
+
+// ATLAS_FOTO_ESTADO_HOVER_LENGUA_V1
+function atlasOpenStateImage(node) {
+  const filename = decodeURIComponent(node.getAttribute('data-atlas-state-photo') || '');
+  if (!filename) return;
+  if (typeof openLightbox === 'function') openLightbox(filename, [filename], 0);
+}
+document.addEventListener('click', (event) => {
+  const node=event.target.closest?.('[data-atlas-state-photo]');
+  if (node) atlasOpenStateImage(node);
+});
+document.addEventListener('keydown', (event) => {
+  const node=event.target.closest?.('[data-atlas-state-photo]');
+  if(node && (event.key==='Enter'||event.key===' ')) { event.preventDefault(); atlasOpenStateImage(node); }
+});
+
+let atlasLanguageHoverTooltip = null;
+let atlasLanguageHoverId = null;
+let atlasLanguageHoverLast = 0;
+function atlasHoverLanguageCloud(event) {
+  if (!map) return;
+  if (activeMapDriver !== 'lengua' || !languageCloudData.length) {
+    if (atlasLanguageHoverTooltip && map.hasLayer(atlasLanguageHoverTooltip)) map.removeLayer(atlasLanguageHoverTooltip);
+    atlasLanguageHoverId = null;
+    return;
+  }
+  // Limit the nearest-point lookup while moving the mouse.
+  const now=Date.now();
+  if(now-atlasLanguageHoverLast<85)return;
+  atlasLanguageHoverLast=now;
+  const cursor=map.latLngToContainerPoint(event.latlng);
+  let nearest=null, best=10*10;
+  const langs=selectedLanguageIds.size ? languageCloudData.filter(l=>selectedLanguageIds.has(l.id)) : languageCloudData;
+  for(const lang of langs){
+    for(const pair of lang.coords||[]){
+      const p=map.latLngToContainerPoint([pair[1],pair[0]]);
+      const dx=p.x-cursor.x,dy=p.y-cursor.y,dist=dx*dx+dy*dy;
+      if(dist<best){best=dist;nearest=lang;}
+    }
+  }
+  if(!nearest){
+    if(atlasLanguageHoverTooltip && map.hasLayer(atlasLanguageHoverTooltip))map.removeLayer(atlasLanguageHoverTooltip);
+    atlasLanguageHoverId=null;
+    return;
+  }
+  if(!atlasLanguageHoverTooltip){
+    atlasLanguageHoverTooltip=L.tooltip({direction:'top',offset:[0,-8],interactive:false,opacity:0.96,className:'atlas-language-hover-tooltip'});
+  }
+  if(atlasLanguageHoverId!==nearest.id){
+    // textContent avoids interpreting language names as HTML.
+    const label=document.createElement('strong');label.textContent=nearest.name||'Lengua';
+    atlasLanguageHoverTooltip.setContent(label);
+    atlasLanguageHoverId=nearest.id;
+  }
+  atlasLanguageHoverTooltip.setLatLng(event.latlng);
+  if(!map.hasLayer(atlasLanguageHoverTooltip))atlasLanguageHoverTooltip.addTo(map);
+}
+function atlasBindLanguageHover(){
+  if(!map || map._atlasLanguageHoverBound)return;
+  map._atlasLanguageHoverBound=true;
+  map.on('mousemove',atlasHoverLanguageCloud);
+  map.on('mouseout',()=>{
+    if(atlasLanguageHoverTooltip && map.hasLayer(atlasLanguageHoverTooltip))map.removeLayer(atlasLanguageHoverTooltip);
+    atlasLanguageHoverId=null;
+  });
+}
