@@ -195,6 +195,12 @@ function refreshCommunities() {
   if (!municipiosLoaded || typeof setCommunityFilter !== 'function') return;
   const languages = languageCloudData.filter(x => selectedLanguageIds.has(x.id));
   setCommunityFilter(feature => {
+    // Respetar ubicación municipal del catálogo (no confundir con coordenada de localidad).
+    if (mapTerritoryFilter instanceof Set) {
+      const est = feature?.properties?.estado_nombre || '';
+      const mun = feature?.properties?.NOMGEO || '';
+      if (!mapTerritoryFilter.has(territoryKey(est, mun))) return false;
+    }
     // La clasificación/técnica es un filtro común a los tres enfoques.
     if (mapFilteredTecnicas) {
       const matchesTechnique = communityTechniques(feature).some(t => mapFilteredTecnicas.has(t));
@@ -717,7 +723,9 @@ function updateStateSelectionStyles() {
 function selectedStateTechniques() {
   const names = new Set();
   selectedStateNames.forEach(state => {
+    const territorial = territoryNamesForState(state);
     getTecnicasForEstado(state).forEach(t => {
+      if (territorial && !territorial.has(t)) return;
       if (!mapFilteredTecnicas || mapFilteredTecnicas.has(t)) names.add(t);
     });
   });
@@ -1053,6 +1061,7 @@ async function setMapDriver(driver) {
 
 clearMapFilter = function() {
   dismissInitialMapOverview?.();
+  mapTerritoryFilter = null;
 
   // Los filtros de clasificación/técnica son comunes a los tres enfoques.
   mapFilterState = { cat1: new Set(), cat2: new Set(), cat3: new Set(), cat4: new Set(), tecnica: new Set() };

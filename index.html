@@ -70,7 +70,7 @@
         <h3 class="atlas-intro-subtitle">Una plataforma para conocer, explorar y documentar las técnicas del arte textil mexicano</h3>
         <div class="atlas-intro-text-flow">
 <p>El Atlas de Técnicas del Arte Textil es una plataforma digital de consulta y exploración que reúne, organiza y presenta información sobre las técnicas, los conocimientos y las prácticas vinculadas con la producción textil en México. Su propósito es facilitar el acceso a estos registros y reconocer la diversidad de formas de elaboración, materiales, territorios y saberes involucrados.</p>
-<p>La plataforma se construyó a partir de fichas de registro completadas por artesanas y artesanos durante los encuentros de Original 2025, realizados en distintas sedes del país. Sus testimonios permiten documentar los procesos de elaboración, los materiales, las formas de aprendizaje y transmisión, los usos y los significados culturales de las técnicas.</p>
+<p>La plataforma se construyó a partir de fichas de registro completadas por artesanas y artesanos durante los encuentros de Original 2025, realizados en distintas sedes del país. Sus testimonios permiten documentar los procesos de elaboración, los materiales, las formas de aprendizaje y transmisión, los usos y los significados culturales de las técnicas. Este ejercicio de registro constituye también una forma de salvaguardia, al contribuir a la documentación, el reconocimiento y la transmisión de conocimientos y prácticas vinculados con el patrimonio cultural textil.</p>
 <p>Para organizar la información se desarrolló, con el acompañamiento de personas expertas, una clasificación basada en tres dimensiones: el textil, el tejido y el bordado. Esta estructura vincula los registros individuales con las técnicas documentadas y permite reconocer elementos compartidos y particularidades entre comunidades y territorios.</p>
 <p>El Atlas ofrece diversas formas de explorar sus contenidos. A través del mapa interactivo, el catálogo, la clasificación, la galería y la red de técnicas, es posible conocer su distribución geográfica, las lenguas asociadas, las relaciones con distintos ecosistemas y los registros fotográficos y audiovisuales disponibles. Las fichas reúnen información sobre las características, los procesos, los materiales y la transmisión de los conocimientos.</p>
 <p>Una misma técnica puede adquirir características diferentes según el territorio, los materiales disponibles y las experiencias transmitidas entre generaciones. La organización de los registros permite aproximarse a estas variaciones sin perder de vista sus contextos culturales y territoriales.</p>
@@ -321,9 +321,7 @@
         </details>
       </div>
 
-      <div class="map-filter-active" id="map-filter-active" style="display:none">
-        <span id="map-filter-active-text"></span>
-      </div>
+
       </div>
     </div>
   </aside>
@@ -332,6 +330,12 @@
   <div class="map-panel">
     <div id="map"></div>
 
+
+    <!-- Créditos visibles exclusivamente en los enfoques Lengua y Ecosistema -->
+    <div class="map-source-credits" aria-label="Fuentes de las capas cartográficas">
+      <p class="map-source-credit map-source-lengua">Fuentes de la capa de lenguas: INPI, INALI e INEGI. Elaboración para el Atlas.</p>
+      <p class="map-source-credit map-source-ecosistema">Fuentes de las capas de ecosistemas y vegetación: SEMARNAT e INEGI. Elaboración para el Atlas.</p>
+    </div>
 
     <div class="map-legend" id="map-legend">
       <h4 id="map-legend-title">Técnicas por estado</h4>
@@ -344,7 +348,9 @@
   </div>
 
   <!-- ━━━ Columna 3: perfiles territoriales construidos desde los testimonios ━━━ -->
-  <div class="side-panel territory-profile-panel">
+  <button type="button" class="territory-panel-toggle" id="territory-panel-toggle"
+    aria-expanded="true" aria-controls="territory-panel" aria-label="Ocultar panel de información">&gt;</button>
+  <div class="side-panel territory-profile-panel" id="territory-panel">
     <div class="panel-header">
       <div class="panel-title" id="panel-title">Estados</div>
       <div class="panel-subtitle" id="panel-subtitle"></div>
@@ -364,15 +370,12 @@
 <div id="view-catalogo" class="view">
   <div class="catalog-view">
     <div class="catalog-toolbar">
-      <input class="catalog-search" type="text" id="catalog-search" placeholder="Buscar técnica...">
+      <input class="catalog-search" type="search" id="catalog-search" placeholder="Buscar técnica..." aria-label="Buscar técnica">
       <label class="catalog-all-switch" for="catalog-show-all"><input type="checkbox" id="catalog-show-all"><span class="catalog-switch-track" aria-hidden="true"></span><span>Mostrar todas las técnicas</span></label>
-      <button class="filter-btn active" data-grupo="all">Todas</button>
-      <button class="filter-btn" data-grupo="Tejido">Tejido</button>
-      <button class="filter-btn" data-grupo="Técnicas decorativas">Técnicas decorativas</button>
-      <button class="filter-btn" data-grupo="Acabados">Acabados</button>
-      <button class="filter-btn" data-grupo="Teñidos">Teñidos</button>
+      <button type="button" id="catalog-clear" class="catalog-action catalog-reset">Limpiar filtros</button>
+      <button type="button" id="catalog-to-map" class="catalog-action catalog-map-action">Mostrar selección en el mapa</button>
     </div>
-    <div class="catalog-results" id="catalog-results">Cargando…</div>
+    <div id="catalog-filters" class="catalog-filters" aria-label="Filtros del catálogo"></div>
     <div class="tecnicas-grid" id="tecnicas-grid"></div>
   </div>
 </div>
@@ -425,6 +428,7 @@
   <div class="network-view">
     <!-- Panel flotante derecho: búsqueda + layer + subcategorías -->
     <div class="network-side-panel" id="network-side-panel">
+      <p class="network-reading-guide">Cada punto representa una técnica o grupo; las líneas muestran sus relaciones según la capa seleccionada. Pulsa un punto para explorar.</p>
       <!-- Búsqueda -->
       <div class="network-search-wrap">
         <input class="network-search-input" id="network-search" type="text" placeholder="Buscar técnica…" autocomplete="off">

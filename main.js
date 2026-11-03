@@ -494,7 +494,7 @@ async function loadCSVs() {
   const errBanner = document.getElementById('error-banner');
 
   try {
-    const [techRes, recRes, imgRes, galleryRes, biblioTechRes, biblioTaxRes, videoRes] = await Promise.all([
+    const [techRes, recRes, imgRes, galleryRes, biblioTechRes, biblioTaxRes, videoRes, culturalRes] = await Promise.all([
       fetch('data/data_by_technique_id.csv'),
       fetch('data/data_by_record_id.csv'),
       fetch('data/indice_imagenes.csv'),
@@ -502,11 +502,12 @@ async function loadCSVs() {
       fetch('data/fichas_bibliograficas_tecnicas.csv'),
       fetch('data/fichas_bibliograficas_taxonomia.csv'),
       fetch('data/indice_videos.csv'),
+      fetch('data/catalogo_cultural_normalizado.csv'),
     ]);
 
-    if (!techRes.ok || !recRes.ok) throw new Error('No se pudieron cargar los CSV.');
+    if (!techRes.ok || !recRes.ok || !culturalRes.ok) throw new Error('No se pudieron cargar los datos del catálogo.');
 
-    const [techText, recText, imgText, galleryPayload, biblioTechText, biblioTaxText, videoText] = await Promise.all([
+    const [techText, recText, imgText, galleryPayload, biblioTechText, biblioTaxText, videoText, culturalText] = await Promise.all([
       techRes.text(),
       recRes.text(),
       imgRes.ok ? imgRes.text() : Promise.resolve(''),
@@ -514,6 +515,7 @@ async function loadCSVs() {
       biblioTechRes.ok ? biblioTechRes.text() : Promise.resolve(''),
       biblioTaxRes.ok ? biblioTaxRes.text() : Promise.resolve(''),
       videoRes.ok ? videoRes.text() : Promise.resolve(''),
+      culturalRes.ok ? culturalRes.text() : Promise.resolve(''),
     ]);
 
     const techRows   = parseCSV(techText);
@@ -534,6 +536,49 @@ async function loadCSVs() {
     window.ATLAS_VIDEO_ROWS = window.ATLAS_VIDEO_ROWS.map(row => ({...row, ...(videoMetadataMap.get(row.archivo) || {})}));
 
     ATLAS = buildAtlasFromCSV(techRows, recordRows, imgRows);
+    // Vocabulario cultural curado: se conservan intactas las respuestas originales.
+    const culturalByTechnique = new Map((culturalText ? parseCSV(culturalText) : [])
+      .map(r => [normalizeLookup(r.tecnica_norm), r]));
+    ATLAS.tecnicas.forEach(t => {
+      const entry = culturalByTechnique.get(normalizeLookup(t.tecnica));
+      t.prendas_normalizadas = entry ? entry.prendas_normalizadas.split(';').map(s => s.trim()).filter(Boolean) : [];
+      t.ceremonias_normalizadas = entry ? entry.ceremonias_normalizadas.split(';').map(s => s.trim()).filter(Boolean) : [];
+      t.materiales_normalizados = entry ? (entry.materiales_normalizados || '').split(';').map(s => s.trim()).filter(Boolean) : [];
+    });
+
+    // Territorialidad verificada: los puntos magenta son centroides MUNICIPALES.
+    // Las localidades proceden de la galería y no se confunden con esos centroides.
+    const territoriosPorTecnica = new Map();
+    recordRows.forEach(r => {
+      const key = normalizeLookup(r.Tecnica);
+      const estado = String(r.Estado || '').trim();
+      const municipio = String(r.Municipio || '').trim();
+      if (!key || !estado || !municipio || /^(na|sin dato|no aplica)$/i.test(municipio)) return;
+      if (!territoriosPorTecnica.has(key)) territoriosPorTecnica.set(key, new Map());
+      const codigo = territoryKey(estado, municipio);
+      territoriosPorTecnica.get(key).set(codigo, {estado, municipio, codigo, etiqueta: `${municipio} · ${estado}`});
+    });
+    const localidadesPorTecnica = new Map();
+    GALLERY_ITEMS.forEach(item => {
+      const key = normalizeLookup(item.tecnica);
+      const localidad = String(item.localidad || '').trim();
+      const estado = String(item.estado || '').trim();
+      const municipio = String(item.municipio || '').trim();
+      if (!key || !localidad || /^(na|n\/?a|sin dato|no aplica)$/i.test(localidad)) return;
+      if (!localidadesPorTecnica.has(key)) localidadesPorTecnica.set(key, new Map());
+      const etiqueta = [localidad, municipio, estado].filter(Boolean).join(" · ");
+      const codigo = estado && municipio ? territoryKey(estado, municipio) : '';
+      localidadesPorTecnica.get(key).set(catalogNorm(etiqueta), {localidad, estado, municipio, codigo, etiqueta});
+    });
+    ATLAS.tecnicas.forEach(t => {
+      const key = normalizeLookup(t.tecnica);
+      t.territorios = [...(territoriosPorTecnica.get(key)?.values() || [])]
+        .sort((a,b) => a.etiqueta.localeCompare(b.etiqueta, 'es'));
+      t.localidades = [...(localidadesPorTecnica.get(key)?.values() || [])]
+        .sort((a,b) => a.etiqueta.localeCompare(b.etiqueta, 'es'));
+      // Propiedad conservada para compatibilidad con código no migrado.
+      t.comunidades = t.localidades.map(x => x.etiqueta);
+    });
     tecnicasMap     = {};
     estadosTecnicas = ATLAS.estados;
     municipiosTecnicas = ATLAS.municipios || {};
@@ -646,6 +691,10 @@ function getTecnicasForEstado(name) {
 // La clave de lookup es "Estado||Municipio" (necesario porque hay nombres
 // de municipio que se repiten entre estados, ej. "Hidalgo" en varios).
 // ────────────────────────────────────────────────
+function territoryKey(estado, municipio) {
+  return `${normalizeEstado(estado)}||${catalogNorm(municipio)}`;
+}
+
 function municipioKey(estado, municipio) { return `${estado}||${municipio}`; }
 
 function countForMunicipio(estado, municipio) {
@@ -778,7 +827,7 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
         if (typeof refreshMapViewport === 'function') refreshMapViewport();
       }, 80);
     } else if (id === 'catalogo' && !catalogInitialized) {
-      catalogInitialized = true; renderCatalog();
+      catalogInitialized = true; renderCatalogFilters(); renderCatalog();
     } else if (id === 'red' && !networkInitialized) {
       networkInitialized = true; initNetwork();
     } else if (id === 'arbol' && !arbolInitialized) {
@@ -1108,7 +1157,7 @@ function renderSidePanel(tecnicas) {
     cat1Map[key][sub].push(tname);
   });
   let html = '';
-  Object.keys(cat1Map).sort().forEach(c1 => {
+  Object.keys(cat1Map).sort((a,b) => (catalogNorm(a) === 'otras' ? 1 : 0) - (catalogNorm(b) === 'otras' ? 1 : 0) || a.localeCompare(b,'es')).forEach(c1 => {
     const color1   = CAT1_COLOR[c1] || COLORS.arena;
     const chipCls  = catChipClass(c1);
     html += `<div class="grupo-section">
@@ -1376,12 +1425,8 @@ function mapFilterSummaryParts() {
 function applyMapFilter() {
   dismissInitialMapOverview();
   const filtered=getFilteredTecnicas();
-  const activeEl=document.getElementById('map-filter-active');
-  const activeText=document.getElementById('map-filter-active-text');
   const hasFilter=mapFilterHasSelection();
   mapFilteredTecnicas=hasFilter?new Set(filtered.map(t=>t.tecnica)):null;
-  if(activeEl) activeEl.style.display=hasFilter?'':'none';
-  if(activeText && hasFilter) activeText.textContent=`${mapFilterSummaryParts().join(' · ')} · ${filtered.length} técnica${filtered.length!==1?'s':''}`;
 
   if (geojsonLayer) {
     geojsonLayer.eachLayer(l=>{
@@ -1406,7 +1451,21 @@ function applyMapFilter() {
   }
 }
 
+function territoryNamesForState(name) {
+  if (!(mapTerritoryFilter instanceof Set)) return null;
+  const names = new Set();
+  Object.entries(municipiosTecnicas).forEach(([key, techs]) => {
+    const [estado, municipio] = key.split('||');
+    if (normalizeEstado(estado) !== normalizeEstado(name)) return;
+    if (!mapTerritoryFilter.has(territoryKey(estado, municipio))) return;
+    techs.forEach(t => { if (!mapFilteredTecnicas || mapFilteredTecnicas.has(t)) names.add(t); });
+  });
+  return names;
+}
+
 function countForEstadoFiltered(name) {
+  const allowed = territoryNamesForState(name);
+  if (allowed) return allowed.size;
   const tecs=getTecnicasForEstado(name);
   return tecs.filter(t=>mapFilteredTecnicas && mapFilteredTecnicas.has(t)).length;
 }
@@ -1419,24 +1478,238 @@ function filteredStateStyle(name) {
 // ────────────────────────────────────────────────
 // CATALOG VIEW
 // ────────────────────────────────────────────────
-let activeGrupo  = 'all';
+// Catálogo: OR dentro de cada dimensión y AND entre dimensiones.
+// Conservar la selección al navegar entre fichas, catálogo y mapa.
+const CATALOG_GROUPS = [
+  {title:'Clasificación', fields:[['cat1','Categoría'],['cat2','Subcategoría'],['cat3','Tipo'],['cat4','Variante']]},
+  {title:'Ubicación', fields:[['estados','Estados'],['comunidades','Comunidades']]},
+  {title:'Otras características asociadas', fields:[['lenguas','Lenguas'],['ceremonias','Ceremonias y festividades'],['prendas','Prendas y objetos'],['materiales','Materiales']]}
+];
+const CATALOG_FILTERS = CATALOG_GROUPS.flatMap(group => group.fields);
 let activeSearch = '';
 let catalogShowAll = false;
+const catalogSelected = Object.fromEntries(CATALOG_FILTERS.map(([k]) => [k, new Set()]));
+
+function catalogNorm(v) {
+  return String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+function catalogValues(t, field) {
+  if (['cat1', 'cat2', 'cat3', 'cat4'].includes(field)) return t[field] ? [t[field]] : [];
+  if (field === 'prendas') return t.prendas_normalizadas || [];
+  if (field === 'materiales') return t.materiales_normalizados || [];
+  if (field === 'ceremonias') return t.ceremonias_normalizadas || [];
+  if (field === 'comunidades') return (t.localidades || []).map(x => x.etiqueta);
+  return t[field] || [];
+}
+function matchesCatalog(t) {
+  if (activeSearch && !catalogNorm(t.tecnica).includes(catalogNorm(activeSearch))) return false;
+  const estados = catalogSelected.estados;
+  const comunidades = catalogSelected.comunidades;
+  if (comunidades.size && estados.size && !(t.localidades || []).some(loc =>
+    comunidades.has(loc.etiqueta) && [...estados].some(e => normalizeEstado(e) === normalizeEstado(loc.estado)))) return false;
+  return CATALOG_FILTERS.every(([field]) => {
+    const set = catalogSelected[field];
+    if (!set.size) return true;
+    return catalogValues(t, field).some(value => set.has(value));
+  });
+}
+function getCatalogResults() {
+  if (!ATLAS) return [];
+  const hayDestacadas = ATLAS.tecnicas.some(t => t.destacada_catalogo);
+  return ATLAS.tecnicas.filter(t =>
+    matchesCatalog(t) && (catalogShowAll || activeSearch || CATALOG_FILTERS.some(([f]) => catalogSelected[f].size) || (hayDestacadas
+      ? t.destacada_catalogo
+      : (t.n_fichas >= 2 && ((t.imagenes || []).length || (t.videos || []).length))))
+  ).sort((a,b) => a.tecnica.localeCompare(b.tecnica,'es',{sensitivity:'base'}));
+}
+function availableCatalogOptions(field) {
+  const estados = catalogSelected.estados;
+  let techs = ATLAS.tecnicas;
+  if (field === 'comunidades' && estados.size) {
+    techs = techs.filter(t => t.estados.some(s => [...estados].some(e => normalizeEstado(e) === normalizeEstado(s))));
+    return [...new Set(techs.flatMap(t => (t.localidades || [])
+      .filter(loc => [...estados].some(e => normalizeEstado(e) === normalizeEstado(loc.estado)))
+      .map(loc => loc.etiqueta)))].filter(Boolean).sort((a,b) => a.localeCompare(b,'es',{sensitivity:'base'}));
+  }
+  return [...new Set(techs.flatMap(t => catalogValues(t, field)))]
+    .filter(Boolean).sort((a,b) => (catalogNorm(a) === 'otras' ? 1 : 0) - (catalogNorm(b) === 'otras' ? 1 : 0) || a.localeCompare(b,'es',{sensitivity:'base'}));
+}
+function renderCatalogFilters() {
+  if (!ATLAS) return;
+  const wrap = document.getElementById('catalog-filters');
+  if (!wrap) return;
+  const previousOpen = wrap.querySelector('.catalog-filter-dropdown[open]')?.dataset.filter;
+  const mobileCollapsed = wrap.dataset.initialized ? wrap.classList.contains('catalog-filters-collapsed') : true;
+  wrap.dataset.initialized = 'true';
+  wrap.innerHTML = `<button type="button" class="catalog-mobile-toggle" aria-expanded="${!mobileCollapsed}" aria-controls="catalog-filter-groups"><span aria-hidden="true">☰</span> Filtros del catálogo <span class="catalog-mobile-toggle-count"></span></button><div id="catalog-filter-groups" class="catalog-filter-groups">` + CATALOG_GROUPS.map(group => `<section class="catalog-filter-group">
+    <h3>${esc(group.title)}</h3>
+    <div class="catalog-filter-group-grid">${group.fields.map(([field, label]) => {
+      const values = availableCatalogOptions(field);
+      const checkboxes = values.map((value, i) => `<label class="catalog-filter-option">
+        <input type="checkbox" data-field="${field}" data-value="${esc(value)}" ${catalogSelected[field].has(value) ? 'checked' : ''}>
+        <span>${esc(value)}</span>
+      </label>`).join('');
+      return `<details class="catalog-filter-dropdown" data-filter="${field}" ${previousOpen === field ? 'open' : ''}>
+        <summary><span class="catalog-filter-label">${esc(label)}</span><span class="catalog-filter-count" data-count="${field}"></span></summary>
+        <div class="catalog-filter-options">
+          <div class="catalog-filter-actions"><button type="button" class="catalog-filter-none">Limpiar selección</button></div>
+          ${values.length > 8 ? `<input type="search" class="catalog-filter-search" placeholder="Buscar…" aria-label="Buscar ${esc(label)}">` : ''}
+          <div class="catalog-filter-scroll">${checkboxes || '<span class="catalog-filter-empty">Sin opciones disponibles</span>'}</div>
+        </div>
+      </details>`;
+    }).join('')}</div>
+  </section>`).join('') + '</div>';
+  wrap.classList.toggle('catalog-filters-collapsed', mobileCollapsed);
+  wrap.querySelector('.catalog-mobile-toggle')?.addEventListener('click', () => {
+    const collapsed = wrap.classList.toggle('catalog-filters-collapsed');
+    wrap.querySelector('.catalog-mobile-toggle').setAttribute('aria-expanded', String(!collapsed));
+  });
+  wrap.querySelectorAll('.catalog-filter-dropdown').forEach(details => {
+    details.addEventListener('toggle', () => {
+      if (!details.open) return;
+      wrap.querySelectorAll('.catalog-filter-dropdown[open]').forEach(other => {
+        if (other !== details) other.open = false;
+      });
+    });
+    const search = details.querySelector('.catalog-filter-search');
+    if (search) search.addEventListener('input', () => {
+      const term = catalogNorm(search.value);
+      details.querySelectorAll('.catalog-filter-option').forEach(row => {
+        row.hidden = !catalogNorm(row.textContent).includes(term);
+      });
+    });
+    details.querySelectorAll('input[type="checkbox"]').forEach(box => box.addEventListener('change', () => {
+      const set = catalogSelected[box.dataset.field];
+      if (box.checked) set.add(box.dataset.value);
+      else set.delete(box.dataset.value);
+      onCatalogSelectionChanged(box.dataset.field);
+    }));
+    details.querySelector('.catalog-filter-none')?.addEventListener('click', () => {
+      const field = details.dataset.filter;
+      catalogSelected[field].clear();
+      onCatalogSelectionChanged(field);
+    });
+  });
+  updateCatalogFilterCounts();
+}
+function onCatalogSelectionChanged(field) {
+  if (field === 'estados') {
+    const options = new Set(availableCatalogOptions('comunidades'));
+    [...catalogSelected.comunidades].forEach(v => { if (!options.has(v)) catalogSelected.comunidades.delete(v); });
+  }
+  // Mantener abiertos los menús al marcar opciones, sin perder el texto de búsqueda.
+  if (field === 'estados' || field === 'comunidades') {
+    const values = availableCatalogOptions('comunidades');
+    const communityDetails = document.querySelector('.catalog-filter-dropdown[data-filter="comunidades"]');
+    if (communityDetails && field === 'estados') {
+      const opened = communityDetails.open;
+      communityDetails.querySelector('.catalog-filter-scroll').innerHTML = values.map(v => `<label class="catalog-filter-option">
+        <input type="checkbox" data-field="comunidades" data-value="${esc(v)}" ${catalogSelected.comunidades.has(v) ? 'checked' : ''}>
+        <span>${esc(v)}</span></label>`).join('') || '<span class="catalog-filter-empty">Sin opciones disponibles</span>';
+      communityDetails.querySelectorAll('input[type="checkbox"]').forEach(box => box.addEventListener('change', () => {
+        if (box.checked) catalogSelected.comunidades.add(box.dataset.value);
+        else catalogSelected.comunidades.delete(box.dataset.value);
+        updateCatalogFilterCounts(); renderCatalog();
+      }));
+      communityDetails.open = opened;
+    }
+  }
+  updateCatalogFilterCounts();
+  renderCatalog();
+}
+function updateCatalogFilterCounts() {
+  const mobileTotal = CATALOG_FILTERS.reduce((sum, [field]) => sum + catalogSelected[field].size, 0);
+  const mobileCounter = document.querySelector('.catalog-mobile-toggle-count');
+  if (mobileCounter) mobileCounter.textContent = mobileTotal ? `${mobileTotal} seleccionados` : '';
+  CATALOG_FILTERS.forEach(([field]) => {
+    const counter = document.querySelector(`[data-count="${field}"]`);
+    if (counter) counter.textContent = catalogSelected[field].size ? String(catalogSelected[field].size) : '';
+  });
+}
+// Cerrar al pulsar fuera o Escape, como un menú de selección convencional.
+document.addEventListener('click', event => {
+  if (!event.target.closest('#catalog-filters')) document.querySelectorAll('#catalog-filters details[open]').forEach(x => x.open = false);
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') document.querySelectorAll('#catalog-filters details[open]').forEach(x => x.open = false);
+});
+function resetCatalogFilters() {
+  CATALOG_FILTERS.forEach(([field]) => catalogSelected[field].clear());
+  activeSearch = '';
+  const input = document.getElementById('catalog-search');
+  if (input) input.value = '';
+  renderCatalogFilters();
+  renderCatalog();
+}
+// Enlaces de las fichas: sustituir filtros anteriores por el elemento elegido.
+function goToCatalogFilter(field, value) {
+  if (!catalogSelected[field]) return;
+  closeFicha();
+  CATALOG_FILTERS.forEach(([key]) => catalogSelected[key].clear());
+  catalogSelected[field].add(value);
+  activeSearch = '';
+  const search = document.getElementById('catalog-search');
+  if (search) search.value = '';
+  // Una ficha puede no ser 'destacada': no ocultarla al seguir el enlace.
+  catalogShowAll = true;
+  const showAll = document.getElementById('catalog-show-all');
+  if (showAll) showAll.checked = true;
+  document.querySelector('[data-tab="catalogo"]').click();
+  renderCatalogFilters();
+  renderCatalog();
+  document.getElementById('view-catalogo')?.scrollIntoView({block:'start'});
+}
+function goToCatalog(cat1) { goToCatalogFilter('cat1', cat1); }
+
+let mapTerritoryFilter = null; // centroids municipales válidos para la selección del catálogo
+
+async function showCatalogSelectionOnMap() {
+  const selected = getCatalogResults();
+  if (!selected.length) return;
+  const territoryKeys = new Set();
+  const filteredLocalities = catalogSelected.comunidades;
+  const filteredEstados = catalogSelected.estados;
+  selected.forEach(t => {
+    let keys = new Set((t.territorios || [])
+      .filter(x => !filteredEstados.size || filteredEstados.has(x.estado))
+      .map(x => x.codigo));
+    if (filteredLocalities.size) {
+      const localKeys = new Set((t.localidades || [])
+        .filter(x => filteredLocalities.has(x.etiqueta) && x.codigo && (!filteredEstados.size || [...filteredEstados].some(e => normalizeEstado(e) === normalizeEstado(x.estado))))
+        .map(x => x.codigo));
+      keys = new Set([...keys].filter(x => localKeys.has(x)));
+    }
+    keys.forEach(x => territoryKeys.add(x));
+  });
+  mapFilterState = {
+    cat1:new Set(), cat2:new Set(), cat3:new Set(), cat4:new Set(),
+    tecnica:new Set(selected.map(t => t.tecnica))
+  };
+  mapTerritoryFilter = territoryKeys;
+  if (typeof selectedStateNames !== 'undefined') selectedStateNames.clear();
+  if (typeof selectedMaterials !== 'undefined') selectedMaterials.estado.clear();
+  document.querySelector('[data-tab="mapa"]')?.click();
+  if (typeof setMapDriver === 'function') await setMapDriver('estado');
+  rebuildMapFilterCascade();
+  applyMapFilter();
+  // La capa de puntos se activa explícitamente al mostrar la selección.
+  const cb = document.getElementById('comunidades-toggle');
+  if (cb) cb.checked = true;
+  await toggleComunidadesLayer(true);
+  if (typeof refreshCommunities === 'function') refreshCommunities();
+}
 
 function renderCatalog() {
   if (!ATLAS) return;
-  const catalogoFuente = ATLAS.tecnicas || [];
-  const hayDestacadas = catalogoFuente.some(t => t.destacada_catalogo);
-  // Compatibilidad con datos donde el indicador viene vacío o desactualizado.
-  // No alterar los CSV ni el orden alfabético.
-  const tecnicas = catalogoFuente.filter(t => {
-    const gMatch = activeGrupo === 'all' || t.cat1 === activeGrupo;
-    const sMatch = !activeSearch || t.tecnica.toLowerCase().includes(activeSearch);
-    return gMatch && sMatch && (catalogShowAll || (hayDestacadas ? t.destacada_catalogo : (t.n_fichas >= 2 && ((t.imagenes || []).length > 0 || (t.videos || []).length > 0))));
-  }).sort((a, b) => String(a.tecnica || '').localeCompare(String(b.tecnica || ''), 'es', { sensitivity: 'base' }));
-  document.getElementById('catalog-results').textContent = `${tecnicas.length} técnica${tecnicas.length !== 1 ? 's' : ''}`;
+  const tecnicas = getCatalogResults();
+  const resultLabel = document.getElementById('catalog-results');
+  if (resultLabel) resultLabel.textContent = `${tecnicas.length} técnica${tecnicas.length !== 1 ? 's' : ''}`;
+  const button = document.getElementById('catalog-to-map');
+  if (button) button.disabled = tecnicas.length === 0;
   document.getElementById('tecnicas-grid').innerHTML = tecnicas.map(t => {
-    const img   = t.imagenes && t.imagenes.length > 0 ? t.imagenes[0] : null;
+    const img = t.imagenes && t.imagenes.length ? t.imagenes[0] : null;
     const color = getCatColor(t);
     const catLabel = [t.cat1, t.cat2].filter(Boolean).join(' › ');
     const estados = (t.estados || []).slice(0, 3).join(', ');
@@ -1456,24 +1729,22 @@ function renderCatalog() {
     </div>`;
   }).join('');
 }
-
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    activeGrupo = btn.dataset.grupo;
-    renderCatalog();
-  });
-});
-
 document.getElementById('catalog-show-all')?.addEventListener('change', function() {
-  catalogShowAll = this.checked;
-  renderCatalog();
+  catalogShowAll = this.checked; renderCatalog();
 });
-
-document.getElementById('catalog-search').addEventListener('input', function() {
-  activeSearch = this.value.toLowerCase().trim();
-  renderCatalog();
+document.getElementById('catalog-search')?.addEventListener('input', function() {
+  activeSearch = this.value.toLowerCase().trim(); renderCatalog();
+});
+document.getElementById('catalog-clear')?.addEventListener('click', resetCatalogFilters);
+document.getElementById('catalog-to-map')?.addEventListener('click', showCatalogSelectionOnMap);
+// Colapsar/expandir el panel derecho sin desmontar el mapa ni perder filtros.
+document.getElementById('territory-panel-toggle')?.addEventListener('click', function() {
+  const wrap = document.getElementById('view-mapa');
+  const collapsed = wrap.classList.toggle('territory-panel-collapsed');
+  this.textContent = collapsed ? '<' : '>';
+  this.setAttribute('aria-expanded', String(!collapsed));
+  this.setAttribute('aria-label', collapsed ? 'Mostrar panel de información' : 'Ocultar panel de información');
+  window.setTimeout(() => { if (map) map.invalidateSize({animate:false,pan:false}); }, 220);
 });
 
 // ────────────────────────────────────────────────
@@ -1785,7 +2056,7 @@ function renderFichaBody(t, source = 'testimonio') {
 
   if (t.estados && t.estados.length > 0) {
     html += `<div class="estados-row">
-      ${t.estados.map(e => `<span class="estado-tag" onclick="goToEstado('${escJs(e)}')">${esc(e)}</span>`).join('')}
+      ${t.estados.map(e => `<button type="button" class="estado-tag catalog-link-tag" onclick="goToCatalogFilter('estados', '${escJs(e)}')">${esc(e)}</button>`).join('')}
     </div>`;
   }
 
@@ -1799,7 +2070,7 @@ function renderFichaBody(t, source = 'testimonio') {
   if (t.lenguas && t.lenguas.length > 0) {
     html += `<div style="margin-bottom:18px">
       <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--arena);margin-bottom:7px">Lenguas documentadas</div>
-      <div class="tags-row">${t.lenguas.map(l => `<span class="lengua-tag">${esc(l)}</span>`).join('')}</div>
+      <div class="tags-row">${t.lenguas.map(l => `<button type="button" class="lengua-tag catalog-link-tag" onclick="goToCatalogFilter('lenguas', '${escJs(l)}')">${esc(l)}</button>`).join('')}</div>
     </div>`;
   }
 
@@ -1821,13 +2092,13 @@ function renderFichaBody(t, source = 'testimonio') {
     </div>`;
   }
 
-  if (t.materiales) {
-    const mats = t.materiales.split(',').map(m => m.trim()).filter(Boolean);
+  if (t.materiales_normalizados?.length) {
+    const mats = t.materiales_normalizados || [];
     const ten  = t.tenido;
     const tenTotal = Object.values(ten).reduce((a, b) => a + b, 0);
     html += `<div class="section">
       <div class="section-head"><span class="section-title">Materiales</span></div>
-      <div class="tag-cloud">${mats.map(m => `<span class="mat-tag">${esc(m)}</span>`).join('')}</div>
+      <div class="tag-cloud">${mats.map(m => `<button type="button" class="mat-tag catalog-link-tag" onclick="goToCatalogFilter('materiales', '${escJs(m)}')">${esc(m)}</button>`).join('')}</div>
       ${tenTotal > 0 ? `
         <div style="margin-top:14px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--verde);margin-bottom:8px">Fuentes de teñido</div>
         <div class="bar-chart">
@@ -1839,16 +2110,14 @@ function renderFichaBody(t, source = 'testimonio') {
     </div>`;
   }
 
-  if (t.prendas_resumen) {
-    const prendas    = parseSummary(t.prendas_resumen);
-    const ceremonias = parseSummary(t.ceremonias_resumen);
+  if (t.prendas_normalizadas?.length || t.ceremonias_normalizadas?.length) {
+    const prendas = t.prendas_normalizadas || [];
+    const ceremonias = t.ceremonias_normalizadas || [];
     html += `<div class="section">
-      <div class="section-head"><span class="section-title">Prendas y Objetos</span></div>
-      <div class="tag-cloud">${prendas.slice(0, 14).map(p => `<span class="prenda-tag">${esc(p)}</span>`).join('')}</div>
-      ${ceremonias.length > 0 ? `
-        <div style="margin-top:12px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--naranja);margin-bottom:7px">Uso ceremonial y festivo</div>
-        <div class="tag-cloud">${ceremonias.slice(0, 10).map(c => `<span class="prenda-tag">${esc(c)}</span>`).join('')}
-      </div>` : ''}
+      ${prendas.length ? `<div class="section-head"><span class="section-title">Prendas y objetos</span></div>
+        <div class="tag-cloud">${prendas.map(value => `<button type="button" class="prenda-tag catalog-link-tag" onclick="goToCatalogFilter('prendas', '${escJs(value)}')">${esc(value)}</button>`).join('')}</div>` : ''}
+      ${ceremonias.length ? `<div class="section-head" style="margin-top:16px"><span class="section-title">Ceremonias y festividades</span></div>
+        <div class="tag-cloud">${ceremonias.map(value => `<button type="button" class="prenda-tag catalog-link-tag" onclick="goToCatalogFilter('ceremonias', '${escJs(value)}')">${esc(value)}</button>`).join('')}</div>` : ''}
     </div>`;
   }
 
@@ -1900,10 +2169,10 @@ function renderFichaBody(t, source = 'testimonio') {
     </div>`;
   }
 
-  if (t.municipios && t.municipios.length > 0) {
+  if (t.localidades && t.localidades.length) {
     html += `<div style="margin-bottom:16px">
-      <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--arena);margin-bottom:7px">Municipios documentados</div>
-      <div class="tag-cloud">${t.municipios.map(m => `<span class="mat-tag">${esc(m)}</span>`).join('')}</div>
+      <div class="ficha-list-heading">Comunidades y localidades documentadas</div>
+      <div class="tag-cloud">${t.localidades.map(loc => `<button type="button" class="mat-tag catalog-link-tag" onclick="goToCatalogFilter('comunidades', '${escJs(loc.etiqueta)}')">${esc(loc.etiqueta)}</button>`).join('')}</div>
     </div>`;
   }
 
@@ -1963,16 +2232,6 @@ function goToNetwork(tecnicaNombre) {
   setTimeout(() => highlightNetworkNode(tecnicaNombre), 600);
 }
 
-function goToCatalog(cat1) {
-  closeFicha();
-  document.querySelector('[data-tab="catalogo"]').click();
-  if (!catalogInitialized) catalogInitialized = true;
-  activeGrupo = cat1 || 'all';
-  document.querySelectorAll('.filter-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.grupo === activeGrupo);
-  });
-  renderCatalog();
-}
 
 // ────────────────────────────────────────────────
 // LIGHTBOX
@@ -3218,7 +3477,11 @@ function initArbol() {
         variantesArr: [...type.variantes.values()].sort((a, b) => b.tecnicas.size - a.tecnicas.size || a.name.localeCompare(b.name, 'es')),
       })).sort((a, b) => b.tecnicas.size - a.tecnicas.size || a.name.localeCompare(b.name, 'es')),
     })).sort((a, b) => b.tecnicas.size - a.tecnicas.size || a.name.localeCompare(b.name, 'es')),
-  })).sort((a, b) => b.tecnicas.size - a.tecnicas.size || a.name.localeCompare(b.name, 'es'));
+  })).sort((a, b) => {
+    // En el diagrama, la categoría Otras siempre aparece al final.
+    const isOther = name => /^(otras|otros)$/i.test(String(name || '').trim());
+    return Number(isOther(a.name)) - Number(isOther(b.name)) || b.tecnicas.size - a.tecnicas.size || a.name.localeCompare(b.name, 'es');
+  });
 
   const categoryIndex = new Map(root.categories.map(cat => [cat.name, cat]));
   const subcategoryIndex = new Map();
@@ -3843,7 +4106,7 @@ function renderReporteChipsCategorias() {
     if (c2) cat1Map[c1].add(c2);
   });
 
-  Object.keys(cat1Map).sort().forEach(c1 => {
+  Object.keys(cat1Map).sort((a,b) => (catalogNorm(a) === 'otras' ? 1 : 0) - (catalogNorm(b) === 'otras' ? 1 : 0) || a.localeCompare(b,'es')).forEach(c1 => {
     const color = CAT1_COLOR[c1] || COLORS.arena;
     // Chip CAT-N-1
     const chip1 = document.createElement('button');
