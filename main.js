@@ -1,5 +1,5 @@
 /* ================================================
-   ATLAS DE TÉCNICAS DEL ARTE TEXTIL — MAIN JS
+   ATLAS COMUNITARIO DEL ARTE TEXTIL DE MÉXICO — MAIN JS
    Lee los datos directamente desde los CSV.
    Para actualizar: reemplaza los CSV y recarga.
    ================================================ */
@@ -231,12 +231,24 @@ function buildAtlasFromCSV(techRows, recordRows, imgRows) {
     const tecnica = (r['Tecnica'] || '').trim();
     const archivo = (r['archivo_descargado'] || '').trim();
     const status  = (r['status'] || '').toLowerCase().trim();
-    if (!archivo || status === 'error') return;
+    if (!archivo || status === 'error' ||
+        (window.ATLAS_AVAILABLE_IMAGES && !window.ATLAS_AVAILABLE_IMAGES.has(archivo))) return;
     if (tecnica) {
       const key = imageKey(tecnica);
       if (!imgByTech[key]) imgByTech[key] = [];
       imgByTech[key].push(archivo);
     }
+  });
+
+  // La galería contiene registros multimedia que no figuraban en indice_imagenes.csv.
+  // Reconciliar por denominación normalizada y eliminar duplicados al preparar la ficha.
+  GALLERY_ITEMS.forEach(item => {
+    const archivo = String(item?.archivo || '').trim();
+    const key = imageKey(item?.tecnica);
+    if (!key || !archivo ||
+        (window.ATLAS_AVAILABLE_IMAGES && !window.ATLAS_AVAILABLE_IMAGES.has(archivo))) return;
+    const files = (imgByTech[key] ||= []);
+    if (!files.includes(archivo)) files.push(archivo);
   });
 
   // Índice independiente de videos; sus notas internas nunca se muestran.
@@ -447,7 +459,7 @@ function buildAtlasFromCSV(techRows, recordRows, imgRows) {
   // clasificación, reporte, "Acerca del Atlas") operan sobre el subset
   // resultante sin saberlo.
   // ─────────────────────────────────────────────────────────────────
-  .filter(t => t.tecnica); // Todas las técnicas normalizadas; el catálogo decide cuáles destacar.
+  .filter(t => t.tecnica); // Todos los registros normalizadas; el catálogo decide cuáles destacar.
 
   // Set con los nombres de técnicas que pasaron el filtro
   const tecnicasValidas = new Set(tecnicas.map(t => t.tecnica));
@@ -535,6 +547,15 @@ async function loadCSVs() {
     const videoMetadataMap = new Map(videoMetadata.map(row => [row.archivo, row]));
     window.ATLAS_VIDEO_ROWS = window.ATLAS_VIDEO_ROWS.map(row => ({...row, ...(videoMetadataMap.get(row.archivo) || {})}));
 
+    // Lista de archivos presentes en esta publicación: evita referencias rotas
+    // y respeta fotografías retiradas por motivos de consentimiento.
+    try {
+      const mediaResponse = await fetch('data/imagenes_disponibles.json');
+      window.ATLAS_AVAILABLE_IMAGES = mediaResponse.ok
+        ? new Set(await mediaResponse.json()) : null;
+    } catch (error) {
+      window.ATLAS_AVAILABLE_IMAGES = null;
+    }
     ATLAS = buildAtlasFromCSV(techRows, recordRows, imgRows);
     // Vocabulario cultural curado: se conservan intactas las respuestas originales.
     const culturalByTechnique = new Map((culturalText ? parseCSV(culturalText) : [])
@@ -808,11 +829,12 @@ let catalogInitialized = false;
 let arbolInitialized = false;
 let galleryInitialized = false;
 let reporteInitialized = false;
+let alluvialInitialized = false;
 
 document.querySelectorAll('.nav-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     const id = tab.dataset.tab;
-    if (!id) return;
+    if (!id || id === 'red') return; // Red conservada en código, no disponible públicamente.
     if (id === currentTab) return;
     if (id !== 'mapa' && typeof dismissInitialMapOverview === 'function') dismissInitialMapOverview();
     currentTab = id;
@@ -836,6 +858,17 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
       galleryInitialized = true; initGallery();
     } else if (id === 'reporte' && !reporteInitialized) {
       reporteInitialized = true; initReporteView();
+    } else if (id === 'aluvial') {
+      if (!alluvialInitialized) {
+        alluvialInitialized = true;
+        if (typeof initAlluvial === 'function') initAlluvial();
+      } else if (typeof refreshAlluvial === 'function') {
+        refreshAlluvial();
+      }
+    }
+    if (id === 'red' && !networkHelpSeen) {
+      networkHelpSeen = true;
+      openNetworkHelp();
     }
     if (id !== 'red' && _animFrame) { cancelAnimationFrame(_animFrame); _animFrame = null; }
     if (id === 'red' && networkInitialized && !_animFrame) { _simAlpha = 0.05; (function loop(){drawNetwork(); _animFrame=requestAnimationFrame(loop);})(); }
@@ -1705,7 +1738,7 @@ function renderCatalog() {
   if (!ATLAS) return;
   const tecnicas = getCatalogResults();
   const resultLabel = document.getElementById('catalog-results');
-  if (resultLabel) resultLabel.textContent = `${tecnicas.length} técnica${tecnicas.length !== 1 ? 's' : ''}`;
+  if (resultLabel) resultLabel.textContent = `${tecnicas.length} entrada${tecnicas.length !== 1 ? 's' : ''} del catálogo`;
   const button = document.getElementById('catalog-to-map');
   if (button) button.disabled = tecnicas.length === 0;
   document.getElementById('tecnicas-grid').innerHTML = tecnicas.map(t => {
@@ -1737,6 +1770,49 @@ document.getElementById('catalog-search')?.addEventListener('input', function() 
 });
 document.getElementById('catalog-clear')?.addEventListener('click', resetCatalogFilters);
 document.getElementById('catalog-to-map')?.addEventListener('click', showCatalogSelectionOnMap);
+// Leyenda plegable, independiente de los controles y filtros del mapa.
+function syncMapLegendReopen() {
+  // La cabecera de la leyenda siempre queda a la vista, también en móvil.
+  // Se conserva el botón legado oculto para no duplicar controles.
+  const reopen = document.getElementById('map-legend-reopen');
+  if (reopen) reopen.hidden = true;
+}
+// La simbología compacta reproduce tres colores de la leyenda activa.
+// Se actualiza al cambiar entre Estado, Lengua y Ecosistema.
+function refreshMapLegendPreview() {
+  const body = document.getElementById('map-legend-body');
+  const preview = document.getElementById('map-legend-preview');
+  if (!body || !preview) return;
+  const colors = [...body.querySelectorAll('.legend-dot, .atlas-legend-swatch, .legend-circle')]
+    .map(el => getComputedStyle(el).backgroundColor)
+    .filter(color => color && color !== 'rgba(0, 0, 0, 0)' && color !== 'transparent');
+  const samples = [...new Set(colors)].slice(0, 3);
+  preview.replaceChildren(...samples.map(color => {
+    const swatch = document.createElement('i');
+    swatch.style.backgroundColor = color;
+    return swatch;
+  }));
+  preview.hidden = !samples.length;
+}
+const atlasLegendBody = document.getElementById('map-legend-body');
+if (atlasLegendBody) {
+  const legendPreviewObserver = new MutationObserver(refreshMapLegendPreview);
+  legendPreviewObserver.observe(atlasLegendBody, { childList:true, subtree:true });
+  refreshMapLegendPreview();
+}
+document.getElementById('map-legend-reopen')?.addEventListener('click', () => {
+  document.getElementById('map-legend-toggle')?.click();
+});
+document.getElementById('map-legend-toggle')?.addEventListener('click', function() {
+  const legend = document.getElementById('map-legend');
+  const collapsed = legend.classList.toggle('is-collapsed');
+  this.textContent = collapsed ? '+' : '−';
+  this.setAttribute('aria-expanded', String(!collapsed));
+  this.setAttribute('aria-label', collapsed ? 'Expandir leyenda' : 'Contraer leyenda');
+  this.title = collapsed ? 'Expandir leyenda' : 'Contraer leyenda';
+  syncMapLegendReopen();
+});
+
 // Colapsar/expandir el panel derecho sin desmontar el mapa ni perder filtros.
 document.getElementById('territory-panel-toggle')?.addEventListener('click', function() {
   const wrap = document.getElementById('view-mapa');
@@ -1745,6 +1821,33 @@ document.getElementById('territory-panel-toggle')?.addEventListener('click', fun
   this.setAttribute('aria-expanded', String(!collapsed));
   this.setAttribute('aria-label', collapsed ? 'Mostrar panel de información' : 'Ocultar panel de información');
   window.setTimeout(() => { if (map) map.invalidateSize({animate:false,pan:false}); }, 220);
+});
+
+
+// Ayuda de lectura: aparece al entrar por primera vez en la Red y se reabre con «i».
+let networkHelpSeen = false;
+function openNetworkHelp() {
+  const backdrop = document.getElementById('network-help-backdrop');
+  if (!backdrop) return;
+  backdrop.classList.add('open');
+  backdrop.setAttribute('aria-hidden', 'false');
+  backdrop.querySelector('.network-help-dialog')?.focus();
+}
+function closeNetworkHelp() {
+  const backdrop = document.getElementById('network-help-backdrop');
+  if (!backdrop) return;
+  backdrop.classList.remove('open');
+  backdrop.setAttribute('aria-hidden', 'true');
+  document.getElementById('network-help-button')?.focus();
+}
+document.getElementById('network-help-button')?.addEventListener('click', openNetworkHelp);
+document.getElementById('network-help-close')?.addEventListener('click', closeNetworkHelp);
+document.getElementById('network-help-understood')?.addEventListener('click', closeNetworkHelp);
+document.getElementById('network-help-backdrop')?.addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeNetworkHelp();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('network-help-backdrop')?.classList.contains('open')) closeNetworkHelp();
 });
 
 // ────────────────────────────────────────────────
@@ -1778,7 +1881,7 @@ function populateGallerySelects() {
   const techniqueSelect = document.getElementById('gallery-technique-filter');
   const stateSelect = document.getElementById('gallery-state-filter');
   if (techniqueSelect) {
-    techniqueSelect.innerHTML = '<option value="">Todas las técnicas</option>' + techniques
+    techniqueSelect.innerHTML = '<option value="">Todos los registros</option>' + techniques
       .map(value => `<option value="${esc(value)}">${esc(value)}</option>`).join('');
     techniqueSelect.value = activeGalleryTechnique;
   }
@@ -1868,7 +1971,7 @@ function renderGallery() {
       <div class="gallery-card-image">${visual}
         ${!isVideo && item.categoria ? `<span class="gallery-category-badge">${esc(item.categoria)}</span>` : ''}
       </div>
-      <div class="gallery-card-copy"><strong>${esc(item.tecnica || 'Técnica no registrada')}</strong>
+      <div class="gallery-card-copy"><strong>${esc(item.tecnica || 'Registro sin denominación')}</strong>
         ${!isVideo && artisan ? `<span>${esc(artisan)}</span>` : ''}
         ${place ? `<small>${esc(place)}</small>` : ''}
       </div></button>`;
@@ -2177,8 +2280,8 @@ function renderFichaBody(t, source = 'testimonio') {
   }
 
   html += `<div style="margin-top:24px;padding-top:18px;border-top:1px solid var(--border)">
-    <button onclick="goToNetwork('${escJs(t.tecnica)}')" style="background:var(--negro);color:var(--crema);border:none;padding:10px 20px;border-radius:4px;font-family:var(--font-body);font-size:.8rem;font-weight:600;cursor:pointer;letter-spacing:.3px;">
-      Ver en la red de técnicas
+    <button hidden aria-hidden="true" tabindex="-1" onclick="goToNetwork('${escJs(t.tecnica)}')" style="background:var(--negro);color:var(--crema);border:none;padding:10px 20px;border-radius:4px;font-family:var(--font-body);font-size:.8rem;font-weight:600;cursor:pointer;letter-spacing:.3px;">
+      Ver en la red de registros
     </button>
     <button onclick="goToCatalog('${escJs(t.cat1)}')" style="background:transparent;color:var(--arena);border:1px solid var(--border);padding:10px 20px;border-radius:4px;font-family:var(--font-body);font-size:.8rem;font-weight:600;cursor:pointer;letter-spacing:.3px;margin-left:8px;">
       Ver técnicas de esta categoría
@@ -2227,6 +2330,7 @@ function goToEstado(nombre) {
 }
 
 function goToNetwork(tecnicaNombre) {
+  return; // Red de registros desactivada para visitantes; código retenido.
   closeFicha();
   document.querySelector('[data-tab="red"]').click();
   setTimeout(() => highlightNetworkNode(tecnicaNombre), 600);
@@ -3406,12 +3510,13 @@ function initArbol() {
   const container = document.getElementById('arbol-container');
   if (!container) return;
 
-  const root = { name: 'Técnicas del arte textil', count: tecnicas.length, categories: [] };
+  const root = { name: 'Clasificación del arte textil', count: tecnicas.length, categories: [] };
   const byCategory = new Map();
 
   tecnicas.forEach(t => {
     const cat1 = (t.cat1 || 'Sin categoría').trim();
-    const cat2 = (t.cat2 || 'Sin subcategoría').trim();
+    const cat2Original = (t.cat2 || 'Sin subcategoría').trim();
+    const cat2 = cat1 === 'Acabados' && normalizeLookup(cat2Original) === 'sin subcategoria' ? 'Otras' : cat2Original;
     const cat3 = (t.cat3 || '').trim();
     const cat4 = (t.cat4 || '').trim();
 
@@ -3468,6 +3573,71 @@ function initArbol() {
     }
   });
 
+
+  // Estructura de referencia completa de la clasificación textil.
+  // Los niveles ausentes en el CSV se muestran con 0 registros.
+  // Se preservan asimismo las categorías adicionales realmente presentes en los datos.
+  const TAXONOMY_REFERENCE = {
+    'Tejido': {
+      'Tejidos': {
+        'Telares': ['Telar de cintura', 'Telar de pedal', 'Otros telares'],
+        'Tejidos planos': [],
+        'Gasas': [],
+        'Tejidos de urdimbre': [],
+        'Tapicería': [],
+      },
+      'Anudados': {},
+    },
+    'Técnicas decorativas': {
+      'Bordados': {
+        'A mano': ['Lineal', 'Punto', 'Libres', 'Deshilado'],
+        'Máquina de pedal': [],
+      },
+      'Aplicaciones': {},
+      'Otras': {},
+    },
+    'Acabados': {
+      'Empuntados': {}, 'Randas': {}, 'Festón': {},
+      'Sobre teñido': {}, 'Pintura textil': {}, 'Otras': {},
+    },
+  };
+  Object.entries(TAXONOMY_REFERENCE).forEach(([categoryName, subcategories]) => {
+    if (!byCategory.has(categoryName)) {
+      byCategory.set(categoryName, {
+        name: categoryName, color: CAT1_COLOR[categoryName] || COLORS.arena,
+        tecnicas: new Set(), subcats: new Map(),
+      });
+    }
+    const category = byCategory.get(categoryName);
+    Object.entries(subcategories).forEach(([subcategoryName, types]) => {
+      if (!category.subcats.has(subcategoryName)) {
+        category.subcats.set(subcategoryName, {
+          name: subcategoryName, parent: categoryName,
+          color: CAT2_COLOR[subcategoryName] || category.color,
+          tecnicas: new Set(), tipos: new Map(),
+        });
+      }
+      const subcategory = category.subcats.get(subcategoryName);
+      Object.entries(types).forEach(([typeName, variants]) => {
+        if (!subcategory.tipos.has(typeName)) {
+          subcategory.tipos.set(typeName, {
+            name: typeName, parent: subcategoryName, category: categoryName,
+            tecnicas: new Set(), variantes: new Map(),
+          });
+        }
+        const type = subcategory.tipos.get(typeName);
+        variants.forEach(name => {
+          if (!type.variantes.has(name)) {
+            type.variantes.set(name, {
+              name, parent: typeName, subcategory: subcategoryName,
+              category: categoryName, tecnicas: new Set(),
+            });
+          }
+        });
+      });
+    });
+  });
+
   root.categories = [...byCategory.values()].map(cat => ({
     ...cat,
     subcatsArr: [...cat.subcats.values()].map(sub => ({
@@ -3475,12 +3645,17 @@ function initArbol() {
       tiposArr: [...sub.tipos.values()].map(type => ({
         ...type,
         variantesArr: [...type.variantes.values()].sort((a, b) => b.tecnicas.size - a.tecnicas.size || a.name.localeCompare(b.name, 'es')),
-      })).sort((a, b) => b.tecnicas.size - a.tecnicas.size || a.name.localeCompare(b.name, 'es')),
-    })).sort((a, b) => b.tecnicas.size - a.tecnicas.size || a.name.localeCompare(b.name, 'es')),
+      })).sort((a, b) => a.name.localeCompare(b.name, 'es')),
+    })).sort((a, b) => {
+      const isOtras = name => /^otras?$/i.test(String(name).trim());
+      return Number(isOtras(a.name)) - Number(isOtras(b.name)) || a.name.localeCompare(b.name, 'es');
+    }),
   })).sort((a, b) => {
     // En el diagrama, la categoría Otras siempre aparece al final.
     const isOther = name => /^(otras|otros)$/i.test(String(name || '').trim());
-    return Number(isOther(a.name)) - Number(isOther(b.name)) || b.tecnicas.size - a.tecnicas.size || a.name.localeCompare(b.name, 'es');
+    const order = ['Tejido', 'Técnicas decorativas', 'Acabados', 'Teñidos'];
+    const pos = n => order.includes(n) ? order.indexOf(n) : 100;
+    return Number(isOther(a.name)) - Number(isOther(b.name)) || pos(a.name) - pos(b.name) || a.name.localeCompare(b.name, 'es');
   });
 
   const categoryIndex = new Map(root.categories.map(cat => [cat.name, cat]));
@@ -3563,7 +3738,7 @@ function initArbol() {
         const isActive = activeVariantKey === variantKey;
         return `<div class="brace-variant-row">
           <span class="brace-variant-bullet" aria-hidden="true"></span>
-          <button type="button" class="brace-variant-card${isActive ? ' is-active' : ''}" data-variant-select="${escAttr(variantKey)}">
+          <button type="button" class="brace-variant-card${isActive ? ' is-active' : ''}${v.tecnicas.size ? '' : ' is-empty'}" data-variant-select="${escAttr(variantKey)}">
             <span class="brace-level-copy">
               <span class="brace-level-label">Variante</span>
               <span class="brace-level-name">${esc(v.name)}</span>
@@ -3588,7 +3763,7 @@ function initArbol() {
             <button type="button" class="brace-mini-toggle" data-type-toggle="${escAttr(typeKey)}" aria-expanded="${typeOpen}" title="${typeOpen ? 'Ocultar' : 'Mostrar'} variantes">
               ${type.variantesArr.length ? (typeOpen ? '−' : '+') : '•'}
             </button>
-            <button type="button" class="brace-type-card${isActive ? ' is-active' : ''}" data-type-select="${escAttr(typeKey)}">
+            <button type="button" class="brace-type-card${isActive ? ' is-active' : ''}${type.tecnicas.size ? '' : ' is-empty'}" data-type-select="${escAttr(typeKey)}">
               <span class="brace-level-copy">
                 <span class="brace-level-label">Tipo</span>
                 <span class="brace-level-name">${esc(type.name)}</span>
@@ -3609,8 +3784,8 @@ function initArbol() {
       <div class="brace-cat-col">
         <div class="brace-cat-main">
           <button type="button" class="brace-mini-toggle brace-cat-toggle" data-cat-toggle="${escAttr(cat.name)}" aria-expanded="${expanded}" title="${expanded ? 'Ocultar' : 'Mostrar'} subcategorías">${expanded ? '−' : '+'}</button>
-          <button type="button" class="brace-cat-card${active ? ' is-active' : ''}" data-cat-select="${escAttr(cat.name)}">
-            <span class="brace-cat-name">${esc(cat.name)}</span>
+          <button type="button" class="brace-cat-card${active ? ' is-active' : ''}${cat.tecnicas.size ? '' : ' is-empty'}" data-cat-select="${escAttr(cat.name)}">
+            <span class="brace-cat-name">${esc(cat.name === 'Tejido' ? 'Tejido artesanal' : cat.name)}</span>
             <span class="brace-cat-count">${cat.tecnicas.size}</span>
           </button>
         </div>
@@ -3625,7 +3800,7 @@ function initArbol() {
             return `<div class="brace-subcat-node" style="--subcat-color:${sub.color}">
               <div class="brace-subcat-row">
                 <button type="button" class="brace-mini-toggle" data-subcat-toggle="${escAttr(key)}" aria-expanded="${subOpen}" title="${subOpen ? 'Ocultar' : 'Mostrar'} tipos">${sub.tiposArr.length ? (subOpen ? '−' : '+') : '•'}</button>
-                <button type="button" class="brace-subcat-card${activeSub ? ' is-active' : ''}" data-subcat-select="${escAttr(key)}">
+                <button type="button" class="brace-subcat-card${activeSub ? ' is-active' : ''}${sub.tecnicas.size ? '' : ' is-empty'}" data-subcat-select="${escAttr(key)}">
                   <span class="brace-subcat-copy">
                     <span class="brace-subcat-name">${esc(sub.name)}</span>
                   </span>
@@ -3650,6 +3825,7 @@ function initArbol() {
 
   function renderTechList(names) {
     return `<div class="class-detail-list">
+      ${names.length ? '' : '<p class="class-detail-zero">Aún no hay registros vinculados con este nivel de la clasificación.</p>'}
       ${names.map(name => `<button type="button" class="class-detail-tech" data-tech-name="${escAttr(name)}"><span>${esc(name)}</span><b>Ver ficha</b></button>`).join('')}
     </div>`;
   }
@@ -3696,8 +3872,8 @@ function initArbol() {
         <div class="class-detail-kicker">Variante</div>
         <h3>${esc(node.name)}</h3>
         <div class="class-detail-path"><span>${esc(node.category)}</span><b>›</b><span>${esc(node.subcategory)}</span><b>›</b><span>${esc(node.parent)}</span><b>›</b><span>${esc(node.name)}</span></div>
-        <div class="class-detail-summary"><strong>${names.length}</strong><span>técnica${names.length !== 1 ? 's' : ''} registradas en esta variante</span></div>
-        <p class="class-detail-note">Selecciona una técnica para consultar su ficha.</p>
+        <div class="class-detail-summary"><strong>${names.length}</strong><span>entrada${names.length !== 1 ? 's' : ''} del catálogo vinculadas con esta variante</span></div>
+        <p class="class-detail-note">Selecciona un registro para consultar su ficha.</p>
         ${renderTechList(names)}
       </aside>`;
     }
@@ -3709,11 +3885,8 @@ function initArbol() {
         <div class="class-detail-kicker">Tipo</div>
         <h3>${esc(node.name)}</h3>
         <div class="class-detail-path"><span>${esc(node.category)}</span><b>›</b><span>${esc(node.parent)}</span><b>›</b><span>${esc(node.name)}</span></div>
-        <div class="class-detail-summary"><strong>${names.length}</strong><span>técnica${names.length !== 1 ? 's' : ''} registradas en este tipo</span></div>
-        <div class="class-detail-mini-grid">
-          <div><b>${node.variantesArr.length}</b><span>Variante${node.variantesArr.length !== 1 ? 's' : ''}</span></div>
-        </div>
-        <p class="class-detail-note">Selecciona una técnica para consultar su ficha.</p>
+        <div class="class-detail-summary"><strong>${names.length}</strong><span>entrada${names.length !== 1 ? 's' : ''} del catálogo vinculadas con este tipo</span></div>
+        <p class="class-detail-note">Selecciona un registro para consultar su ficha.</p>
         ${renderTechList(names)}
       </aside>`;
     }
@@ -3728,12 +3901,8 @@ function initArbol() {
         <h3>${esc(node.name)}</h3>
         <div class="class-detail-path"><span>${esc(node.parent)}</span><b>›</b><span>${esc(node.name)}</span></div>
         ${taxonomyBibliographyButton(biblioCard, 'Subcategoría', node.name)}
-        <div class="class-detail-summary"><strong>${names.length}</strong><span>técnica${names.length !== 1 ? 's' : ''} registradas en esta subcategoría</span></div>
-        <div class="class-detail-mini-grid">
-          <div><b>${node.tiposArr.length}</b><span>Tipo${node.tiposArr.length !== 1 ? 's' : ''}</span></div>
-          <div><b>${variantCount}</b><span>Variante${variantCount !== 1 ? 's' : ''}</span></div>
-        </div>
-        <p class="class-detail-note">Selecciona una técnica para consultar su ficha.</p>
+        <div class="class-detail-summary"><strong>${names.length}</strong><span>entrada${names.length !== 1 ? 's' : ''} del catálogo vinculadas con esta subcategoría</span></div>
+        <p class="class-detail-note">Selecciona un registro para consultar su ficha.</p>
         ${renderTechList(names)}
       </aside>`;
     }
@@ -3744,16 +3913,10 @@ function initArbol() {
       const counts = getCategoryCounts(cat);
       return `<aside class="class-detail-panel">
         <div class="class-detail-kicker">Categoría</div>
-        <h3>${esc(cat.name)}</h3>
+        <h3>${esc(cat.name === 'Tejido' ? 'Tejido artesanal' : cat.name)}</h3>
         ${taxonomyBibliographyButton(biblioCard, 'Categoría', cat.name)}
-        <div class="class-detail-summary"><strong>${cat.tecnicas.size}</strong><span>técnica${cat.tecnicas.size !== 1 ? 's' : ''} agrupadas en esta categoría</span></div>
-        <div class="class-detail-mini-grid">
-          <div><b>${cat.subcatsArr.length}</b><span>Subcategoría${cat.subcatsArr.length !== 1 ? 's' : ''}</span></div>
-          <div><b>${counts.tipos}</b><span>Tipos</span></div>
-          <div><b>${counts.variantes}</b><span>Variantes</span></div>
-          <div><b>${cat.tecnicas.size}</b><span>Técnicas</span></div>
-        </div>
-        <p class="class-detail-note">Selecciona una subcategoría del diagrama para consultar sus técnicas.</p>
+        <div class="class-detail-summary"><strong>${cat.tecnicas.size}</strong><span>entrada${cat.tecnicas.size !== 1 ? 's' : ''} del catálogo vinculadas con esta categoría</span></div>
+        <p class="class-detail-note">Selecciona una subcategoría del diagrama para consultar los registros asociados.</p>
         <div class="class-detail-list compact">
           ${cat.subcatsArr.map(sub => `<button type="button" class="class-detail-tech" data-subcat-detail="${escAttr(`${cat.name}|||${sub.name}`)}"><span>${esc(sub.name)}</span><b>${sub.tecnicas.size}</b></button>`).join('')}
         </div>
@@ -3767,7 +3930,7 @@ function initArbol() {
     container.innerHTML = `<div class="class-schema-layout brace-layout">
       <section class="class-schema brace-schema">
         <div class="brace-toolbar">
-          <div class="brace-toolbar-copy">Selecciona cualquier grupo para consultar sus técnicas.</div>
+          <div class="brace-toolbar-copy">Selecciona cualquier grupo para consultar sus registros.</div>
           <div class="brace-toolbar-actions">
             <button type="button" class="brace-toolbar-btn" id="brace-expand-all">Expandir todas</button>
             <button type="button" class="brace-toolbar-btn" id="brace-collapse-all">Contraer todas</button>
@@ -3936,8 +4099,8 @@ const REPORTE_SECCIONES = [
     applies: subset => subset.estados.length > 0,
   },
   {
-    id: 'catalogo', label: 'Catálogo de técnicas',
-    desc: 'Ficha resumida de cada técnica con foto principal.',
+    id: 'catalogo', label: 'Catálogo de registros',
+    desc: 'Ficha resumida de cada entrada del catálogo, con su fotografía principal.',
     icon: '◉', defaultOn: true,
     applies: subset => subset.tecnicas.length > 0,
   },
@@ -4451,7 +4614,7 @@ function construirReporteHTML(subset) {
   html += `
     <footer class="rep-footer">
       <div class="rep-footer-line"></div>
-      <p>Generado el ${esc(fecha)} a partir del Atlas Nacional de Técnicas del Arte Textil.<br>
+      <p>Generado el ${esc(fecha)} a partir del Atlas Comunitario del Arte Textil de México.<br>
       Encuentro Nacional de Arte Textil "Original" · Secretaría de Cultura · UNESCO México.</p>
     </footer>
   `;
@@ -4475,7 +4638,7 @@ function construirPortada(titulo, autor, fecha, filtrosResumen, subset) {
       <div class="rep-cover-logos">
         <img src="assets/atlas_plataforma_logos_cropped.png" alt="Logos institucionales" />
       </div>
-      <div class="rep-cover-eyebrow">Atlas Nacional de Técnicas del Arte Textil</div>
+      <div class="rep-cover-eyebrow">Atlas Comunitario del Arte Textil de México</div>
       <h1 class="rep-cover-title">${esc(titulo)}</h1>
       <div class="rep-cover-subtitle">${esc(filtrosResumen)}</div>
       <div class="rep-cover-stats">
@@ -4545,7 +4708,7 @@ function construirResumenEjecutivo(subset) {
         <span class="rep-section-num">01</span>
         <h2>Resumen ejecutivo</h2>
       </header>
-      <p class="rep-lead">Este reporte abarca <strong>${tecs.length} técnicas textiles</strong> documentadas
+      <p class="rep-lead">Este reporte abarca <strong>${tecs.length} entradas del catálogo</strong> documentadas
         en <strong>${subset.estados.length} estados</strong> de la República Mexicana, con un total de
         <strong>${subset.totalRegistros} registros</strong> levantados durante el Encuentro Nacional de Arte Textil "Original".</p>
 
@@ -4638,7 +4801,7 @@ function construirCatalogoTecnicas(subset) {
   let html = `<section class="rep-section">
     <header class="rep-section-head">
       <span class="rep-section-num">03</span>
-      <h2>Catálogo de técnicas</h2>
+      <h2>Catálogo de registros</h2>
     </header>
     <p class="rep-prose">Ficha resumida de cada técnica incluida en este reporte.</p>
     <div class="rep-cards">`;
@@ -4704,7 +4867,7 @@ function construirCategoriasExpertas(subset) {
         <span class="rep-section-num">04</span>
         <h2>Categorías expertas</h2>
       </header>
-      <p class="rep-prose">Distribución de técnicas según la clasificación experta del Atlas.</p>
+      <p class="rep-prose">Distribución de los registros según la clasificación de textiles del Atlas.</p>
       <div class="rep-charts-grid">
         <div class="rep-chart-wrap">
           <h4>Por categoría madre</h4>
@@ -5056,7 +5219,7 @@ function descargarReporteWord() {
 
     // Portada
     children.push(new Paragraph({
-      text: 'Atlas Nacional de Técnicas del Arte Textil',
+      text: 'Atlas Comunitario del Arte Textil de México',
       alignment: AlignmentType.CENTER,
       spacing: { before: 1200, after: 400 },
     }));
@@ -5100,7 +5263,7 @@ function descargarReporteWord() {
 
     // Pie
     children.push(new Paragraph({
-      text: `Generado el ${fecha} a partir del Atlas Nacional de Técnicas del Arte Textil. Encuentro Nacional de Arte Textil "Original" · Secretaría de Cultura · UNESCO México.`,
+      text: `Generado el ${fecha} a partir del Atlas Comunitario del Arte Textil de México. Encuentro Nacional de Arte Textil "Original" · Secretaría de Cultura · UNESCO México.`,
       alignment: AlignmentType.CENTER,
       spacing: { before: 800 },
     }));
@@ -5133,7 +5296,7 @@ function añadirSeccionWord(children, id, subset, dx) {
   if (id === 'resumen') {
     const promFichas = (subset.totalRegistros / subset.tecnicas.length).toFixed(1);
     children.push(new Paragraph({
-      text: `Este reporte abarca ${subset.tecnicas.length} técnicas textiles documentadas en ${subset.estados.length} estados de la República Mexicana, con un total de ${subset.totalRegistros} registros. El promedio es de ${promFichas} registros por técnica.`,
+      text: `Este reporte abarca ${subset.tecnicas.length} entradas del catálogo documentadas en ${subset.estados.length} estados de la República Mexicana, con un total de ${subset.totalRegistros} registros. El promedio es de ${promFichas} aportaciones por entrada del catálogo.`,
       spacing: { after: 200 },
     }));
   }

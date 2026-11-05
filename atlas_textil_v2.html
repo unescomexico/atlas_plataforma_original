@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self'; upgrade-insecure-requests">
-<title>Reporte de Registros — Atlas Textil ORIGINAL</title>
+<title>Reporte de Registros — Atlas Comunitario del Arte Textil de México</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
@@ -53,7 +53,7 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 1000; display: flex
 .nav-tab:hover { color: rgba(255,248,245,.80); }
 .nav-tab.active { color: var(--ocre); border-bottom-color: var(--ocre); }
 
-.report-wrap { max-width: 1100px; margin: 0 auto; padding: 0 40px 80px; }
+.report-wrap { width: 100%; max-width: 1320px; margin: 0 auto; padding: 0 40px 80px; }
 #intro { padding: 80px 40px 60px; max-width: 1100px; margin: 0 auto; }
 .intro-eyebrow { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; color: var(--magenta); margin-bottom: 14px; }
 .intro-title { font-family: var(--font-display); font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 900; color: var(--negro); line-height: 1.08; margin-bottom: 1rem; }
@@ -113,10 +113,26 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 1000; display: flex
 .chart-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 22px; box-shadow: var(--shadow-sm); }
 .chart-card-title { font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; color: var(--negro); margin-bottom: 3px; }
 .chart-card-sub { font-size: 0.75rem; color: var(--arena); margin-bottom: 18px; line-height: 1.5; }
-.chart-card-full { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 22px; box-shadow: var(--shadow-sm); margin: 1.5rem 0; }
+.chart-card-full { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-sm); margin: 1.5rem 0; width: 100%; min-width: 0; }
+/* Gráficas compactas y responsivas: se controla la altura desde un contenedor,
+   tal como recomienda Chart.js, para que el tamaño no dependa del ancho de pantalla. */
+.atlas-chart-frame { position: relative; width: 100%; height: 280px; }
+.atlas-chart-frame--short { height: 215px; }
+.atlas-chart-frame--medium { height: 305px; }
+.atlas-chart-frame--long { height: 360px; }
+.atlas-chart-frame--dense { height: 415px; }
+.atlas-chart-frame canvas { display: block; width: 100% !important; height: 100% !important; }
+/* Las gráficas de dona mantienen un área cuadrada, independientemente del ancho. */
+.donut-canvas-wrap { position: relative; width: 180px; height: 180px; flex: 0 0 180px; }
+@media (max-width: 840px) {
+  .chart-card-full { width: 100%; padding: 16px; }
+  .atlas-chart-frame--dense { height: 420px; }
+  .atlas-chart-frame--long { height: 360px; }
+}
+
 
 .donut-wrap { display: flex; align-items: center; gap: 2rem; }
-.donut-canvas-wrap { flex: 0 0 200px; }
+.donut-canvas-wrap { position: relative; flex: 0 0 180px; width: 180px; height: 180px; }
 .donut-legend { flex: 1; }
 .donut-legend-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
 .donut-legend-item:last-child { border-bottom: none; }
@@ -163,7 +179,7 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 1000; display: flex
   <button type="button" class="nav-tab active" data-target="metodologia">Metodología</button>
   <button type="button" class="nav-tab" data-target="participacion">Participación</button>
   <button type="button" class="nav-tab" data-target="distribucion">Distribución</button>
-  <button type="button" class="nav-tab" data-target="tecnicas">Técnicas</button>
+  <button type="button" class="nav-tab" data-target="tecnicas">Registros</button>
   <button type="button" class="nav-tab" data-target="tenido">Teñido</button>
   <button type="button" class="nav-tab" data-target="transmision">Transmisión</button>
 </nav>
@@ -172,19 +188,19 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 1000; display: flex
   <div class="intro-eyebrow">Reporte de registros</div>
   <h1 class="intro-title">Aplicación y<br><em>metodología</em></h1>
   <div class="intro-divider"></div>
-  <p class="intro-lead">La propuesta del <strong>Atlas De Técnicas De Artes Textiles En ORIGINAL</strong> surgió ante la necesidad de reconocer, documentar y fortalecer la diversidad de técnicas textiles que existen en México, muchas de las cuales están en riesgo por la falta de registro, la desvalorización cultural y el debilitamiento de los procesos de transmisión intergeneracional.</p>
-  <p class="intro-lead">Impulsada en el marco del Encuentro Nacional de Artes Textiles ORIGINAL, esta iniciativa representa una oportunidad para promover formas <strong>participativas de consulta y registro</strong> que contribuyan a la salvaguardia de técnicas artesanales en todo el país, aprovechando la amplia convocatoria del evento.</p>
+  <p class="intro-lead">La propuesta del <strong>Atlas Comunitario del Arte Textil de México</strong> surgió ante la necesidad de reconocer, documentar y fortalecer la diversidad de conocimientos, prácticas y productos textiles que existen en México, muchas de las cuales están en riesgo por la falta de registro, la desvalorización cultural y el debilitamiento de los procesos de transmisión intergeneracional.</p>
+  <p class="intro-lead">Impulsada en el marco del Encuentro Nacional de Artes Textiles ORIGINAL, esta iniciativa representa una oportunidad para promover formas <strong>participativas de consulta y registro</strong> que contribuyan a la salvaguardia de los conocimientos y prácticas artesanales en todo el país, aprovechando la amplia convocatoria del evento.</p>
   <p class="intro-lead"><strong>La fuente principal de la información presentada en el Atlas son los testimonios compartidos por las artesanas y los artesanos participantes.</strong> Las fichas, descripciones, materiales, contextos y referencias territoriales sistematizan lo que las personas entrevistadas comunicaron durante el ejercicio de registro.</p>
-  <div class="callout">Este atlas no pretende ser exhaustivo, sino representar una muestra de la diversidad técnica del arte textil en México. Su estructura permanece abierta y podrá enriquecerse con futuras experiencias, registros y actividades.</div>
+  <div class="callout">Este atlas no pretende ser exhaustivo, sino representar una muestra de la diversidad de expresiones del arte textil en México. Su estructura permanece abierta y podrá enriquecerse con futuras experiencias, registros y actividades.</div>
 </div>
 
 <div class="report-wrap">
 
   <!-- 01 METODOLOGÍA -->
   <section class="section-block" id="metodologia">
-    <div class="section-eyebrow">01 — Técnicas del arte textil</div>
-    <h2 class="section-title">Clasificación experta de las técnicas</h2>
-    <p class="section-lead">Las técnicas registradas en el Atlas han sido clasificadas en cuatro niveles jerárquicos por un equipo de expertas y expertos en textiles mexicanos. Esta taxonomía organiza las <strong id="total-tecnicas">—</strong> técnicas documentadas en categorías, subcategorías, tipos y variantes.</p>
+    <div class="section-eyebrow">01 — Clasificación del arte textil</div>
+    <h2 class="section-title">Clasificación de los elementos textiles</h2>
+    <p class="section-lead">Las denominaciones registradas en el Atlas se han vinculado con una clasificación textil de cuatro niveles jerárquicos por un equipo de expertas y expertos en textiles mexicanos. Esta taxonomía organiza las <strong id="total-tecnicas">—</strong> entradas del catálogo en categorías, subcategorías, tipos y variantes.</p>
     <div class="expertos-nota">
       <div class="expertos-nota-titulo">Clasificación elaborada por:</div>
       <ol class="expertos-nota-lista">
@@ -196,8 +212,12 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 1000; display: flex
     </div>
     <div class="tree-grid" id="cat-tree-grid"></div>
     <h2 class="section-title" style="margin-top:3rem">Recolección de datos</h2>
-    <p class="section-lead">Se diseñó una <strong>Ficha de Registro de Técnicas Textiles</strong> en plataforma digital, aplicada en campo mediante dispositivos móviles en tres sedes: <strong>CDMX, Mérida y Tijuana</strong>. La ficha incluyó datos generales de la persona entrevistada, identificación de la técnica, ubicación geográfica, características técnicas, contexto cultural, prendas y transmisión del conocimiento.</p>
-    <p class="section-lead">El levantamiento se acompañó de una <strong>actividad de cartografía participativa</strong> en la que las y los asistentes colocaban en un mapa las técnicas que iban registrando, permitiendo visualizar la diversidad geográfica de los saberes compartidos.</p>
+    <p class="section-lead">Se diseñó una <strong>Ficha de Registro del Arte Textil</strong> en plataforma digital, aplicada en campo mediante dispositivos móviles en tres sedes: <strong>CDMX, Mérida y Tijuana</strong>. La ficha incluyó datos generales de la persona entrevistada, identificación del elemento textil registrado, ubicación geográfica, características de elaboración, contexto cultural, prendas y transmisión del conocimiento.</p>
+    <p class="section-lead">Los talleres de registro realizados con las personas artesanas contaron con el acompañamiento de <strong>Silvia Terán, especialista en textiles, y Salomón Bazbaz, especialista en patrimonio cultural inmaterial</strong>. Su participación formó parte de esta etapa inicial de recopilación de testimonios y construcción del Atlas.</p>
+    <p class="section-lead">El levantamiento se acompañó de una <strong>actividad de cartografía participativa</strong> en la que las y los asistentes colocaban en un mapa los elementos textiles que iban registrando, permitiendo visualizar la diversidad geográfica de los saberes compartidos.</p>
+    <h2 class="section-title" style="margin-top:2.2rem">Revisión y procesamiento de la información</h2>
+    <p class="section-lead">Después de los talleres se realizó una etapa de revisión, organización, procesamiento y sistematización de los registros con el acompañamiento de diversos especialistas. Entre ellos, <strong>Katherine Castaneda</strong> colaboró en estos trabajos de revisión y procesamiento de la información.</p>
+    <p class="section-lead">Las cifras y gráficas de esta sección se calculan a partir de las aportaciones consolidadas y las denominaciones del catálogo. Las respuestas sobre género, lengua, teñido o aprendizaje pueden estar incompletas o admitir múltiples opciones, por lo que sus conteos no deben interpretarse automáticamente como números de personas distintas.</p>
   </section>
 
   <!-- 02 PARTICIPACIÓN -->
@@ -208,12 +228,12 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 1000; display: flex
     <div class="two-col">
       <div class="chart-card">
         <div class="chart-card-title">Registros por sede</div>
-        <div class="chart-card-sub">Total de fichas levantadas en cada sede del evento</div>
-        <canvas id="chart-sede" height="210"></canvas>
+        <div class="chart-card-sub">Total de aportaciones registradas por sede</div>
+        <div class="atlas-chart-frame atlas-chart-frame--short"><canvas id="chart-sede"></canvas></div>
       </div>
       <div class="chart-card">
         <div class="chart-card-title">Distribución por género</div>
-        <div class="chart-card-sub">Porcentaje de participantes según género declarado</div>
+        <div class="chart-card-sub">Proporción de fichas según el género declarado; incluye respuestas no especificadas</div>
         <div class="donut-wrap" style="margin-top:8px">
           <div class="donut-canvas-wrap"><canvas id="chart-genero" height="200"></canvas></div>
           <div class="donut-legend" id="chart-genero-legend"></div>
@@ -222,13 +242,13 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 1000; display: flex
     </div>
     <div class="chart-card-full">
       <div class="chart-card-title">Registros por estado de origen</div>
-      <div class="chart-card-sub">Top 15 estados con mayor número de fichas registradas</div>
-      <canvas id="chart-part-estado" height="320"></canvas>
+      <div class="chart-card-sub">15 entidades con más aportaciones; se excluyen fichas sin estado declarado</div>
+      <div class="atlas-chart-frame atlas-chart-frame--long"><canvas id="chart-part-estado"></canvas></div>
     </div>
     <div class="chart-card-full">
-      <div class="chart-card-title">Registros por lengua indígena</div>
-      <div class="chart-card-sub">Las 12 lenguas con mayor número de portadores registrados en el Atlas</div>
-      <canvas id="chart-lengua" height="260"></canvas>
+      <div class="chart-card-title">Aportaciones por lengua declarada</div>
+      <div class="chart-card-sub">12 lenguas con más menciones en las fichas; la lengua no determina la pertenencia a un pueblo</div>
+      <div class="atlas-chart-frame atlas-chart-frame--medium"><canvas id="chart-lengua"></canvas></div>
     </div>
   </section>
 
@@ -236,61 +256,61 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 1000; display: flex
   <section class="section-block" id="distribucion">
     <div class="section-eyebrow">03 — Distribución geográfica</div>
     <h2 class="section-title">El mapa del textil mexicano</h2>
-    <p class="section-lead">Ranking de estados con mayor diversidad de técnicas distintas reportadas. <strong id="top3-estados">—</strong> concentran la mayor riqueza técnica registrada en este ejercicio.</p>
+    <p class="section-lead">Ranking de estados con mayor diversidad de denominaciones registradas. <strong id="top3-estados">—</strong> concentran la mayor diversidad de registros en este ejercicio.</p>
     <div class="chart-card-full">
-      <div class="chart-card-title">Técnicas distintas por estado</div>
-      <div class="chart-card-sub">Número de técnicas únicas registradas en cada entidad federativa</div>
-      <canvas id="chart-tec-estado" height="320"></canvas>
+      <div class="chart-card-title">Denominaciones distintas por estado</div>
+      <div class="chart-card-sub">Número de denominaciones distintas documentadas por entidad, calculado a partir de sus aportaciones</div>
+      <div class="atlas-chart-frame atlas-chart-frame--dense"><canvas id="chart-tec-estado"></canvas></div>
     </div>
     <div class="chart-card-full">
       <div class="chart-card-title">Municipios con mayor número de registros</div>
-      <div class="chart-card-sub">Top 20 municipios con más fichas levantadas</div>
-      <canvas id="chart-municipios" height="320"></canvas>
+      <div class="chart-card-sub">20 municipios con más aportaciones; municipio y estado se consideran conjuntamente</div>
+      <div class="atlas-chart-frame atlas-chart-frame--dense"><canvas id="chart-municipios"></canvas></div>
     </div>
     <div class="chart-card-full" style="margin-top:2rem">
-      <div class="chart-card-title">Técnica más representativa por estado</div>
-      <div class="chart-card-sub" style="margin-bottom:14px">Para cada estado, la técnica con mayor número de registros · incluye categoría experta</div>
+      <div class="chart-card-title">Denominación más frecuente por estado</div>
+      <div class="chart-card-sub" style="margin-bottom:14px">Para cada estado, la denominación con más aportaciones en ese mismo estado · incluye su clasificación</div>
       <div class="table-search-wrap">
-        <input class="table-search" type="text" id="table-search" placeholder="Buscar estado o técnica…" oninput="filterTable()">
+        <input class="table-search" type="text" id="table-search" placeholder="Buscar estado o registro…" oninput="filterTable()">
       </div>
       <div class="data-table-wrap">
         <table class="data-table">
-          <thead><tr><th>Estado</th><th>Técnica más común</th><th>Categoría</th><th style="text-align:center">Registros</th></tr></thead>
+          <thead><tr><th>Estado</th><th>Denominación más frecuente</th><th>Categoría</th><th style="text-align:center">Registros</th></tr></thead>
           <tbody id="table-body"></tbody>
         </table>
       </div>
     </div>
   </section>
 
-  <!-- 04 TÉCNICAS -->
+  <!-- 04 CARACTERÍSTICAS DE LOS REGISTROS -->
   <section class="section-block" id="tecnicas">
-    <div class="section-eyebrow">04 — Características de las técnicas</div>
-    <h2 class="section-title">Técnicas registradas</h2>
+    <div class="section-eyebrow">04 — Características de los registros</div>
+    <h2 class="section-title">Denominaciones documentadas</h2>
     <p class="section-lead" id="tecnicas-lead">Cargando datos…</p>
     <div class="chart-card-full">
-      <div class="chart-card-title">Las 20 técnicas más frecuentes</div>
-      <div class="chart-card-sub">Número total de registros por técnica en el Atlas · coloreado por categoría experta</div>
-      <canvas id="chart-top-tec" height="400"></canvas>
+      <div class="chart-card-title">Las 20 denominaciones más frecuentes</div>
+      <div class="chart-card-sub">Número de aportaciones por denominación en el Atlas · color según categoría de clasificación</div>
+      <div class="atlas-chart-frame atlas-chart-frame--dense"><canvas id="chart-top-tec"></canvas></div>
     </div>
     <div class="two-col">
       <div class="chart-card">
-        <div class="chart-card-title">Categoría de técnica</div>
-        <div class="chart-card-sub">Distribución de registros por categoría principal según clasificación experta</div>
+        <div class="chart-card-title">Categoría de clasificación</div>
+        <div class="chart-card-sub">Aportaciones de las cuatro categorías principales de la clasificación</div>
         <div class="donut-wrap" style="margin-top:8px">
           <div class="donut-canvas-wrap"><canvas id="chart-grupos" height="220"></canvas></div>
           <div class="donut-legend" id="chart-grupos-legend"></div>
         </div>
       </div>
       <div class="chart-card">
-        <div class="chart-card-title">Subcategoría de técnica</div>
-        <div class="chart-card-sub">Registros agrupados por subcategoría dentro del esquema experto</div>
-        <canvas id="chart-manufactura" height="260"></canvas>
+        <div class="chart-card-title">Subcategoría de clasificación</div>
+        <div class="chart-card-sub">Aportaciones de las cuatro categorías principales, agrupadas por subcategoría</div>
+        <div class="atlas-chart-frame atlas-chart-frame--medium"><canvas id="chart-manufactura"></canvas></div>
       </div>
     </div>
     <div class="chart-card-full">
-      <div class="chart-card-title">Distribución de técnicas por lengua indígena</div>
-      <div class="chart-card-sub">Top 10 técnicas entre las 10 lenguas con más registros (barras apiladas)</div>
-      <canvas id="chart-lengua-tec" height="360"></canvas>
+      <div class="chart-card-title">Aportaciones por lengua y denominación</div>
+      <div class="chart-card-sub">Cruce de las 10 denominaciones más frecuentes con las 10 lenguas más mencionadas (aportaciones)</div>
+      <div class="atlas-chart-frame atlas-chart-frame--long"><canvas id="chart-lengua-tec"></canvas></div>
     </div>
   </section>
 
@@ -298,11 +318,11 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 1000; display: flex
   <section class="section-block" id="tenido">
     <div class="section-eyebrow">05 — Teñido</div>
     <h2 class="section-title">Prácticas de teñido</h2>
-    <p class="section-lead">El teñido es una técnica <strong>transversal</strong> que puede incorporarse al bordado o al tejido. La mayoría de los artesanos reportaron el uso de <strong>tintes naturales de plantas</strong> como práctica predominante, seguido de insectos y animales.</p>
+    <p class="section-lead">El teñido puede formar parte de distintas prácticas textiles. Entre los métodos señalados en las fichas, <strong>el uso de plantas es el más frecuente</strong>. Una misma aportación puede mencionar más de un tipo de teñido, por lo que las cantidades representan menciones y no personas distintas.</p>
     <div class="two-col">
       <div class="chart-card">
         <div class="chart-card-title">Tipos de teñido registrados</div>
-        <div class="chart-card-sub">Distribución general de los métodos de teñido</div>
+        <div class="chart-card-sub">Distribución de las menciones por método de teñido (respuesta múltiple)</div>
         <div class="donut-wrap" style="margin-top:8px">
           <div class="donut-canvas-wrap"><canvas id="chart-tenido-donut" height="200"></canvas></div>
           <div class="donut-legend" id="chart-tenido-legend"></div>
@@ -310,8 +330,8 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 1000; display: flex
       </div>
       <div class="chart-card">
         <div class="chart-card-title">Frecuencia por tipo de teñido</div>
-        <div class="chart-card-sub">Número de registros que reportan cada método</div>
-        <canvas id="chart-tenido-bar" height="260"></canvas>
+        <div class="chart-card-sub">Número de menciones por tipo de teñido; una ficha puede aportar varias</div>
+        <div class="atlas-chart-frame atlas-chart-frame--short"><canvas id="chart-tenido-bar"></canvas></div>
       </div>
     </div>
   </section>
@@ -320,13 +340,13 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 1000; display: flex
   <section class="section-block" id="transmision">
     <div class="section-eyebrow">06 — Transmisión del conocimiento</div>
     <h2 class="section-title">¿Cómo se aprende y se enseña?</h2>
-    <p class="section-lead">La transmisión de los saberes textiles ocurre principalmente dentro del <strong>núcleo familiar</strong>. La madre es la figura más frecuente en el proceso de aprendizaje, seguida de tías y abuelas, lo que evidencia el papel central de las mujeres como portadoras y transmisoras de este patrimonio.</p>
+    <p class="section-lead">Las respuestas sobre aprendizaje mencionan con mayor frecuencia a la <strong>madre</strong>, seguida de las tías y las abuelas. Como las personas podían señalar varias fuentes de aprendizaje, cada barra representa menciones registradas y no personas distintas.</p>
     <div class="chart-card-full">
-      <div class="chart-card-title">Fuentes de aprendizaje de la técnica</div>
-      <div class="chart-card-sub">¿De quién aprendió esta técnica? (respuesta múltiple posible)</div>
-      <canvas id="chart-aprendizaje" height="260"></canvas>
+      <div class="chart-card-title">Fuentes de aprendizaje</div>
+      <div class="chart-card-sub">¿De quién aprendió? Número de menciones en las fichas; respuesta múltiple</div>
+      <div class="atlas-chart-frame atlas-chart-frame--medium"><canvas id="chart-aprendizaje"></canvas></div>
     </div>
-    <div class="callout">El aprendizaje intergeneracional —especialmente de madres a hijas— constituye el principal mecanismo de transmisión del patrimonio textil. La instructora formal representa una vía complementaria, especialmente en contextos urbanos.</div>
+    <div class="callout">Los testimonios muestran la relevancia del aprendizaje familiar. Las barras permiten reconocer a quiénes se mencionó en las fichas, sin suponer que una sola persona transmitió cada conocimiento.</div>
   </section>
 
 </div>
@@ -345,13 +365,19 @@ const CAT2_COLORS = {
   'Bordados': MAGENTA, 'Aplicaciones': ROSA, 'Otras': ARENA, 'Artesanales': VERDE,
 };
 const CAT1_DESC = {
-  'Tejido':               'Técnicas que producen tela mediante el entrelazado de hilos. Incluye tejidos en telar, a mano y técnicas de anudado.',
+  'Tejido':               'Procedimientos que producen tela mediante el entrelazado de hilos. Incluye tejidos en telar, a mano y procedimientos de anudado.',
   'Técnicas decorativas': 'Métodos que aplican ornamentación sobre una tela base, como el bordado y las aplicaciones.',
   'Acabados':             'Procesos que dan terminado o tratamiento final a la pieza textil ya elaborada.',
-  'Teñidos':              'Técnicas para añadir color a los textiles mediante tintes naturales o artificiales.',
+  'Teñidos':              'Procedimientos para añadir color a los textiles mediante tintes naturales o artificiales.',
   'Hilados':              'Procesos de transformación de fibras en hilos, tanto con herramientas tradicionales como industriales.',
 };
 const MULTI = [MAGENTA, AZUL, VERDE, OCRE, NARANJA, CYAN, ROSA, '#7F8C8D', '#9B59B6', ARENA];
+// La clasificación conserva los identificadores originales de los datos.
+const claseVisible = v => v === 'Técnicas decorativas' ? 'Decorativas' : v;
+// Solo las cuatro categorias principales en las visualizaciones de clasificacion.
+// La categoria 'Otras' se conserva sin cambios en los datos originales.
+const CATEGORIAS_PRINCIPALES = ['Acabados', 'Tejido', 'Técnicas decorativas', 'Teñidos'];
+
 
 const rampMagenta = n => Array.from({length:n}, (_,i) => {
   const t = i / Math.max(n-1,1);
@@ -369,29 +395,39 @@ const baseOpts = (indexAxis='x') => ({
 
 /* ── CSV PARSER ── */
 function parseCSV(text) {
-  const lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
-  if (lines.length < 2) return [];
-  const headers = parseCSVRow(lines[0]);
-  return lines.slice(1).filter(l => l.trim()).map(l => {
-    const vals = parseCSVRow(l);
+  // Lee CSV real: los campos entre comillas pueden contener saltos de línea.
+  // Se eliminan los saltos SOLO si están fuera de comillas.
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  text = String(text || '').replace(/^\uFEFF/, '');
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '"') {
+      if (inQuotes && text[i + 1] === '"') { field += '"'; i++; }
+      else inQuotes = !inQuotes;
+    } else if (ch === ',' && !inQuotes) {
+      row.push(field.trim()); field = '';
+    } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+      if (ch === '\r' && text[i + 1] === '\n') i++;
+      row.push(field.trim());
+      if (row.some(value => value !== '')) rows.push(row);
+      row = []; field = '';
+    } else {
+      field += ch;
+    }
+  }
+  if (inQuotes) throw new Error('CSV incompleto: comillas sin cierre');
+  row.push(field.trim());
+  if (row.some(value => value !== '')) rows.push(row);
+  const headers = rows.shift() || [];
+  return rows.map(values => {
     const obj = {};
-    headers.forEach((h,i) => { obj[h] = vals[i] !== undefined ? vals[i] : ''; });
+    headers.forEach((h, idx) => { obj[h] = values[idx] === undefined ? '' : values[idx]; });
     return obj;
   });
 }
-function parseCSVRow(line) {
-  const result = []; let cur = ''; let inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') { if (inQ && line[i+1]==='"') { cur+='"'; i++; } else { inQ=!inQ; } }
-    else if (ch === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
-    else cur += ch;
-  }
-  result.push(cur.trim());
-  return result;
-}
 
-function num(v) { const n = parseFloat(v); return isNaN(n) ? 0 : n; }
+  function num(v) { const n = parseFloat(v); return isNaN(n) ? 0 : n; }
 function pct(n, t) { return t > 0 ? (n/t*100).toFixed(1)+' %' : '0 %'; }
 function esc(s) {
   if (!s) return '';
@@ -427,9 +463,10 @@ function renderAll(rowsTec, rowsRec) {
   Chart.defaults.color = '#8C7A80';
   Chart.defaults.borderColor = 'rgba(26,16,24,.08)';
   Chart.defaults.font.family = "'DM Sans', sans-serif";
+  Chart.defaults.maintainAspectRatio = false;
 
   // ─────────────────────────────────────────────────────────────────
-  // FILTRO GLOBAL DE LA PLATAFORMA: solo técnicas con datos sólidos
+  // FILTRO GLOBAL DE LA PLATAFORMA: solo entradas con datos sólidos
   // (`incluida === sí` en data_by_technique_id.csv).
   //
   // El criterio se basa en un score curatorial que evalúa la riqueza
@@ -440,6 +477,10 @@ function renderAll(rowsTec, rowsRec) {
   rowsTec = rowsTec.filter(r => (r['incluida'] || '').trim().toLowerCase() === 'sí');
   const tecnicasValidas = new Set(rowsTec.map(r => (r['Tecnica'] || r['tecnica_norm'] || '').trim()));
   rowsRec = rowsRec.filter(r => tecnicasValidas.has((r['Tecnica'] || '').trim()));
+  const totalCatalogo = rowsTec.reduce((sum, r) => sum + num(r['n_fichas']), 0);
+  if (totalCatalogo !== rowsRec.length) {
+    throw new Error(`Los totales del catálogo (${totalCatalogo}) y las aportaciones (${rowsRec.length}) no coinciden`);
+  }
 
   /* ══════════════════════════
      01 — CLASIFICACIÓN
@@ -448,7 +489,7 @@ function renderAll(rowsTec, rowsRec) {
   const catTree = {};
   rowsTec.forEach(r => {
     const c1 = (r['CAT-N-1']||'').trim();
-    const c2 = (r['CAT-N-2']||'').trim();
+    const c2 = (r['CAT-N-2']||'').trim() || 'Otras';
     const c3 = (r['CAT-N-3']||'').trim();
     const nombre = (r['Tecnica']||r['tecnica_norm']||'').trim();
     const fichas = num(r['n_fichas']);
@@ -465,7 +506,10 @@ function renderAll(rowsTec, rowsRec) {
   const totalTecnicas = rowsTec.filter(r => (r['Tecnica']||r['tecnica_norm']||'').trim()).length;
   document.getElementById('total-tecnicas').textContent = totalTecnicas;
 
-  document.getElementById('cat-tree-grid').innerHTML = Object.entries(catTree).map(([c1, node]) => {
+  document.getElementById('cat-tree-grid').innerHTML = CATEGORIAS_PRINCIPALES
+    .filter(c1 => catTree[c1])
+    .map(c1 => [c1, catTree[c1]])
+    .map(([c1, node]) => {
     const subsHTML = Object.entries(node.subs).map(([c2, sub]) => {
       const lvl3 = [...new Set(sub.items.map(i => i.cat3).filter(Boolean))];
       const subItems = lvl3.map(c3 => `<div class="tree-item tree-sub">${esc(c3)}</div>`).join('');
@@ -476,7 +520,7 @@ function renderAll(rowsTec, rowsRec) {
     return `<div class="tree-card">
       <div class="tree-card-header">
         <div class="tree-card-dot" style="background:${node.color}"></div>
-        <span class="tree-card-label">${esc(c1)}</span>
+        <span class="tree-card-label">${esc(claseVisible(c1))}</span>
         <span class="tree-card-count">${node.total} reg.</span>
       </div>
       <p class="tree-card-desc">${esc(node.desc)}</p>
@@ -490,11 +534,13 @@ function renderAll(rowsTec, rowsRec) {
      ══════════════════════════ */
   const totalRegistros = rowsRec.length;
   const estadosUnicos   = new Set(rowsRec.map(r => (r['Estado']||'').trim()).filter(Boolean));
-  const municipiosUnicos = new Set(rowsRec.map(r => (r['Municipio']||'').trim()).filter(Boolean));
+  const municipiosUnicos = new Set(rowsRec
+    .filter(r => (r['Estado']||'').trim() && (r['Municipio']||'').trim())
+    .map(r => `${(r['Estado']||'').trim()}|||${(r['Municipio']||'').trim()}`));
   const lenguasUnicas   = new Set(rowsRec.map(r => (r['Lengua']||'').trim()).filter(Boolean));
 
   document.getElementById('participacion-lead').innerHTML =
-    `Se recibieron un total de <strong>${totalRegistros} aportaciones</strong>, provenientes de artesanas y artesanos de <strong>${estadosUnicos.size} estados</strong> y <strong>${municipiosUnicos.size} municipios</strong> del país, con técnicas vinculadas a <strong>${lenguasUnicas.size} lenguas indígenas</strong>.`;
+    `La base consolidada reúne <strong>${totalRegistros} aportaciones</strong>, <strong>${totalTecnicas} denominaciones</strong> del catálogo y registros de <strong>${estadosUnicos.size} entidades federativas</strong>. Se documentaron <strong>${municipiosUnicos.size} combinaciones de municipio y estado</strong> y se mencionaron <strong>${lenguasUnicas.size} lenguas</strong> en las fichas. Los totales corresponden a aportaciones, no a personas únicas.`;
 
   /* 2a. Sede */
   const sedeCount = {};
@@ -512,13 +558,13 @@ function renderAll(rowsTec, rowsRec) {
     const g = (r['Genero']||'').trim().toLowerCase();
     if (g === 'mujer') genMap.mujer++;
     else if (g === 'hombre') genMap.hombre++;
-    else if (g) genMap.otro++;
+    else genMap.otro++;
   });
-  const genTotal = genMap.mujer + genMap.hombre + genMap.otro;
+  const genTotal = rowsRec.length;
   const genData = [
     { label:'Mujer',         v: genMap.mujer,  color: MAGENTA },
     { label:'Hombre',        v: genMap.hombre, color: ROSA    },
-    { label:'No especificó', v: genMap.otro,   color: ARENA   },
+    { label:'Sin dato o no especificado', v: genMap.otro, color: ARENA },
   ].filter(d => d.v > 0);
 
   document.getElementById('chart-genero-legend').innerHTML = genData.map(d =>
@@ -556,24 +602,25 @@ function renderAll(rowsTec, rowsRec) {
 
   /* ══════════════════════════
      03 — DISTRIBUCIÓN
-     Fuente: data_by_technique_id (técnicas×estado)
+     Fuente: data_by_technique_id (registros×estado)
              data_by_record_id   (municipios)
      ══════════════════════════ */
 
-  /* 3a. Técnicas distintas por estado */
+  /* 3a. Denominaciones diferentes por estado: de fichas individuales. */
   const estadoTecMap = {};
-  rowsTec.forEach(r => {
-    const nombre = (r['Tecnica']||r['tecnica_norm']||'').trim();
-    if (!nombre) return;
-    (r['estados']||'').split(',').map(s=>s.trim()).filter(Boolean).forEach(e => {
-      if (!estadoTecMap[e]) estadoTecMap[e] = new Set();
-      estadoTecMap[e].add(nombre);
-    });
+  const estadoFrecuencias = {};
+  rowsRec.forEach(r => {
+    const e = (r['Estado']||'').trim();
+    const nombre = (r['Tecnica']||'').trim();
+    if (!e || !nombre) return;
+    if (!estadoTecMap[e]) estadoTecMap[e] = new Set();
+    if (!estadoFrecuencias[e]) estadoFrecuencias[e] = {};
+    estadoTecMap[e].add(nombre);
+    estadoFrecuencias[e][nombre] = (estadoFrecuencias[e][nombre]||0) + 1;
   });
   const estadoTecArr = Object.entries(estadoTecMap)
     .map(([e,set])=>[abreviarEstado(e), set.size])
     .sort((a,b)=>b[1]-a[1]).slice(0,20);
-
   if (estadoTecArr.length >= 3) {
     document.getElementById('top3-estados').textContent =
       `${estadoTecArr[0][0]}, ${estadoTecArr[1][0]} y ${estadoTecArr[2][0]}`;
@@ -584,35 +631,35 @@ function renderAll(rowsTec, rowsRec) {
     options: { ...baseOpts('y') }
   });
 
-  /* 3b. Municipios */
+  /* 3b. Municipios: siempre entidad y municipio como clave compuesta. */
   const muniCount = {};
-  rowsRec.forEach(r => { const m = (r['Municipio']||'').trim(); if (m) muniCount[m] = (muniCount[m]||0)+1; });
+  rowsRec.forEach(r => {
+    const m = (r['Municipio']||'').trim();
+    const estado = (r['Estado']||'').trim();
+    if (!m || !estado) return;
+    const key = `${m} (${abreviarEstado(estado)})`;
+    muniCount[key] = (muniCount[key]||0) + 1;
+  });
   const muniArr = Object.entries(muniCount).sort((a,b)=>b[1]-a[1]).slice(0,20);
   new Chart(document.getElementById('chart-municipios'), {
     type: 'bar',
     data: { labels: muniArr.map(d=>d[0]), datasets: [{ data: muniArr.map(d=>d[1]), backgroundColor: AZUL, borderWidth:0, borderRadius:3 }] },
-    options: { plugins: { legend: { display:false } }, scales: { x: { grid:{display:false}, ticks:{color:ARENA, maxRotation:45, font:{size:11}} }, y: { grid:{color:'rgba(26,16,24,.06)'} } } }
+    options: { ...baseOpts('y') }
   });
 
-  /* 3c. Tabla técnica más representativa por estado */
-  const estadoBest = {};
-  rowsTec.forEach(r => {
-    const nombre = (r['Tecnica']||r['tecnica_norm']||'').trim();
-    const cat1   = (r['CAT-N-1']||'').trim();
-    const fichas = num(r['n_fichas']);
-    if (!nombre) return;
-    (r['estados']||'').split(',').map(s=>s.trim()).filter(Boolean).forEach(e => {
-      const key = abreviarEstado(e);
-      if (!estadoBest[key] || estadoBest[key].fichas < fichas) estadoBest[key] = { tecnica: nombre, fichas, cat1 };
-    });
-  });
-  window._tableData = Object.entries(estadoBest)
-    .sort((a,b)=>a[0].localeCompare(b[0],'es'))
-    .map(([e,d])=>[e, d.tecnica, d.cat1, d.fichas]);
+  /* 3c. La denominación más frecuente dentro de cada estado, no su total nacional. */
+  const clasificacionPorNombre = Object.fromEntries(rowsTec.map(r =>
+    [(r['Tecnica']||r['tecnica_norm']||'').trim(), (r['CAT-N-1']||'').trim()]));
+  window._tableData = Object.entries(estadoFrecuencias)
+    .map(([estado, frecuencias]) => {
+      const [nombre, cantidad] = Object.entries(frecuencias).sort((a,b)=>b[1]-a[1] || a[0].localeCompare(b[0],'es'))[0];
+      return [abreviarEstado(estado), nombre, clasificacionPorNombre[nombre]||'', cantidad];
+    })
+    .sort((a,b)=>a[0].localeCompare(b[0],'es'));
   renderTable(window._tableData);
 
-  /* ══════════════════════════
-     04 — TÉCNICAS
+    /* ══════════════════════════
+     04 — REGISTROS
      Fuente: data_by_technique_id
      ══════════════════════════ */
   const topRows = [...rowsTec]
@@ -630,39 +677,47 @@ function renderAll(rowsTec, rowsRec) {
       ...baseOpts('y'),
       plugins: { legend:{display:false}, tooltip:{ callbacks:{ label: ctx => {
         const r = topRows[ctx.dataIndex];
-        return [`${ctx.parsed.x} registros`, [r['CAT-N-1'],r['CAT-N-2']].filter(Boolean).join(' › ')];
+        return [`${ctx.parsed.x} registros`, [claseVisible(r['CAT-N-1']),r['CAT-N-2']].filter(Boolean).join(' › ')];
       }}}}
     }
   });
   document.getElementById('tecnicas-lead').innerHTML =
-    `Se identificaron <strong>${totalTecnicas} técnicas distintas</strong> en todo el ejercicio. Las más reportadas son <strong>${esc(topNames[0]||'')}</strong> y <strong>${esc(topNames[1]||'')}</strong>, presentes en múltiples estados y lenguas indígenas.`;
+    `El catálogo reúne <strong>${totalTecnicas} denominaciones</strong>, documentadas en <strong>${totalRegistros} aportaciones</strong>. Las más frecuentes en la base consolidada son <strong>${esc(topNames[0]||'')}</strong> y <strong>${esc(topNames[1]||'')}</strong>. Cada barra representa aportaciones, no personas diferentes.`;
 
   /* 4b. Dona CAT-N-1 */
-  const cat1Entries = Object.entries(catTree).map(([c1,n])=>({label:c1, value:n.total, color:n.color}));
+  const cat1Entries = CATEGORIAS_PRINCIPALES
+    .filter(c1 => catTree[c1])
+    .map(c1 => ({label:c1, value:catTree[c1].total, color:catTree[c1].color}));
   document.getElementById('chart-grupos-legend').innerHTML = cat1Entries.map(e =>
     `<div class="donut-legend-item">
       <div class="donut-legend-dot" style="background:${e.color}"></div>
-      <span class="donut-legend-name">${esc(e.label)}</span>
+      <span class="donut-legend-name">${esc(claseVisible(e.label))}</span>
       <span class="donut-legend-val">${e.value}</span>
     </div>`
   ).join('');
   new Chart(document.getElementById('chart-grupos'), {
     type: 'doughnut',
-    data: { labels: cat1Entries.map(e=>e.label), datasets: [{ data: cat1Entries.map(e=>e.value), backgroundColor: cat1Entries.map(e=>e.color), borderWidth:3, borderColor:'#FFF8F5' }] },
+    data: { labels: cat1Entries.map(e=>claseVisible(e.label)), datasets: [{ data: cat1Entries.map(e=>e.value), backgroundColor: cat1Entries.map(e=>e.color), borderWidth:3, borderColor:'#FFF8F5' }] },
     options: { cutout:'55%', plugins:{ legend:{display:false} } }
   });
 
   /* 4c. Barras CAT-N-2 */
   const cat2Map = {};
-  rowsTec.forEach(r => { const c2=(r['CAT-N-2']||'').trim(); if(c2) cat2Map[c2]=(cat2Map[c2]||0)+num(r['n_fichas']); });
+  rowsTec.forEach(r => {
+    const c1 = (r['CAT-N-1']||'').trim();
+    const c2 = (r['CAT-N-2']||'').trim() || 'Otras';
+    if (!CATEGORIAS_PRINCIPALES.includes(c1)) return;
+    const label = `${claseVisible(c1)} · ${c2}`;
+    cat2Map[label] = (cat2Map[label]||0) + num(r['n_fichas']);
+  });
   const cat2Sorted = Object.entries(cat2Map).sort((a,b)=>b[1]-a[1]);
   new Chart(document.getElementById('chart-manufactura'), {
     type: 'bar',
-    data: { labels: cat2Sorted.map(d=>d[0]), datasets: [{ data: cat2Sorted.map(d=>d[1]), backgroundColor: cat2Sorted.map(d=>CAT2_COLORS[d[0]]||ARENA), borderWidth:0, borderRadius:3 }] },
-    options: { plugins:{legend:{display:false}}, scales:{ x:{grid:{display:false}, ticks:{color:ARENA, maxRotation:35, font:{size:11}}}, y:{grid:{color:'rgba(26,16,24,.06)'}} } }
+    data: { labels: cat2Sorted.map(d=>d[0]), datasets: [{ data: cat2Sorted.map(d=>d[1]), backgroundColor: cat2Sorted.map(d=>CAT2_COLORS[d[0].split(' · ').pop()]||ARENA), borderWidth:0, borderRadius:3 }] },
+    options: { ...baseOpts('y') }
   });
 
-  /* 4d. Matriz técnicas × lengua (cruce de ambos CSV) */
+  /* 4d. Matriz registros × lengua (cruce de ambos CSV) */
   const top10Tec = topNames.slice(0,10);
   const top10Len = lenguaArr.slice(0,10).map(d=>d[0]);
   const top10TecSet = new Set(top10Tec);
@@ -760,7 +815,7 @@ function renderTable(data) {
     return `<tr>
       <td style="color:var(--tinta);font-weight:500">${esc(e)}</td>
       <td><span class="tec-badge">${esc(t)}</span></td>
-      <td><span class="cat-badge" style="background:${color}">${esc(cat1||'—')}</span></td>
+      <td><span class="cat-badge" style="background:${color}">${esc(claseVisible(cat1||'—'))}</span></td>
       <td style="text-align:center"><span class="num-badge">${n}</span></td>
     </tr>`;
   }).join('');

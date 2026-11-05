@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://raw.githubusercontent.com; frame-src 'self' https://ee.kobotoolbox.org; form-action 'self' https://ee.kobotoolbox.org; worker-src 'self' blob:; upgrade-insecure-requests">
-<meta name="description" content="Atlas de Técnicas del Arte Textil — información construida a partir de testimonios de artesanas y artesanos">
+<meta name="description" content="Atlas Comunitario del Arte Textil de México — información construida a partir de testimonios de artesanas y artesanos">
 <meta name="theme-color" content="#8B0440">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Atlas Textil">
-<title>Atlas de Técnicas del Arte Textil</title>
+<title>Atlas Comunitario del Arte Textil de México</title>
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,7 +31,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" data-security-review="version-pinned"></script>
 
 <!-- App styles -->
-<link rel="stylesheet" href="styles.css?v=atlas-leyendas-visibles-20261101">
+<link rel="stylesheet" href="styles.css?v=atlas-pueblos-20261104">
 </head>
 <body>
 
@@ -58,6 +58,8 @@
       <span class="atlas-intro-dot" data-intro-dot="1"></span>
       <span class="atlas-intro-dot" data-intro-dot="2"></span>
       <span class="atlas-intro-dot" data-intro-dot="3"></span>
+      <span class="atlas-intro-dot" data-intro-dot="4"></span>
+      <span class="atlas-intro-dot" data-intro-dot="5"></span>
     </div>
 
     <section class="atlas-intro-slide active" data-intro-slide="0">
@@ -66,17 +68,12 @@
       </div>
       <div class="atlas-intro-copy atlas-intro-copy-intro">
         <div class="atlas-intro-kicker">Introducción</div>
-        <h2 id="atlas-intro-title">Atlas de Técnicas del Arte Textil</h2>
-        <h3 class="atlas-intro-subtitle">Una plataforma para conocer, explorar y documentar las técnicas del arte textil mexicano</h3>
+        <h2 id="atlas-intro-title">Atlas Comunitario del Arte Textil de México</h2>
+        <h3 class="atlas-intro-subtitle">Registro de técnicas, puntadas y saberes textiles compartidos por las personas artesanas</h3>
         <div class="atlas-intro-text-flow">
-<p>El Atlas de Técnicas del Arte Textil es una plataforma digital de consulta y exploración que reúne, organiza y presenta información sobre las técnicas, los conocimientos y las prácticas vinculadas con la producción textil en México. Su propósito es facilitar el acceso a estos registros y reconocer la diversidad de formas de elaboración, materiales, territorios y saberes involucrados.</p>
-<p>La plataforma se construyó a partir de fichas de registro completadas por artesanas y artesanos durante los encuentros de Original 2025, realizados en distintas sedes del país. Sus testimonios permiten documentar los procesos de elaboración, los materiales, las formas de aprendizaje y transmisión, los usos y los significados culturales de las técnicas. Este ejercicio de registro constituye también una forma de salvaguardia, al contribuir a la documentación, el reconocimiento y la transmisión de conocimientos y prácticas vinculados con el patrimonio cultural textil.</p>
-<p>Para organizar la información se desarrolló, con el acompañamiento de personas expertas, una clasificación basada en tres dimensiones: el textil, el tejido y el bordado. Esta estructura vincula los registros individuales con las técnicas documentadas y permite reconocer elementos compartidos y particularidades entre comunidades y territorios.</p>
-<p>El Atlas ofrece diversas formas de explorar sus contenidos. A través del mapa interactivo, el catálogo, la clasificación, la galería y la red de técnicas, es posible conocer su distribución geográfica, las lenguas asociadas, las relaciones con distintos ecosistemas y los registros fotográficos y audiovisuales disponibles. Las fichas reúnen información sobre las características, los procesos, los materiales y la transmisión de los conocimientos.</p>
-<p>Una misma técnica puede adquirir características diferentes según el territorio, los materiales disponibles y las experiencias transmitidas entre generaciones. La organización de los registros permite aproximarse a estas variaciones sin perder de vista sus contextos culturales y territoriales.</p>
-<p>Además de reunir información dispersa, esta plataforma busca facilitar su consulta y difusión entre personas artesanas, comunidades, estudiantes, especialistas y público interesado. Su contenido puede enriquecerse con nuevas experiencias y materiales documentales.</p>
-<p class="atlas-intro-closing"><strong>El Atlas no pretende constituir un inventario definitivo. Es una plataforma abierta y en desarrollo, que puede incorporar nuevos registros, testimonios y materiales.</strong></p>
-</div>
+<p>Esta plataforma es una herramienta de consulta y documentación de los saberes, las técnicas y otros elementos culturales vinculados al arte textil mexicano. La información que contiene ha sido proporcionada directamente por las personas artesanas, quienes, a través de este espacio, han decidido compartir con el mundo sus conocimientos, sus técnicas, sus historias y los significados que dan sentido a su práctica cultural.</p>
+<p>El Atlas Comunitario del Arte Textil de México tiene como propósito reconocer la diversidad creativa de las comunidades artesanales del país y brindar un espacio para que sean ellas mismas quienes describan, nombren y transmitan sus conocimientos desde sus propias experiencias y perspectivas.</p>
+        </div>
       </div>
     </section>
 
@@ -85,18 +82,16 @@
         <img class="atlas-intro-photo" src="assets/intro/intro_02.webp" alt="Participantes registrando información durante el ejercicio del Atlas">
       </div>
       <div class="atlas-intro-copy atlas-intro-copy-compact">
-        <div class="atlas-intro-kicker">Escuchar y registrar</div>
-        <h2>Método de registro</h2>
-        <h3 class="atlas-intro-subtitle atlas-intro-subtitle-card">Una ficha construida para recoger cada técnica</h3>
+        <div class="atlas-intro-kicker">Registro participativo</div>
+        <h2>Las aportaciones</h2>
         <div class="atlas-intro-text-flow atlas-intro-text-flow-short">
-          <p>Durante Original 2025 se realizaron entrevistas con una <strong>Ficha de Registro de Técnicas Textiles</strong>. En ella, artesanas y artesanos compartieron información sobre sus técnicas, materiales, lugares de práctica, prendas, significados y formas de aprendizaje y transmisión.</p>
-          <p>La plataforma recupera ese trabajo de registro y lo presenta de forma accesible para consulta pública, manteniendo la diversidad de voces y la riqueza de la información compartida durante el proceso.</p>
+<p>La plataforma comenzó a construirse a partir de una ficha de registro completada por más de 500 artesanas y artesanos de 29 estados de la República durante los encuentros de Original realizados en 2025 en Mérida, Tijuana y Ciudad de México. Los testimonios aquí reunidos permiten conocer de primera mano los procesos de elaboración, los materiales, las formas de aprendizaje y transmisión, así como los usos, valores y significados culturales que las personas artesanas atribuyen a las técnicas, procedimientos y demás elementos de su práctica textil.</p>
+<p>El Atlas es, además, una iniciativa en constante construcción. Su vocación es permanecer abierta para que cualquier persona artesana que así lo desee pueda continuar contribuyendo con nuevos registros, complementar la información existente o proponer correcciones a los contenidos ya publicados.</p>
         </div>
         <div class="atlas-intro-stat-panel" aria-label="Panorama del Atlas">
           <div class="atlas-intro-stat-card"><strong data-intro-stat="registros">—</strong><span>Aportaciones</span></div>
           <div class="atlas-intro-stat-card"><strong data-intro-stat="participantes">—</strong><span>Participantes</span></div>
           <div class="atlas-intro-stat-card"><strong data-intro-stat="estados">—</strong><span>Estados</span></div>
-          <div class="atlas-intro-stat-card"><strong data-intro-stat="tecnicas">—</strong><span>Técnicas</span></div>
         </div>
       </div>
     </section>
@@ -107,12 +102,11 @@
       </div>
       <div class="atlas-intro-copy atlas-intro-copy-compact atlas-intro-copy-map">
         <div class="atlas-intro-map-text">
-          <div class="atlas-intro-kicker">Ubicar los saberes</div>
-          <h2>Mapeo colectivo</h2>
-          <h3 class="atlas-intro-subtitle atlas-intro-subtitle-card">También se construyó un mapa de manera conjunta</h3>
+          <div class="atlas-intro-kicker">Organización y consulta</div>
+          <h2>Conocimientos y territorios</h2>
           <div class="atlas-intro-text-flow atlas-intro-text-flow-short">
-            <p>El levantamiento se acompañó con un ejercicio de <strong>cartografía participativa</strong>: las personas colocaron en un mapa las técnicas que iban registrando. El ejercicio permitió observar la diversidad geográfica de los saberes compartidos y propició el intercambio entre regiones.</p>
-            <p>La plataforma retoma esa lógica: las comunidades y los registros de técnicas son el centro, mientras que estados, lenguas y ecosistemas ayudan a leer su contexto territorial.</p>
+<p>Para organizar la información, se desarrolló una clasificación basada en tres grandes dimensiones: el textil, el tejido y el bordado. Esta estructura permite relacionar los distintos registros, identificar elementos compartidos y reconocer las particularidades que existen entre materiales, técnicas, pueblos y territorios. Asimismo, se realizó un esfuerzo de revisión bibliográfica asociado a los registros disponibles, con el propósito de ampliar y contextualizar la información cuando existen fuentes documentales relacionadas.</p>
+<p>El Atlas ofrece diversas formas de explorar sus contenidos mediante un mapa interactivo, un catálogo, una clasificación temática y una galería de imágenes. Las fichas reúnen información sobre las características, los procesos, los materiales y las formas de transmisión de los conocimientos vinculados a cada elemento registrado.</p>
           </div>
         </div>
         <div class="atlas-intro-map-illustration">
@@ -126,18 +120,53 @@
         <img class="atlas-intro-photo" src="assets/intro/intro_04.webp" alt="Artesana participando en el Encuentro Nacional de Arte Textil Original">
       </div>
       <div class="atlas-intro-copy atlas-intro-copy-compact">
-        <div class="atlas-intro-kicker">Explora la información</div>
-        <h2>Plataforma</h2>
-        <h3 class="atlas-intro-subtitle atlas-intro-subtitle-card">Del registro al Atlas interactivo</h3>
+        <div class="atlas-intro-kicker">Salvaguardia y continuidad</div>
+        <h2>Un patrimonio vivo</h2>
         <div class="atlas-intro-text-flow atlas-intro-text-flow-short">
-          <p>Después del encuentro, los registros fueron revisados y organizados para facilitar su consulta. Aquí puedes recorrerlos por <strong>Estado, Lengua o Ecosistema</strong>, combinar filtros, consultar fichas y explorar cómo se relacionan las técnicas dentro de su clasificación.</p>
+<p>Este Atlas no pretende constituir un inventario académico definitivo del arte textil mexicano. Es una plataforma abierta y participativa que busca promover el reconocimiento, la valoración y la transmisión de los saberes textiles desde la voz de sus propias portadoras y portadores. Su principal valor reside en hacer visibles los conocimientos que las comunidades artesanales han decidido compartir y en contribuir a la salvaguardia de un patrimonio vivo que continúa recreándose y transmitiéndose de generación en generación.</p>
         </div>
-        <div class="atlas-intro-steps atlas-intro-steps-wide">
-          <div><span>1</span><p>Elige una forma de explorar el territorio.</p></div>
-          <div><span>2</span><p>Combina uno o varios filtros.</p></div>
-          <div><span>3</span><p>Abre las fichas para conocer la información compartida en cada registro.</p></div>
+      </div>
+    </section>
+
+    <!-- Guía rápida de las secciones visibles. La Red de registros permanece oculta. -->
+    <section class="atlas-intro-slide" data-intro-slide="4" aria-label="Secciones del Atlas">
+      <div class="atlas-intro-photo-wrap">
+        <img class="atlas-intro-photo" src="assets/intro/intro_03.webp" alt="Registro participativo de saberes textiles en el Atlas">
+      </div>
+      <div class="atlas-intro-copy atlas-intro-copy-guide">
+        <div class="atlas-intro-kicker">Guía de consulta</div>
+        <h2>Qué encontrarás en el Atlas</h2>
+        <p class="atlas-intro-guide-lead">Cada sección permite acercarse a los registros desde una perspectiva distinta.</p>
+        <div class="atlas-intro-section-grid">
+          <div class="atlas-intro-section-item"><strong>Mapa interactivo</strong><span>Explora los registros en el territorio y consulta las vistas de estados, pueblos indígenas y ecosistemas.</span></div>
+          <div class="atlas-intro-section-item"><strong>Clasificación de textiles</strong><span>Recorre categorías y subcategorías para conocer cómo se organizan los registros.</span></div>
+          <div class="atlas-intro-section-item"><strong>Catálogo de registros</strong><span>Busca y filtra las fichas para consultar testimonios, materiales, usos e imágenes.</span></div>
+          <div class="atlas-intro-section-item"><strong>Galería</strong><span>Descubre fotografías y videos relacionados con los registros textiles.</span></div>
+          <div class="atlas-intro-section-item"><strong>Explorar relaciones</strong><span>Elige tres características y observa sus conexiones en un diagrama interactivo.</span></div>
+          <div class="atlas-intro-section-item"><strong>Reporte</strong><span>Selecciona contenidos para generar un documento de consulta.</span></div>
+          <div class="atlas-intro-section-item"><strong>Contribuir</strong><span>Conoce cómo compartir nuevos registros o proponer correcciones.</span></div>
+          <div class="atlas-intro-section-item"><strong>Acerca del Atlas</strong><span>Consulta información sobre el proyecto, su metodología y los resultados generales.</span></div>
         </div>
-        <p class="atlas-intro-small">Puedes cerrar esta introducción en cualquier momento y seguir consultando el Atlas.</p>
+      </div>
+    </section>
+
+    <!-- Instrucciones de navegación sin modificar los textos institucionales anteriores. -->
+    <section class="atlas-intro-slide" data-intro-slide="5" aria-label="Cómo navegar por el Atlas">
+      <div class="atlas-intro-photo-wrap">
+        <img class="atlas-intro-photo" src="assets/intro/intro_04.webp" alt="Participación de personas artesanas en los encuentros de Original">
+      </div>
+      <div class="atlas-intro-copy atlas-intro-copy-guide">
+        <div class="atlas-intro-kicker">Cómo navegar</div>
+        <h2>Explora a tu ritmo</h2>
+        <p class="atlas-intro-guide-lead">No necesitas seguir un orden: elige lo que te interese y cambia de sección cuando quieras.</p>
+        <ol class="atlas-intro-guide-steps">
+          <li><strong>Elige una sección.</strong> Usa las pestañas superiores; en celular, desliza la barra horizontalmente para ver las demás.</li>
+          <li><strong>Prueba los filtros.</strong> En el mapa, cambia entre Estado, Pueblo indígena y Ecosistema. En el catálogo, combina filtros para encontrar registros.</li>
+          <li><strong>Abre los contenidos.</strong> Pulsa puntos, tarjetas y elementos de los diagramas para consultar la información relacionada.</li>
+          <li><strong>Explora las conexiones.</strong> En «Explorar relaciones», elige qué representa cada una de las tres columnas del gráfico.</li>
+          <li><strong>Vuelve a empezar.</strong> Limpia los filtros para hacer otra consulta. Puedes abrir estas instrucciones de nuevo desde «Info».</li>
+        </ol>
+        <p class="atlas-intro-guide-finish">Pulsa «Explorar el Atlas» para comenzar.</p>
       </div>
     </section>
 
@@ -154,7 +183,7 @@
 <header class="header">
   <div class="header-inner">
     <div class="header-wordmark">
-      <h1>Atlas de <span class="word-highlight">Técnicas</span> del Arte Textil</h1>
+      <h1>Atlas <span class="word-highlight">Comunitario</span> del Arte Textil de México</h1>
     </div>
     <div class="header-logos" aria-label="Secretaría de Cultura · Original · UNESCO">
       <img src="assets/atlas_plataforma_logos_cropped.png" alt="Secretaría de Cultura · Original · UNESCO" />
@@ -167,10 +196,11 @@
 ════════════════════════════════════════ -->
 <nav class="nav-tabs">
   <button class="nav-tab active" data-tab="mapa">Mapa interactivo</button>
-  <button class="nav-tab" data-tab="arbol">Clasificación</button>
-  <button class="nav-tab" data-tab="catalogo">Catálogo de técnicas</button>
+  <button class="nav-tab" data-tab="arbol">Clasificación de textiles</button>
+  <button class="nav-tab" data-tab="catalogo">Catálogo de registros</button>
   <button class="nav-tab" data-tab="galeria">Galería</button>
-  <button class="nav-tab" data-tab="red">Red de técnicas</button>
+  <button class="nav-tab" data-tab="red" hidden disabled aria-hidden="true" tabindex="-1">Red de registros</button>
+  <button class="nav-tab" data-tab="aluvial">Explorar relaciones</button>
   <button class="nav-tab" data-tab="reporte">Reporte</button>
   <button class="nav-tab nav-tab-contribuir" data-tab="contribuir">Contribuir</button>
   <button class="nav-tab nav-tab-info nav-tab-info-first" type="button" onclick="reopenAtlasIntro()">Info</button>
@@ -194,7 +224,7 @@
 
       <div class="map-driver-switch" role="tablist" aria-label="Forma de explorar el mapa">
         <button class="map-driver-btn active" data-map-driver="estado" type="button">Estado</button>
-        <button class="map-driver-btn" data-map-driver="lengua" type="button">Lengua</button>
+        <button class="map-driver-btn" data-map-driver="lengua" type="button">Pueblo indígena</button>
         <button class="map-driver-btn" data-map-driver="ecosistema" type="button">Ecosistema</button>
       </div>
 
@@ -222,12 +252,12 @@
       <div class="map-driver-filter" id="map-filter-driver-lengua">
         <details class="filter-dropdown" id="map-language-dropdown">
           <summary>
-            <span class="filter-dropdown-label">Lenguas</span>
+            <span class="filter-dropdown-label">Pueblos indígenas</span>
             <span class="filter-dropdown-value" id="map-language-summary">Todas</span>
             <span class="filter-dropdown-chevron">⌄</span>
           </summary>
           <div class="filter-dropdown-search-wrap">
-            <input class="map-filter-search" type="text" id="map-language-search" placeholder="Buscar lengua…" autocomplete="off">
+            <input class="map-filter-search" type="text" id="map-language-search" placeholder="Buscar pueblo indígena…" autocomplete="off">
           </div>
           <div class="filter-checkbox-list" id="map-language-chips"></div>
         </details>
@@ -269,7 +299,7 @@
 
       <!-- Filtros comunes: funcionan igual en Estado, Lengua y Ecosistema -->
       <div class="map-common-filters">
-        <div class="map-common-filters-title">Técnicas y clasificación</div>
+        <div class="map-common-filters-title">Registros y clasificación</div>
         <div class="map-technique-search-global">
           <label for="map-filter-search">Buscar por nombre de técnica</label>
           <input class="map-filter-search" type="search" id="map-filter-search" placeholder="Escribe el nombre de una técnica…" autocomplete="off" aria-label="Buscar técnica por nombre">
@@ -313,7 +343,7 @@
 
         <details class="filter-dropdown" id="map-level-tecs">
           <summary>
-            <span class="filter-dropdown-label">Técnicas</span>
+            <span class="filter-dropdown-label">Registros</span>
             <span class="filter-dropdown-value" id="map-tecs-summary">Todas</span>
             <span class="filter-dropdown-chevron">⌄</span>
           </summary>
@@ -333,18 +363,25 @@
 
     <!-- Créditos visibles exclusivamente en los enfoques Lengua y Ecosistema -->
     <div class="map-source-credits" aria-label="Fuentes de las capas cartográficas">
-      <p class="map-source-credit map-source-lengua">Fuentes de la capa de lenguas: INPI, INALI e INEGI. Elaboración para el Atlas.</p>
+      <p class="map-source-credit map-source-lengua">Fuentes: denominaciones de pueblos del INPI; distribución geográfica de lenguas según las capas INPI, INALI e INEGI.</p>
       <p class="map-source-credit map-source-ecosistema">Fuentes de las capas de ecosistemas y vegetación: SEMARNAT e INEGI. Elaboración para el Atlas.</p>
     </div>
 
     <div class="map-legend" id="map-legend">
-      <h4 id="map-legend-title">Técnicas por estado</h4>
+      <div class="map-legend-heading">
+        <h4 id="map-legend-title">Registros por estado</h4>
+        <span class="map-legend-preview" id="map-legend-preview" aria-hidden="true"></span>
+        <button type="button" id="map-legend-toggle" class="map-legend-toggle" aria-expanded="true" aria-controls="map-legend-body" aria-label="Contraer leyenda" title="Contraer leyenda">−</button>
+      </div>
       <div id="map-legend-body">
         <div class="legend-item"><div class="legend-dot" style="background:#FCBC52FF"></div><span>20 o más</span></div>
         <div class="legend-item"><div class="legend-dot" style="background:#A4D984FF"></div><span>10 – 19</span></div>
         <div class="legend-item"><div class="legend-dot" style="background:#F588AFFF"></div><span>1 – 9</span></div>
       </div>
     </div>
+    <button type="button" id="map-legend-reopen" class="map-legend-reopen" aria-label="Mostrar leyenda del mapa" title="Mostrar la leyenda" hidden>
+      <span aria-hidden="true">☷</span> Leyenda
+    </button>
   </div>
 
   <!-- ━━━ Columna 3: perfiles territoriales construidos desde los testimonios ━━━ -->
@@ -370,8 +407,8 @@
 <div id="view-catalogo" class="view">
   <div class="catalog-view">
     <div class="catalog-toolbar">
-      <input class="catalog-search" type="search" id="catalog-search" placeholder="Buscar técnica..." aria-label="Buscar técnica">
-      <label class="catalog-all-switch" for="catalog-show-all"><input type="checkbox" id="catalog-show-all"><span class="catalog-switch-track" aria-hidden="true"></span><span>Mostrar todas las técnicas</span></label>
+      <input class="catalog-search" type="search" id="catalog-search" placeholder="Buscar registro..." aria-label="Buscar registro">
+      <label class="catalog-all-switch" for="catalog-show-all"><input type="checkbox" id="catalog-show-all"><span class="catalog-switch-track" aria-hidden="true"></span><span>Mostrar todos los registros</span></label>
       <button type="button" id="catalog-clear" class="catalog-action catalog-reset">Limpiar filtros</button>
       <button type="button" id="catalog-to-map" class="catalog-action catalog-map-action">Mostrar selección en el mapa</button>
     </div>
@@ -389,7 +426,7 @@
       <div>
         <div class="gallery-kicker">Archivo fotográfico del Atlas</div>
         <h2>Galería</h2>
-        <p>Explora las fotografías y descubre los detalles de las técnicas textiles documentadas en el Atlas.</p>
+        <p>Explora las fotografías y descubre los detalles de los registros textiles documentados en el Atlas.</p>
       </div>
       <div class="gallery-count" id="gallery-count">Cargando…</div>
     </div>
@@ -402,9 +439,9 @@
     </div>
     <div class="gallery-secondary-filters" aria-label="Filtros de galería">
       <label class="gallery-select-wrap">
-        <span>Técnica</span>
+        <span>Registro</span>
         <select id="gallery-technique-filter">
-          <option value="">Todas las técnicas</option>
+          <option value="">Todos los registros</option>
         </select>
       </label>
       <label class="gallery-select-wrap">
@@ -424,11 +461,10 @@
 <!-- ═══════════════════════════════════════
      VIEW: RED DE TÉCNICAS
 ════════════════════════════════════════ -->
-<div id="view-red" class="view">
+<div id="view-red" class="view" hidden inert aria-hidden="true">
   <div class="network-view">
     <!-- Panel flotante derecho: búsqueda + layer + subcategorías -->
     <div class="network-side-panel" id="network-side-panel">
-      <p class="network-reading-guide">Cada punto representa una técnica o grupo; las líneas muestran sus relaciones según la capa seleccionada. Pulsa un punto para explorar.</p>
       <!-- Búsqueda -->
       <div class="network-search-wrap">
         <input class="network-search-input" id="network-search" type="text" placeholder="Buscar técnica…" autocomplete="off">
@@ -451,10 +487,28 @@
       <div class="network-sublayer-section">
         <div class="network-sublayer-label" id="network-sublayer-label">Categorías</div>
         <div class="network-sublayer-chips" id="network-sublayer-chips"></div>
-        <div class="network-legend-hint">Nodo mayor = más registros · <strong>Clic</strong> en grupo para resaltar · <strong>Arrastra</strong> nodos · <strong>Scroll</strong> para zoom</div>
+        <div class="network-legend-hint">Selecciona una capa para explorar conexiones entre registros</div>
       </div>
     </div>
 
+    <!-- Ayuda accesible de la red, visible al entrar por primera vez -->
+    <button type="button" class="network-help-button" id="network-help-button" aria-label="Cómo leer la red de registros" title="Cómo leer la red de registros">i</button>
+    <div class="network-help-backdrop" id="network-help-backdrop" aria-hidden="true">
+      <section class="network-help-dialog" role="dialog" aria-modal="true" aria-labelledby="network-help-title" tabindex="-1">
+        <button type="button" class="network-help-close" id="network-help-close" aria-label="Cerrar ayuda">×</button>
+        <p class="network-help-eyebrow">Guía rápida</p>
+        <h2 id="network-help-title">¿Cómo leer esta red?</h2>
+        <ol>
+          <li><strong>Los círculos pequeños</strong> son registros del Atlas.</li>
+          <li><strong>Los círculos grandes</strong> son grupos, por ejemplo un material, un estado o una lengua.</li>
+          <li><strong>Las líneas</strong> muestran qué registros pertenecen a cada grupo. Si dos círculos están conectados al mismo grupo, comparten esa característica.</li>
+          <li><strong>Cambia «Capa»</strong> para mirar otras relaciones: clasificación, lenguas, materiales y más.</li>
+          <li><strong>Pulsa un círculo</strong> para destacar sus conexiones. Puedes acercar el diagrama y arrastrarlo para explorarlo.</li>
+        </ol>
+        <p class="network-help-footnote">Esta red muestra relaciones entre datos registrados; no indica que un conocimiento pertenezca exclusivamente a un pueblo o territorio.</p>
+        <button type="button" class="network-help-understood" id="network-help-understood">Entendido, explorar la red</button>
+      </section>
+    </div>
     <!-- Canvas a pantalla completa -->
     <canvas id="network-canvas"></canvas>
     <div class="network-tooltip" id="network-tooltip"></div>
@@ -469,16 +523,74 @@
 </div>
 
 <!-- ═══════════════════════════════════════
+     VIEW: EXPLORADOR ALUVIAL — TRES DIMENSIONES
+════════════════════════════════════════ -->
+<section id="view-aluvial" class="view" aria-labelledby="alluvial-heading">
+  <div class="alluvial-view">
+    <header class="alluvial-hero">
+      <div>
+        <div class="alluvial-eyebrow">Relaciones entre los registros</div>
+        <h2 id="alluvial-heading">Explorar relaciones</h2>
+        <p>Construye tu propio diagrama: elige tres características y observa qué registros las relacionan.</p>
+      </div>
+      <button type="button" id="alluvial-help-toggle" class="alluvial-help-toggle" aria-expanded="false" aria-controls="alluvial-help">ⓘ Cómo se lee</button>
+    </header>
+
+    <div class="alluvial-help" id="alluvial-help" hidden>
+      <div class="alluvial-help-step"><span>1</span><p><strong>Elige tres columnas.</strong> Por ejemplo: registros → estados → prendas.</p></div>
+      <div class="alluvial-help-step"><span>2</span><p><strong>Sigue las bandas.</strong> Una banda une valores presentes en las mismas entradas del catálogo. Cuanto más ancha, mayor peso tiene esa relación.</p></div>
+      <div class="alluvial-help-step"><span>3</span><p><strong>Pulsa un nombre.</strong> El gráfico mostrará solo las entradas relacionadas. Usa «Ver todo» para regresar.</p></div>
+    </div>
+
+    <div class="alluvial-builder">
+      <div class="alluvial-builder-title">Elige qué quieres relacionar</div>
+      <div class="alluvial-builder-grid">
+        <label class="alluvial-field"><span><b>01</b> Primera columna</span><select id="alluvial-dim-0" aria-label="Característica de la primera columna"></select></label>
+        <span class="alluvial-flow-arrow" aria-hidden="true">→</span>
+        <label class="alluvial-field"><span><b>02</b> Segunda columna</span><select id="alluvial-dim-1" aria-label="Característica de la segunda columna"></select></label>
+        <span class="alluvial-flow-arrow" aria-hidden="true">→</span>
+        <label class="alluvial-field"><span><b>03</b> Tercera columna</span><select id="alluvial-dim-2" aria-label="Característica de la tercera columna"></select></label>
+      </div>
+      <div class="alluvial-presets" aria-label="Ejemplos para comenzar">
+        <span>Prueba una combinación:</span>
+        <button type="button" data-alluvial-preset="registro,estado,ceremonia">Registros · Estados · Ceremonias</button>
+        <button type="button" data-alluvial-preset="registro,estado,prenda">Registros · Estados · Prendas</button>
+        <button type="button" data-alluvial-preset="categoria,lengua,prenda">Clasificación · Lenguas · Productos</button>
+      </div>
+    </div>
+
+    <div class="alluvial-results-head">
+      <div class="alluvial-actions">
+        <label class="alluvial-limit">Mostrar <select id="alluvial-limit" aria-label="Cantidad de valores visibles por columna"><option value="10">10 por columna</option><option value="20" selected>20 por columna</option><option value="30">30 por columna</option><option value="40">40 por columna</option></select></label>
+        <button type="button" id="alluvial-reset" class="alluvial-reset" disabled>Ver todo</button>
+      </div>
+    </div>
+    <label class="alluvial-search-label">Buscar un registro específico
+      <input type="search" id="alluvial-search" placeholder="Por ejemplo, telar de cintura…" autocomplete="off">
+    </label>
+    <div class="alluvial-active-filter" id="alluvial-active-filter" hidden></div>
+    <div class="alluvial-chart-frame" id="alluvial-chart-frame">
+      <p class="alluvial-scroll-hint">Desliza horizontalmente para ver las tres columnas y sus relaciones.</p>
+      <div class="alluvial-chart-scroll" id="alluvial-chart-scroll" tabindex="0" aria-label="Diagrama de relaciones desplazable horizontalmente">
+        <svg id="alluvial-svg" role="img" aria-label="Diagrama aluvial de tres columnas configurables"></svg>
+      </div>
+      <div class="alluvial-tooltip" id="alluvial-tooltip" role="status" hidden></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
      VIEW: CLASIFICACIÓN (ÁRBOL)
 ════════════════════════════════════════ -->
 <div id="view-arbol" class="view">
   <div class="arbol-view">
     <div class="arbol-header">
-      <div class="arbol-kicker">Cómo se organizan las técnicas</div>
-      <h2>Clasificación de técnicas</h2>
-      <p>Explora la relación entre categorías y subcategorías mediante un diagrama de llaves interactivo. Abre o cierra cada llave, selecciona cualquier grupo y consulta las técnicas registradas dentro de él.</p>
+      <div class="arbol-kicker">Cómo se organiza la información</div>
+      <h2>Clasificación de textiles</h2>
+      <p>Explora la clasificación de textiles en categorías, subcategorías, tipos y variantes. También puedes consultar sus niveles aunque todavía no tengan registros.</p>
+      <p class="arbol-evolving-note">Esta clasificación es dinámica, por lo que su organización puede modificarse y actualizarse conforme se documenten e integren nuevos conocimientos a esta plataforma.</p>
       <div class="arbol-guide" aria-label="Niveles de clasificación">
-        <span>Categoría</span><b>→</b><span>Subcategoría</span><b>→</b><span>Técnicas</span>
+        <span>Categoría</span><b>→</b><span>Subcategoría</span><b>→</b><span>Tipos y variantes</span>
       </div>
     </div>
     <div class="arbol-container" id="arbol-container">
@@ -500,16 +612,16 @@
       <div class="contribuir-card" onclick="openKobo('nueva')">
         <div class="contribuir-card-icon" style="background:var(--magenta)">+</div>
         <div class="contribuir-card-body">
-          <div class="contribuir-card-title">Registrar nueva técnica</div>
-          <div class="contribuir-card-desc">¿Practicas una técnica textil que no está en el atlas? Comparte tu conocimiento y ayúdanos a documentarla.</div>
+          <div class="contribuir-card-title">Compartir un nuevo registro</div>
+          <div class="contribuir-card-desc">¿Practicas un conocimiento o producto textil que no está documentado en el Atlas? Comparte tu conocimiento y ayúdanos a documentarla.</div>
         </div>
         <div class="contribuir-card-arrow">→</div>
       </div>
       <div class="contribuir-card" onclick="openKobo('cambio')">
         <div class="contribuir-card-icon" style="background:var(--azul-mar)">✎</div>
         <div class="contribuir-card-body">
-          <div class="contribuir-card-title">Proponer cambio a una técnica</div>
-          <div class="contribuir-card-desc">¿Hay información incorrecta o incompleta sobre una técnica ya registrada? Ayúdanos a corregirla o ampliarla.</div>
+          <div class="contribuir-card-title">Proponer cambio a un registro</div>
+          <div class="contribuir-card-desc">¿Hay información incorrecta o incompleta sobre un registro existente? Ayúdanos a corregirla o ampliarla.</div>
         </div>
         <div class="contribuir-card-arrow">→</div>
       </div>
@@ -576,7 +688,7 @@
         <div class="reporte-meta">
           <div class="reporte-field">
             <label for="reporte-titulo">Título del reporte</label>
-            <input type="text" id="reporte-titulo" placeholder="ej. Técnicas textiles de Oaxaca y Chiapas" maxlength="120">
+            <input type="text" id="reporte-titulo" placeholder="ej. Registros textiles de Oaxaca y Chiapas" maxlength="120">
           </div>
           <div class="reporte-field">
             <label for="reporte-autor">Autor o institución</label>
@@ -587,7 +699,7 @@
         <!-- Presets de selección rápida -->
         <div class="reporte-presets">
           <span class="reporte-presets-label">Presets:</span>
-          <button class="reporte-preset" data-preset="all">Todas las técnicas</button>
+          <button class="reporte-preset" data-preset="all">Todos los registros</button>
           <button class="reporte-preset" data-preset="oaxaca">Solo Oaxaca</button>
           <button class="reporte-preset" data-preset="chiapas">Solo Chiapas</button>
           <button class="reporte-preset" data-preset="bordados">Solo bordados</button>
@@ -598,7 +710,7 @@
 
         <!-- Tres bloques de filtros -->
         <div class="reporte-requirement-note" role="note">
-          <strong>Para continuar:</strong> la selección debe incluir al menos una técnica. Si no aplicas filtros, el reporte incluirá todas las técnicas del Atlas.
+          <strong>Para continuar:</strong> la selección debe incluir al menos un registro. Si no aplicas filtros, el reporte incluirá todos los registros del Atlas.
         </div>
 
         <div class="reporte-filtros">
@@ -624,7 +736,7 @@
           <!-- Filtro por técnicas específicas -->
           <div class="reporte-filter-block">
             <div class="reporte-filter-head">
-              <h4>Técnicas específicas</h4>
+              <h4>Registros específicos</h4>
               <span class="reporte-filter-hint">Búsqueda por nombre</span>
             </div>
             <div class="reporte-search-wrap">
@@ -739,9 +851,10 @@
 </div>
 
 <!-- Scripts — NO atlas_data.js: los datos se leen desde los CSV -->
-<script src="atlas_info_embedded.js?v=acerca-nav-v2"></script>
-<script src="main.js"></script>
-<script src="map_drivers.js?v=atlas-leyendas-visibles-20261101"></script>
+<script src="atlas_info_embedded.js?v=atlas-pueblos-20261104"></script>
+<script src="main.js?v=atlas-pueblos-20261104"></script>
+<script src="map_drivers.js?v=atlas-pueblos-20261104"></script>
+<script src="aluvial.js?v=atlas-pueblos-20261104"></script>
 
 <!-- ═══════════════════════════════════════
      OVERLAY — ACERCA DEL ATLAS
@@ -762,7 +875,7 @@
 
     <div class="registration-guidance-header">
       <h2 id="registration-guidance-title">Recomendaciones para tus imágenes</h2>
-      <p>Al subir imágenes para el registro de técnicas te recomendamos que sean nítidas, estén bien iluminadas y permitan reconocer claramente la pieza y su proceso de elaboración. De ser posible, incluye los siguientes tipos de fotografía:</p>
+      <p>Al subir imágenes para un registro de arte textil te recomendamos que sean nítidas, estén bien iluminadas y permitan reconocer claramente la pieza y su proceso de elaboración. De ser posible, incluye los siguientes tipos de fotografía:</p>
     </div>
 
     <div class="registration-guidance-grid">
@@ -950,7 +1063,7 @@ function closeAtlasIntro() {
   refreshMapViewport({ refit: true });
 }
 
-window.addEventListener('resize', () => refreshMapViewport());
+window.addEventListener('resize', () => { refreshMapViewport(); syncMapLegendReopen(); });
 window.addEventListener('orientationchange', () => refreshMapViewport());
 window.addEventListener('pageshow', () => refreshMapViewport());
 document.addEventListener('visibilitychange', () => {
@@ -970,6 +1083,10 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   // En móvil inicia plegado; en escritorio inicia abierto.
   setTimeout(() => toggleMapFiltersCollapse(window.innerWidth <= 960), 0);
+  if (window.innerWidth <= 960 && !document.getElementById('map-legend')?.classList.contains('is-collapsed')) {
+    document.getElementById('map-legend-toggle')?.click();
+  }
+  syncMapLegendReopen();
 });
 
 renderAtlasIntro();

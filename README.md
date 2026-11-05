@@ -1,4 +1,4 @@
-# Atlas Nacional de Técnicas del Arte Textil
+# Atlas Comunitario del Arte Textil de México
 
 Plataforma web estática para documentar y visualizar técnicas textiles registradas a partir de ORIGINAL, Encuentro Nacional de Arte Textil.
 
@@ -22,6 +22,7 @@ No requiere backend propio, base de datos, PHP, Node.js en producción, autentic
 - `index.html`: aplicación principal.
 - `styles.css`: estilos.
 - `main.js`: lógica principal.
+- `aluvial.js`: explorador de relaciones de tres columnas, configurable con datos del catálogo.
 - `map_drivers.js`: lógica territorial y del mapa.
 - `data/`: datasets públicos minimizados.
 - `geodata/`: capas territoriales.
@@ -85,3 +86,38 @@ Esta versión consolida la plataforma preparada para GitHub con la colección co
 - Los manuales existentes se conservan en `manuales/`.
 
 Antes de sustituir una versión anterior del repositorio, se recomienda eliminar la carpeta `imagenes/` previa y cualquier archivo de datos legado ubicado en la raíz que ya tenga su equivalente bajo `data/` o `geodata/`, para evitar conservar archivos pesados u obsoletos. Consulte `docs/ACTUALIZACION_REPOSITORIO.md`.
+
+## Explorador de relaciones (diagrama aluvial)
+
+El botón **Explorar relaciones** permite elegir tres campos del catálogo,
+por ejemplo Registros → Estados → Ceremonias o Clasificación → Lenguas → Prendas.
+Cada entrada con valores en las tres columnas participa una vez en el total,
+y se distribuye proporcionalmente entre sus valores múltiples. Las bandas
+se calculan entre columnas contiguas a nivel de entrada del catálogo.
+**No deben interpretarse como coincidencias observadas dentro de una misma entrevista.**
+Los nombres largos se agrupan visualmente en «Otros», pero permanecen en los datos.
+La vista ofrece búsqueda, ejemplos y selección interactiva de nodos.
+No utiliza servicios externos ni depende de una biblioteca de gráficos.
+
+## Ajustes de interfaz (4 de noviembre de 2026)
+
+- Leyenda contraíble visible como control compacto en móvil y separada del zoom al contraerse en escritorio.
+- Botones laterales del panel territorial ocultos solo en dispositivos de hasta 960 píxeles.
+- Clasificación: nota sobre carácter dinámico y retiro de indicadores laterales de subcategorías y registros.
+- Explorador de relaciones: límites 10, 20, 30 o 40 por columna y sin encabezados/metodología bajo el gráfico.
+- En «Acerca del Atlas», lenguaje orientado a registros, denominaciones y prácticas, conservando claves y categorías originales en los datos.
+
+## Actualización de nomenclatura y enfoque de pueblos (4 de noviembre de 2026)
+
+- La denominación pública es **Atlas Comunitario del Arte Textil de México**. La introducción proporcionada por el equipo se presenta íntegra, en orden, a través de las cuatro pantallas de apertura.
+- La pestaña y el acceso desde las fichas a **Red de registros** están ocultos; la implementación original permanece en `main.js` y `index.html`, pero no se inicializa desde la navegación pública.
+- La vista territorial antes titulada *Lengua* se presenta como **Pueblo indígena**. Conserva el origen cartográfico lingüístico y sus 66 subcapas, con correspondencias a denominaciones del INPI en `geodata/lenguas_cloud.json`.
+- El archivo `data/correspondencia_lenguas_pueblos_inpi.csv` registra las 66 correspondencias, el nombre anterior y su estatus. **63** se vinculan a una denominación de referencia del catálogo, **2** son provisionales (Oluteco y Sayulteco respecto a Popoluca) y **1** queda por verificar (Teko). No se atribuye identidad o pertenencia de personas o comunidades a partir de estas capas.
+- El selector y la leyenda agrupan las subcapas por pueblo de referencia, preservando el nombre lingüístico para transparencia en perfiles, búsquedas y datos originales.
+- Fuente de nomenclatura: [Catálogo INPI, consulta por pueblo](https://catalogo.inpi.gob.mx/consulta-por-pueblo-2/). Antes de usar estas relaciones para investigación etnográfica o atribuir adscripción comunitaria, se requiere validación de las personas portadoras y/o información sobre autoidentificación.
+
+### Archivos necesarios para esta actualización
+
+`index.html`, `main.js`, `styles.css`, `map_drivers.js`, `aluvial.js`, `atlas_textil_v2.html`, `atlas_info_embedded.js`, `geodata/lenguas_cloud.json`, `data/correspondencia_lenguas_pueblos_inpi.csv`.
+
+No se sustituyen fotografías, vídeos, el índice multimedia, otros conjuntos de datos o archivos de CI.

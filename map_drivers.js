@@ -533,61 +533,87 @@ function bindMaterialSearch(driver) {
   });
 }
 
+// Relación de referencia entre capas lingüísticas y pueblos del INPI.
+// No es una inferencia de identidad individual ni de pertenencia comunitaria.
+function puebloGroups() {
+  const byName = new Map();
+  languageCloudData.forEach(language => {
+    const name = language.pueblo_inpi || language.pueblo || 'Correspondencia por verificar';
+    if (!byName.has(name)) byName.set(name, { name, ids: [], languages: [], color: language.color, point_count: 0 });
+    const group = byName.get(name);
+    group.ids.push(language.id);
+    group.languages.push(language.name);
+    group.point_count += Number(language.point_count || 0);
+  });
+  return [...byName.values()].sort((a, b) => a.name.localeCompare(b.name, 'es'));
+}
+function selectedPuebloGroups() {
+  return puebloGroups().filter(group => group.ids.some(id => selectedLanguageIds.has(id)));
+}
+function selectPueblo(name) {
+  const group = puebloGroups().find(item => item.name === name);
+  if (!group) return;
+  dismissInitialMapOverview?.();
+  const allSelected = group.ids.every(id => selectedLanguageIds.has(id));
+  group.ids.forEach(id => allSelected ? selectedLanguageIds.delete(id) : selectedLanguageIds.add(id));
+  renderLanguageChips();
+  ensureLanguageLayer();
+  refreshCommunities();
+  updateLegend();
+  const selected = languageCloudData.filter(item => selectedLanguageIds.has(item.id));
+  if (selected.length) {
+    const points = selected.flatMap(item => item.coords.map(([lon, lat]) => [lat, lon]));
+    const bounds = L.latLngBounds(points);
+    if (bounds.isValid()) map.fitBounds(bounds, { padding: [28, 28], maxZoom: 8 });
+  } else map.fitBounds(MX_BOUNDS);
+}
+
 // ---------- Language UI ----------
 function renderLanguageChips() {
   const wrap = document.getElementById('map-language-chips');
   if (!wrap) return;
   const q = normalizeDriverText(languageSearchText);
-  const items = languageCloudData.filter(item => !q || normalizeDriverText(`${item.name} ${item.pueblo}`).includes(q));
+  const groups = puebloGroups();
+  const shown = groups.filter(group => !q || normalizeDriverText(`${group.name} ${group.languages.join(' ')}`).includes(q));
   wrap.innerHTML = '';
   const allLanguageIds = languageCloudData.map(item => item.id);
-  appendDriverSelectAllRow(
-    wrap,
-    allLanguageIds,
-    selectedLanguageIds,
-    checked => {
-      selectedLanguageIds.clear();
-      if (checked) allLanguageIds.forEach(id => selectedLanguageIds.add(id));
-      dismissInitialMapOverview?.();
-      renderLanguageChips();
-      ensureLanguageLayer();
-      refreshCommunities();
-      updateLegend();
-      if (!checked) map.fitBounds(MX_BOUNDS);
-    },
-    'map-language-all'
-  );
-  items.forEach((item, i) => {
+  appendDriverSelectAllRow(wrap, allLanguageIds, selectedLanguageIds, checked => {
+    selectedLanguageIds.clear();
+    if (checked) allLanguageIds.forEach(id => selectedLanguageIds.add(id));
+    dismissInitialMapOverview?.();
+    renderLanguageChips();
+    ensureLanguageLayer();
+    refreshCommunities();
+    updateLegend();
+    if (!checked) map.fitBounds(MX_BOUNDS);
+  }, 'map-language-all');
+  shown.forEach((group, i) => {
     const row = document.createElement('div');
     row.className = 'filter-checkbox-item';
-    const inputId = `map-language-${i}`;
-    row.innerHTML = `<input type="checkbox" id="${inputId}" ${selectedLanguageIds.has(item.id) ? 'checked' : ''}>
-      <span class="map-chip-swatch" style="background:${item.color}"></span>
-      <label for="${inputId}" class="filter-checkbox-name">${esc(item.name)}</label>
-      <span class="filter-checkbox-meta">${item.point_count.toLocaleString('es-MX')}</span>`;
-    row.title = `${item.point_count.toLocaleString('es-MX')} localidades en la capa`;
-    row.querySelector('input').addEventListener('change', () => selectLanguage(item.id));
+    const inputId = `map-pueblo-${i}`;
+    const checked = group.ids.every(id => selectedLanguageIds.has(id));
+    const partial = !checked && group.ids.some(id => selectedLanguageIds.has(id));
+    row.innerHTML = `<input type="checkbox" id="${inputId}" ${checked ? 'checked' : ''}>
+      <span class="map-chip-swatch" style="background:${group.color}"></span>
+      <label for="${inputId}" class="filter-checkbox-name">${esc(group.name)}</label>
+      <span class="filter-checkbox-meta">${group.point_count.toLocaleString('es-MX')}</span>`;
+    row.title = `Capa(s) de referencia: ${group.languages.join(', ')}. Puntos cartográficos: ${group.point_count.toLocaleString('es-MX')}`;
+    const checkbox = row.querySelector('input');
+    checkbox.indeterminate = partial;
+    checkbox.addEventListener('change', () => selectPueblo(group.name));
     wrap.appendChild(row);
   });
   const summary = document.getElementById('map-language-summary');
-  if (summary) summary.textContent = selectedLanguageIds.size
-    ? (selectedLanguageIds.size === 1 ? (languageCloudData.find(x => selectedLanguageIds.has(x.id))?.name || '1 seleccionada') : `${selectedLanguageIds.size} seleccionadas`)
-    : 'Todas';
+  const selected = selectedPuebloGroups();
+  if (summary) summary.textContent = selected.length
+    ? (selected.length === 1 ? selected[0].name : `${selected.length} pueblos seleccionados`)
+    : 'Todos';
 }
 
+// Compatibilidad con los eventos antiguos que trabajaban con identificadores de lengua.
 function selectLanguage(id) {
-  dismissInitialMapOverview?.();
-  if (selectedLanguageIds.has(id)) selectedLanguageIds.delete(id); else selectedLanguageIds.add(id);
-  renderLanguageChips();
-  ensureLanguageLayer();
-  refreshCommunities();
-  updateLegend();
-  const selected = languageCloudData.filter(x => selectedLanguageIds.has(x.id));
-  if (selected.length) {
-    const points = selected.flatMap(language => language.coords.map(([lon, lat]) => [lat, lon]));
-    const bounds = L.latLngBounds(points);
-    if (bounds.isValid()) map.fitBounds(bounds, { padding: [28, 28], maxZoom: 8 });
-  } else map.fitBounds(MX_BOUNDS);
+  const language = languageCloudData.find(item => item.id === id);
+  if (language) selectPueblo(language.pueblo_inpi || language.pueblo || 'Correspondencia por verificar');
 }
 
 // ---------- Ecosystem UI ----------
@@ -880,10 +906,11 @@ function updateTerritoryPanel() {
 
   if (activeMapDriver === 'lengua') {
     const languages = languageCloudData.filter(x => selectedLanguageIds.has(x.id));
-    if (title) title.textContent = languages.length === 1 ? languages[0].name : languages.length > 1 ? `${languages.length} lenguas seleccionadas` : 'Lenguas indígenas';
+    const pueblos = selectedPuebloGroups();
+    if (title) title.textContent = pueblos.length === 1 ? pueblos[0].name : pueblos.length > 1 ? `${pueblos.length} pueblos seleccionados` : 'Pueblos indígenas';
     if (subtitle) subtitle.textContent = languages.length
       ? `${communities} comunidad${communities !== 1 ? 'es' : ''} dentro de las nubes seleccionadas · ${techniques.length} técnica${techniques.length !== 1 ? 's' : ''}`
-      : `${languageCloudData.length} lenguas en la capa · puedes seleccionar varias`;
+      : `${puebloGroups().length} pueblos de referencia en la capa · puedes seleccionar varios`;
   } else {
     const features = selectedEcosystemFeatures();
     if (title) title.textContent = features.length === 1
@@ -956,16 +983,14 @@ function updateLegend() {
     return;
   }
   if (activeMapDriver==='lengua') {
-    title.textContent='Lenguas indígenas';
-    const selected=selectedLanguageIds.size>0;
-    const entries=languageCloudData.filter(x=>!selected||selectedLanguageIds.has(x.id))
-      .slice().sort((a,b)=>a.name.localeCompare(b.name,'es'));
-    atlasLegendList(body,entries.map(lang=>({
-      color:lang.color,name:lang.name,
-      onClick:()=>{selectLanguage(lang.id);}
+    title.textContent='Pueblos indígenas';
+    const selected = selectedLanguageIds.size > 0;
+    const entries = puebloGroups().filter(group => !selected || group.ids.some(id => selectedLanguageIds.has(id)));
+    atlasLegendList(body, entries.map(group => ({
+      color: group.color, name: group.name,
+      onClick: () => selectPueblo(group.name)
     })));
-    atlasLegendNote(body,selected ? 'Selecciona un nombre para cambiar el filtro. Los colores representan lenguas, no técnicas exclusivas de una lengua.' :
-      'Selecciona un color o pulsa cerca de un punto para consultar y filtrar su lengua.');
+    atlasLegendNote(body, 'Los colores representan pueblos de referencia del INPI. Los puntos proceden de capas de distribución lingüística; no prueban la pertenencia de una persona o comunidad a un pueblo.');
     return;
   }
   const source=activeEcosystemSource;
@@ -1001,13 +1026,13 @@ function atlasClickLanguageCloud(ev) {
   }
   if(!nearest)return;
   const wrap=document.createElement('div');wrap.className='atlas-language-popup';
-  const label=document.createElement('strong');label.textContent=nearest.name;
+  const label=document.createElement('strong');label.textContent=nearest.pueblo_inpi || nearest.pueblo || 'Correspondencia por verificar';
   const sub=document.createElement('div');
   const profile=territoryProfileData?.lengua?.[String(nearest.id)];
   const count=profile?.summary?.n_registros;
   sub.textContent=Number.isFinite(Number(count)) && count !== undefined && count !== null
     ? `${Number(count).toLocaleString('es-MX')} aportación${Number(count)===1?'':'es'} asociada${Number(count)===1?'':'s'}`
-    : 'Lengua representada en esta zona';
+    : `Capa lingüística de referencia: ${nearest.name}`;
   wrap.append(label,sub);
   L.popup({maxWidth:270}).setLatLng(ev.latlng).setContent(wrap).openOn(map);
 }
@@ -1109,6 +1134,12 @@ async function loadDriverData() {
     if (!languageRes.ok || !materialRes.ok) throw new Error('No se pudieron cargar los datos territoriales.');
     const langPayload = await languageRes.json();
     languageCloudData = langPayload.languages || [];
+    const puebloColors = new Map();
+    languageCloudData.forEach(item => {
+      item.pueblo_inpi = item.pueblo_inpi || item.pueblo || 'Correspondencia por verificar';
+      if (!puebloColors.has(item.pueblo_inpi)) puebloColors.set(item.pueblo_inpi, item.color);
+      item.color = puebloColors.get(item.pueblo_inpi);
+    });
     const materialRows = parseCSV(await materialRes.text());
     materialMeta = {};
     MATERIAL_FILTER_GROUPS.forEach((group, order) => {
@@ -1180,7 +1211,7 @@ function territoryProfileType() {
 function territoryTypeLabel(type) {
   return ({
     estado: 'Estado',
-    lengua: 'Lengua',
+    lengua: 'Pueblo indígena',
     ecorregion: 'Ecorregión',
     uso_suelo: 'Uso del suelo y vegetación',
   })[type] || 'Territorio';
@@ -1189,7 +1220,7 @@ function territoryTypeLabel(type) {
 function territoryTypePluralLabel(type) {
   return ({
     estado: 'Estados',
-    lengua: 'Lenguas',
+    lengua: 'Pueblos indígenas',
     ecorregion: 'Ecorregiones',
     uso_suelo: 'Usos del suelo y vegetación',
   })[type] || 'Territorios';
@@ -1269,7 +1300,7 @@ function territoryInterpretationNote(type) {
     return 'Este perfil reúne los registros de técnicas vinculados con este estado dentro del Atlas.';
   }
   if (type === 'lengua') {
-    return 'Aquí se reúnen los registros de técnicas de comunidades ubicadas dentro del área de presencia representada para esta lengua. Es una lectura territorial del Atlas, no una afirmación de que las técnicas pertenezcan exclusivamente a una lengua.';
+    return 'Esta lectura territorial utiliza la presencia de lenguas como referencia cartográfica para explorar pueblos del catálogo del INPI. No identifica la adscripción de personas o comunidades a un pueblo.';
   }
   if (type === 'ecorregion') {
     return 'Aquí se reúnen los registros de técnicas de comunidades ubicadas dentro de esta ecorregión.';
@@ -1309,6 +1340,8 @@ function territoryProfileCard(profile, type) {
   const languages = s.lenguas_mencionadas || [];
   const states = s.estados || [];
   const municipios = s.municipios_reportados || [];
+  const capaLengua = type === 'lengua' ? languageCloudData.find(item => String(item.id) === String(profile.id)) : null;
+  const nombrePerfil = capaLengua ? (capaLengua.pueblo_inpi || capaLengua.pueblo) : profile.name;
 
   const empty = registros === 0 ? `
     <div class="territory-profile-empty">
@@ -1319,8 +1352,8 @@ function territoryProfileCard(profile, type) {
   return `
     <article class="territory-profile-card">
       <div class="territory-profile-kicker">Perfil del Atlas · ${esc(territoryTypeLabel(type))}</div>
-      <h3>${esc(profile.name || '')}</h3>
-      ${type === 'lengua' && profile.pueblo ? `<div class="territory-profile-pueblo">Pueblo de referencia: ${esc(profile.pueblo)}</div>` : ''}
+      <h3>${esc(nombrePerfil || '')}</h3>
+      ${capaLengua ? `<div class="territory-profile-pueblo">Capa lingüística utilizada: ${esc(capaLengua.name)}</div>` : ''}
 
       ${type === 'estado' ? atlasStatePhoto(profile) : ''}
 
@@ -1543,7 +1576,7 @@ function atlasHoverLanguageCloud(event) {
   }
   if(atlasLanguageHoverId!==nearest.id){
     // textContent avoids interpreting language names as HTML.
-    const label=document.createElement('strong');label.textContent=nearest.name||'Lengua';
+    const label=document.createElement('strong');label.textContent=nearest.pueblo_inpi || nearest.pueblo || 'Correspondencia por verificar';
     atlasLanguageHoverTooltip.setContent(label);
     atlasLanguageHoverId=nearest.id;
   }
