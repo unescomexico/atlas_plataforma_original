@@ -57,12 +57,10 @@ function catChipClass(cat1) {
   return map[cat1] || 'chip-other';
 }
 
-// Degradado coropletas: #F588AFFF → #A4D984FF → #FCBC52FF
-// (No hay categoría 40+ porque ningún estado supera ese umbral con el
-// filtro `incluida=sí` activo. Si en algún momento revertes el filtro
-// y los datos crecen, vale la pena restaurar la rama `count >= 40`.)
+// Coropleta del enfoque Estado: aportaciones individuales por demarcación.
+// No confundir estos conteos con el número de entradas/técnicas del catálogo.
 function getMapColor(count) {
-  if (count >= 20) return '#FCBC52FF';
+  if (count >= 50) return '#FCBC52FF';
   if (count >= 10) return '#A4D984FF';
   if (count >= 1)  return '#F588AFFF';
   return '#d8d0d4';
@@ -506,7 +504,7 @@ async function loadCSVs() {
   const errBanner = document.getElementById('error-banner');
 
   try {
-    const [techRes, recRes, imgRes, galleryRes, biblioTechRes, biblioTaxRes, videoRes, culturalRes] = await Promise.all([
+    const [techRes, recRes, imgRes, galleryRes, biblioTechRes, biblioTaxRes, videoRes, culturalRes, pueblosRes] = await Promise.all([
       fetch('data/data_by_technique_id.csv'),
       fetch('data/data_by_record_id.csv'),
       fetch('data/indice_imagenes.csv'),
@@ -515,11 +513,12 @@ async function loadCSVs() {
       fetch('data/fichas_bibliograficas_taxonomia.csv'),
       fetch('data/indice_videos.csv'),
       fetch('data/catalogo_cultural_normalizado.csv'),
+      fetch('data/correspondencia_lenguas_pueblos_inpi.csv'),
     ]);
 
     if (!techRes.ok || !recRes.ok || !culturalRes.ok) throw new Error('No se pudieron cargar los datos del catálogo.');
 
-    const [techText, recText, imgText, galleryPayload, biblioTechText, biblioTaxText, videoText, culturalText] = await Promise.all([
+    const [techText, recText, imgText, galleryPayload, biblioTechText, biblioTaxText, videoText, culturalText, pueblosText] = await Promise.all([
       techRes.text(),
       recRes.text(),
       imgRes.ok ? imgRes.text() : Promise.resolve(''),
@@ -528,6 +527,7 @@ async function loadCSVs() {
       biblioTaxRes.ok ? biblioTaxRes.text() : Promise.resolve(''),
       videoRes.ok ? videoRes.text() : Promise.resolve(''),
       culturalRes.ok ? culturalRes.text() : Promise.resolve(''),
+      pueblosRes.ok ? pueblosRes.text() : Promise.resolve(''),
     ]);
 
     const techRows   = parseCSV(techText);
@@ -557,6 +557,36 @@ async function loadCSVs() {
       window.ATLAS_AVAILABLE_IMAGES = null;
     }
     ATLAS = buildAtlasFromCSV(techRows, recordRows, imgRows);
+    // Correspondencias documentales entre nombres de lenguas y pueblos de referencia INPI.
+    // No se interpreta la lengua como una adscripción étnica de una persona.
+    const puebloCorrespondencias = new Map();
+    (pueblosText ? parseCSV(pueblosText) : []).forEach(row => {
+      if (row.estatus !== 'referencia_inpi' || !row.pueblo_referencia_inpi) return;
+      puebloCorrespondencias.set(catalogNorm(row.lengua_origen), row.pueblo_referencia_inpi.trim());
+    });
+    // Variantes de denominación presentes en las respuestas del Atlas.
+    for (const [source, original] of Object.entries({
+      'Chol': "Ch'ol", 'Purépecha': 'Tarasco', 'Pima (Nevome)': 'Pima'
+    })) {
+      const standard = puebloCorrespondencias.get(catalogNorm(original));
+      if (standard) puebloCorrespondencias.set(catalogNorm(source), standard);
+    }
+    const puebloDesdeLengua = value => puebloCorrespondencias.get(catalogNorm(value)) || null;
+    window.ATLAS_PUEBLO_DESDE_LENGUA = puebloDesdeLengua;
+    const pueblosPorTecnica = new Map();
+    ATLAS.records.forEach(row => {
+      const pueblo = puebloDesdeLengua(row.Lengua);
+      if (!pueblo || !row.Estado || !row.Tecnica) return;
+      const key = normalizeLookup(row.Tecnica);
+      const place = `${normalizeEstado(row.Estado)}|||${pueblo}`;
+      if (!pueblosPorTecnica.has(key)) pueblosPorTecnica.set(key, new Map());
+      pueblosPorTecnica.get(key).set(place, {estado: row.Estado.trim(), pueblo});
+    });
+    ATLAS.tecnicas.forEach(t => {
+      const entries = [...(pueblosPorTecnica.get(normalizeLookup(t.tecnica))?.values() || [])];
+      t.pueblos_por_estado = entries;
+      t.pueblos_indigenas = [...new Set(entries.map(x => x.pueblo))].sort((a,b) => a.localeCompare(b,'es'));
+    });
     // Vocabulario cultural curado: se conservan intactas las respuestas originales.
     const culturalByTechnique = new Map((culturalText ? parseCSV(culturalText) : [])
       .map(r => [normalizeLookup(r.tecnica_norm), r]));
@@ -700,6 +730,22 @@ function countForEstado(name) {
   return 0;
 }
 
+// Aportaciones por estado: mismos registros del catálogo, y respeta filtros activos.
+// Los puntos del mapa siguen siendo centroides municipales de procedencia.
+function countMapRecordsEstado(name, filtered = false) {
+  if (!ATLAS || !Array.isArray(ATLAS.records)) return 0;
+  const key = normalizeEstado(name);
+  const allowed = filtered && mapFilteredTecnicas instanceof Set ? mapFilteredTecnicas : null;
+  const municipalities = filtered && typeof mapTerritoryFilter !== 'undefined' && mapTerritoryFilter instanceof Set
+    ? mapTerritoryFilter : null;
+  return ATLAS.records.reduce((total, row) => {
+    if (normalizeEstado(row.Estado) !== key) return total;
+    if (allowed && !allowed.has(String(row.Tecnica || '').trim())) return total;
+    if (municipalities && !municipalities.has(territoryKey(row.Estado, row.Municipio))) return total;
+    return total + 1;
+  }, 0);
+}
+
 function getTecnicasForEstado(name) {
   for (const [estado, tecs] of Object.entries(estadosTecnicas)) {
     if (normalizeEstado(estado) === normalizeEstado(name)) return tecs;
@@ -777,7 +823,7 @@ function renderStatesList() {
 
   wrap.innerHTML = '';
   _statesListCache.forEach(name => {
-    const count = mapFilteredTecnicas ? countForEstadoFiltered(name) : countForEstado(name);
+    const count = countMapRecordsEstado(name, Boolean(mapFilteredTecnicas));
     const isActive = selectedStateName && normalizeEstado(selectedStateName) === normalizeEstado(name);
     const isDisabled = count === 0;
     const btn = document.createElement('button');
@@ -909,7 +955,7 @@ function initMap() {
   map.createPane('atlasCommunitiesPane');
   map.getPane('atlasCommunitiesPane').style.zIndex = 520;
 
-  L.control.zoom({ position: 'bottomright' }).addTo(map);
+  L.control.zoom({ position: 'topright' }).addTo(map);
   // Sustituye el prefijo gráfico predeterminado de Leaflet por un enlace textual.
   map.attributionControl.setPrefix('<a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a>');
   L.tileLayer('https://www.unesco.org/tiles/clearmap/{z}/{x}/{y}.png', {
@@ -928,10 +974,10 @@ function initMap() {
         style: stateStyle,
         onEachFeature: (feat, layer) => {
           const name = feat.properties.name || feat.properties.NAME_1 || '';
-          const count = countForEstado(name);
+          const count = countMapRecordsEstado(name);
           if (count > 0) {
             layer.bindTooltip(
-              `<b>${esc(name)}</b><br>${count} técnica${count !== 1 ? 's' : ''}`,
+              `<b>${esc(name)}</b><br>${count} registro${count !== 1 ? 's' : ''}`,
               { className: 'leaflet-tooltip-atlas', direction: 'top', sticky: true }
             );
           }
@@ -985,13 +1031,13 @@ function initMap() {
 
 function stateStyle(feature) {
   const name  = feature.properties.name || feature.properties.NAME_1 || '';
-  const count = countForEstado(name);
+  const count = countMapRecordsEstado(name);
   return { fillColor: getMapColor(count), weight: 1.2, opacity: 1, color: '#fff', fillOpacity: count > 0 ? 0.78 : 0.18 };
 }
 
 function highlightStyle(feature) {
   const name  = feature.properties.name || feature.properties.NAME_1 || '';
-  const count = countForEstado(name);
+  const count = countMapRecordsEstado(name);
   return { fillColor: getMapColor(count), weight: 2.5, color: COLORS.negro, fillOpacity: 0.92 };
 }
 
@@ -1157,7 +1203,7 @@ function onStateClick(name, layer, feat) {
         geojsonLayer.resetStyle(l);
       }
     });
-    const count = mapFilteredTecnicas ? countForEstadoFiltered(name) : countForEstado(name);
+    const count = countMapRecordsEstado(name, Boolean(mapFilteredTecnicas));
     layer.setStyle({ weight: 3, color: COLORS.negro, fillOpacity: 0.92, fillColor: getMapColor(count) });
   }
   let tecnicas = getTecnicasForEstado(name);
@@ -1466,8 +1512,8 @@ function applyMapFilter() {
       const name=l.feature?.properties?.name || l.feature?.properties?.NAME_1 || '';
       l.setStyle(mapFilteredTecnicas?filteredStateStyle(name):stateStyle(l.feature));
       l.unbindTooltip();
-      const count=mapFilteredTecnicas?countForEstadoFiltered(name):countForEstado(name);
-      if(count>0) l.bindTooltip(`<b>${esc(name)}</b><br>${count} técnica${count!==1?'s':''}`,{className:'leaflet-tooltip-atlas',direction:'top',sticky:true});
+      const count=countMapRecordsEstado(name, Boolean(mapFilteredTecnicas));
+      if(count>0) l.bindTooltip(`<b>${esc(name)}</b><br>${count} registro${count!==1?'s':''}`,{className:'leaflet-tooltip-atlas',direction:'top',sticky:true});
     });
   }
   if(municipiosLayer) municipiosLayer.eachLayer(l=>l.setStyle(COMUNIDAD_STYLE));
@@ -1504,7 +1550,7 @@ function countForEstadoFiltered(name) {
 }
 
 function filteredStateStyle(name) {
-  const count=countForEstadoFiltered(name);
+  const count=countMapRecordsEstado(name, true);
   return {fillColor:getMapColor(count),weight:1.2,opacity:1,color:'#fff',fillOpacity:count>0?0.88:0.08};
 }
 
@@ -1515,8 +1561,8 @@ function filteredStateStyle(name) {
 // Conservar la selección al navegar entre fichas, catálogo y mapa.
 const CATALOG_GROUPS = [
   {title:'Clasificación', fields:[['cat1','Categoría'],['cat2','Subcategoría'],['cat3','Tipo'],['cat4','Variante']]},
-  {title:'Ubicación', fields:[['estados','Estados'],['comunidades','Comunidades']]},
-  {title:'Otras características asociadas', fields:[['lenguas','Lenguas'],['ceremonias','Ceremonias y festividades'],['prendas','Prendas y objetos'],['materiales','Materiales']]}
+  {title:'Ubicación', fields:[['estados','Estados'],['municipios','Municipios'],['comunidades','Comunidades']]},
+  {title:'Otras características asociadas', fields:[['pueblos','Pueblos indígenas'],['ceremonias','Ceremonias y festividades'],['prendas','Prendas y objetos'],['materiales','Materiales']]}
 ];
 const CATALOG_FILTERS = CATALOG_GROUPS.flatMap(group => group.fields);
 let activeSearch = '';
@@ -1534,6 +1580,8 @@ function catalogValues(t, field) {
   if (field === 'materiales') return t.materiales_normalizados || [];
   if (field === 'ceremonias') return t.ceremonias_normalizadas || [];
   if (field === 'comunidades') return (t.localidades || []).map(x => x.etiqueta);
+  if (field === 'municipios') return (t.territorios || []).map(x => x.municipio);
+  if (field === 'pueblos') return t.pueblos_indigenas || [];
   return t[field] || [];
 }
 function matchesCatalog(t) {
@@ -1542,6 +1590,12 @@ function matchesCatalog(t) {
   const comunidades = catalogSelected.comunidades;
   if (comunidades.size && estados.size && !(t.localidades || []).some(loc =>
     comunidades.has(loc.etiqueta) && [...estados].some(e => normalizeEstado(e) === normalizeEstado(loc.estado)))) return false;
+  const municipios = catalogSelected.municipios;
+  if (municipios.size && estados.size && !(t.territorios || []).some(loc =>
+    municipios.has(loc.municipio) && [...estados].some(e => normalizeEstado(e) === normalizeEstado(loc.estado)))) return false;
+  const pueblos = catalogSelected.pueblos;
+  if (pueblos.size && estados.size && !(t.pueblos_por_estado || []).some(loc =>
+    pueblos.has(loc.pueblo) && [...estados].some(e => normalizeEstado(e) === normalizeEstado(loc.estado)))) return false;
   return CATALOG_FILTERS.every(([field]) => {
     const set = catalogSelected[field];
     if (!set.size) return true;
@@ -1560,6 +1614,16 @@ function getCatalogResults() {
 function availableCatalogOptions(field) {
   const estados = catalogSelected.estados;
   let techs = ATLAS.tecnicas;
+  if (field === 'municipios' && estados.size) {
+    return [...new Set(techs.flatMap(t => (t.territorios || [])
+      .filter(loc => [...estados].some(e => normalizeEstado(e) === normalizeEstado(loc.estado)))
+      .map(loc => loc.municipio)))].filter(Boolean).sort((a,b) => a.localeCompare(b,'es',{sensitivity:'base'}));
+  }
+  if (field === 'pueblos' && estados.size) {
+    return [...new Set(techs.flatMap(t => (t.pueblos_por_estado || [])
+      .filter(loc => [...estados].some(e => normalizeEstado(e) === normalizeEstado(loc.estado)))
+      .map(loc => loc.pueblo)))].filter(Boolean).sort((a,b) => a.localeCompare(b,'es',{sensitivity:'base'}));
+  }
   if (field === 'comunidades' && estados.size) {
     techs = techs.filter(t => t.estados.some(s => [...estados].some(e => normalizeEstado(e) === normalizeEstado(s))));
     return [...new Set(techs.flatMap(t => (t.localidades || [])
@@ -1629,8 +1693,13 @@ function renderCatalogFilters() {
 }
 function onCatalogSelectionChanged(field) {
   if (field === 'estados') {
-    const options = new Set(availableCatalogOptions('comunidades'));
-    [...catalogSelected.comunidades].forEach(v => { if (!options.has(v)) catalogSelected.comunidades.delete(v); });
+    for (const linkedField of ['comunidades', 'municipios', 'pueblos']) {
+      const options = new Set(availableCatalogOptions(linkedField));
+      [...catalogSelected[linkedField]].forEach(v => { if (!options.has(v)) catalogSelected[linkedField].delete(v); });
+    }
+    renderCatalogFilters();
+    renderCatalog();
+    return;
   }
   // Mantener abiertos los menús al marcar opciones, sin perder el texto de búsqueda.
   if (field === 'estados' || field === 'comunidades') {
@@ -1677,11 +1746,12 @@ function resetCatalogFilters() {
   renderCatalog();
 }
 // Enlaces de las fichas: sustituir filtros anteriores por el elemento elegido.
-function goToCatalogFilter(field, value) {
+function goToCatalogFilter(field, value, state = '') {
   if (!catalogSelected[field]) return;
   closeFicha();
   CATALOG_FILTERS.forEach(([key]) => catalogSelected[key].clear());
   catalogSelected[field].add(value);
+  if (state && field !== 'estados') catalogSelected.estados.add(state);
   activeSearch = '';
   const search = document.getElementById('catalog-search');
   if (search) search.value = '';
@@ -2170,10 +2240,10 @@ function renderFichaBody(t, source = 'testimonio') {
     ${t.edad_promedio ? `<div class="stat-box"><div class="val">${Math.round(t.edad_promedio)}</div><div class="key">Edad prom.</div></div>` : ''}
   </div>`;
 
-  if (t.lenguas && t.lenguas.length > 0) {
+  if (t.pueblos_indigenas && t.pueblos_indigenas.length > 0) {
     html += `<div style="margin-bottom:18px">
-      <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--arena);margin-bottom:7px">Lenguas documentadas</div>
-      <div class="tags-row">${t.lenguas.map(l => `<button type="button" class="lengua-tag catalog-link-tag" onclick="goToCatalogFilter('lenguas', '${escJs(l)}')">${esc(l)}</button>`).join('')}</div>
+      <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--arena);margin-bottom:7px">Pueblos indígenas de referencia</div>
+      <div class="tags-row">${t.pueblos_indigenas.map(p => `<button type="button" class="lengua-tag catalog-link-tag" onclick="goToCatalogFilter('pueblos', '${escJs(p)}')">${esc(p)}</button>`).join('')}</div>
     </div>`;
   }
 
@@ -3826,7 +3896,13 @@ function initArbol() {
   function renderTechList(names) {
     return `<div class="class-detail-list">
       ${names.length ? '' : '<p class="class-detail-zero">Aún no hay registros vinculados con este nivel de la clasificación.</p>'}
-      ${names.map(name => `<button type="button" class="class-detail-tech" data-tech-name="${escAttr(name)}"><span>${esc(name)}</span><b>Ver ficha</b></button>`).join('')}
+      ${names.map(name => `<div class="class-detail-tech-row">
+        <span class="class-detail-tech-name">${esc(name)}</span>
+        <div class="class-detail-tech-actions">
+          <button type="button" class="class-detail-action class-detail-action-view" data-tech-name="${escAttr(name)}" aria-label="Ver ficha de ${escAttr(name)}">Ver ficha</button>
+          <button type="button" class="class-detail-action class-detail-action-propose" data-tech-propose="${escAttr(name)}" aria-label="Proponer cambio de ${escAttr(name)}">Proponer cambio</button>
+        </div>
+      </div>`).join('')}
     </div>`;
   }
 
@@ -4015,6 +4091,12 @@ function initArbol() {
 
     container.querySelectorAll('[data-tech-name]').forEach(btn => {
       btn.addEventListener('click', () => openFicha(btn.dataset.techName));
+    });
+    container.querySelectorAll('[data-tech-propose]').forEach(btn => {
+      btn.addEventListener('click', event => {
+        event.preventDefault();
+        if (typeof openKoboForm === 'function') openKoboForm('cambio');
+      });
     });
 
     container.querySelectorAll('[data-tax-biblio]').forEach(btn => {

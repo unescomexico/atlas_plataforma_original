@@ -6008,3 +6008,391 @@ button.atlas-legend-action:hover,button.atlas-legend-action:focus-visible {backg
   .atlas-intro-copy-guide .atlas-intro-guide-finish { font-size: .94rem; }
   .atlas-intro-guide-steps li { font-size: .9rem; }
 }
+
+
+/* Ficha estatal emergente: se añade al panel existente, sin sustituirlo. */
+.territory-profile-card .atlas-open-state-sheet {
+  display:flex; justify-content:space-between; align-items:center; gap:12px;
+  width:100%; margin:9px 0 15px; padding:10px 13px; border:1px solid #8b0440;
+  border-radius:8px; background:#fff3f7; color:#8b0440; cursor:pointer;
+  font-family:var(--font-body); font-size:.78rem; font-weight:700; text-align:left;
+}
+.territory-profile-card .atlas-open-state-sheet:hover,
+.territory-profile-card .atlas-open-state-sheet:focus-visible { background:#fce4ee; outline:2px solid #8b0440; outline-offset:2px; }
+.atlas-state-sheet-overlay[hidden] { display:none!important; }
+.atlas-state-sheet-overlay {position:fixed;inset:0;z-index:2450;display:flex;justify-content:center;align-items:center;padding:22px;background:rgba(23,10,19,.74);backdrop-filter:blur(3px);}
+.atlas-state-sheet-dialog {display:flex;flex-direction:column;position:relative;width:min(960px,100%);max-height:min(92dvh,860px);border-radius:15px;background:#fffaf7;box-shadow:0 30px 80px #0005;overflow:hidden;outline:none;}
+.atlas-state-sheet-top {display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:21px 27px 16px;border-bottom:1px solid #e7d6db;flex:none;}
+.atlas-state-sheet-eyebrow {font:700 .66rem/1.5 var(--font-body);letter-spacing:.10em;text-transform:uppercase;color:#9d2252;}
+.atlas-state-sheet-top h2 {font:800 clamp(1.5rem,3vw,2.25rem)/1.15 var(--font-display);color:#1a1018;margin:5px 0 0;}
+.atlas-state-sheet-close {flex:0 0 40px;width:40px;height:40px;display:grid;place-items:center;border:0;border-radius:50%;background:#f6e5eb;color:#7e0b3a;font-size:1.7rem;cursor:pointer;}
+.atlas-state-sheet-close:hover {background:#ebccda;}
+.atlas-state-sheet-scroll {padding:22px 27px 30px;overflow-y:auto;overscroll-behavior:contain;min-height:0;}
+.atlas-state-sheet-intro {max-width:790px;color:#65515a;font:.85rem/1.6 var(--font-body);margin:0 0 16px;}
+.atlas-state-sheet-kpis {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:23px;}
+.atlas-state-sheet-kpis>div {background:#f8edf0;padding:14px 16px;border-radius:10px;display:flex;flex-direction:column;gap:4px;}
+.atlas-state-sheet-kpis strong {font:800 1.65rem/1 var(--font-display);color:#76083a;}
+.atlas-state-sheet-kpis span {font:.72rem/1.35 var(--font-body);color:#765865;}
+.atlas-state-sheet-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:19px 24px;}
+.atlas-state-sheet-section {min-width:0;}
+.atlas-state-sheet-section h3 {font:700 1rem/1.3 var(--font-display);margin:0 0 11px;color:#281923;}
+.atlas-state-sheet-chips,.atlas-state-sheet-techs {display:flex;flex-wrap:wrap;gap:7px;align-items:flex-start;}
+.atlas-state-sheet-chips span,.atlas-state-sheet-techs span,.atlas-state-sheet-techs button {padding:6px 9px;border:1px solid #eadde0;background:#fff;border-radius:5px;font:.71rem/1.4 var(--font-body);color:#4b3441;}
+.atlas-state-sheet-techs button {border-color:#d8a6bb;color:#8b0440;cursor:pointer;text-align:left;}
+.atlas-state-sheet-techs button:hover {background:#f9e7ef;}
+.atlas-state-sheet-muted {margin:0;color:#866c78;font:.78rem/1.6 var(--font-body);}
+.atlas-state-sheet-media {margin-top:26px;}
+.atlas-state-sheet-gallery {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;}
+.atlas-state-sheet-photo {display:flex;flex-direction:column;min-width:0;border:1px solid #eadbe0;border-radius:9px;overflow:hidden;padding:0;background:white;text-align:left;cursor:pointer;}
+.atlas-state-sheet-photo img {display:block;width:100%;aspect-ratio:4/3;object-fit:cover;}
+.atlas-state-sheet-photo span {padding:8px 9px;font:.7rem/1.35 var(--font-body);color:#4b3441;}
+.atlas-state-sheet-photo:hover,.atlas-state-sheet-photo:focus-visible {outline:2px solid #b50552;outline-offset:2px;}
+.atlas-state-sheet-foot {margin-top:23px;border-top:1px solid #ebdbe1;padding-top:13px;color:#866c78;font:.69rem/1.5 var(--font-body);}
+@media(max-width:700px) {
+ .atlas-state-sheet-overlay {padding:9px;align-items:stretch;}
+ .atlas-state-sheet-dialog {max-height:calc(100dvh - 18px);width:100%;}
+ .atlas-state-sheet-top {padding:16px 15px 13px;}
+ .atlas-state-sheet-scroll {padding:16px 15px 24px;}
+ .atlas-state-sheet-kpis {gap:6px;}
+ .atlas-state-sheet-kpis>div {padding:12px 8px;}
+ .atlas-state-sheet-kpis strong {font-size:1.3rem;}
+ .atlas-state-sheet-grid {grid-template-columns:1fr;gap:18px;}
+ .atlas-state-sheet-gallery {grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+
+
+/* Compatibilidad con los botones de Clasificación incorporados previamente. */
+/* Clasificación: dos acciones por técnica, con jerarquía visual clara. */
+.class-detail-tech-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.class-detail-tech-name {
+  flex: 1 1 135px;
+  min-width: 0;
+  color: var(--negro);
+  font-size: .83rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.class-detail-tech-actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 6px;
+}
+.class-detail-action {
+  border-radius: 6px;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: .7rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+}
+.class-detail-action-view {
+  border: 1px solid var(--magenta);
+  color: var(--magenta);
+  background: transparent;
+}
+.class-detail-action-view:hover { background: #f9e9f0; }
+.class-detail-action-propose {
+  border: 1px solid #176c74;
+  background: #176c74;
+  color: #fff;
+}
+.class-detail-action-propose:hover { background: #10545b; border-color: #10545b; }
+.class-detail-action:focus-visible {
+  outline: 3px solid #f1bc62;
+  outline-offset: 2px;
+}
+@media (max-width: 600px) {
+  .class-detail-tech-row { align-items: flex-start; flex-wrap: wrap; gap: 7px; }
+  .class-detail-tech-name { flex-basis: 100%; }
+  .class-detail-tech-actions { width: 100%; flex-wrap: wrap; }
+}
+
+/* Leyenda un poco más baja sin tapar la atribución cartográfica. */
+@media(min-width:701px){#view-mapa #map-legend.map-legend{bottom:28px;}}
+
+/* Fichas por estado: los valores territoriales actúan como enlaces al Catálogo. */
+.atlas-state-sheet-chips .atlas-state-sheet-filter {
+  display:inline-flex; align-items:center; gap:6px; padding:7px 10px;
+  border:1px solid #cbdce3; border-radius:6px; background:#f7fbfc;
+  color:#075878; font:600 .72rem/1.35 var(--font-body); cursor:pointer;
+  max-width:100%; text-align:left; overflow-wrap:anywhere;
+}
+.atlas-state-sheet-chips .atlas-state-sheet-filter:hover,
+.atlas-state-sheet-chips .atlas-state-sheet-filter:focus-visible {
+  background:#eaf4f7; border-color:#047394; outline:2px solid transparent;
+  box-shadow:0 0 0 2px rgba(3,90,121,.18);
+}
+.atlas-state-sheet-chips .atlas-state-sheet-filter span {padding:0; border:0; color:inherit; background:transparent; font:inherit;}
+.atlas-state-sheet-more {font-size:.73rem; color:#74636c;}
+
+@media(min-width:1050px) { #catalog-filters .catalog-filter-group:nth-child(2) .catalog-filter-group-grid {grid-template-columns:repeat(3,minmax(0,1fr));} }
+
+/* ATLAS — Fichas estatales y lectura del mapa, 2026-11-07.
+   Sobrescribe reglas anteriores que separaban la leyenda del zoom inferior. */
+#view-mapa #map-legend.map-legend.is-collapsed,
+#view-mapa #map-legend.map-legend:not(.is-collapsed) {
+  top:auto;
+  right:12px;
+  bottom:24px;
+  left:auto;
+}
+#view-mapa .leaflet-top.leaflet-right .leaflet-control-zoom {
+  margin-top:12px;
+  margin-right:12px;
+}
+#view-mapa .map-reading-guide {
+  margin-top:8px;
+  padding-top:7px;
+  border-top:1px solid rgba(255,255,255,.16);
+  color:rgba(255,248,245,.86);
+  font:.71rem/1.45 var(--font-body);
+}
+#view-mapa .map-reading-guide[hidden] {display:none!important;}
+#view-mapa #map-legend.is-collapsed .map-reading-guide {display:none!important;}
+#view-mapa .map-reading-guide summary {
+  cursor:pointer;
+  color:#f5d4a4;
+  font-weight:700;
+  padding:3px 2px;
+  border-radius:4px;
+}
+#view-mapa .map-reading-guide summary:focus-visible {outline:2px solid #fff;outline-offset:2px;}
+#view-mapa .map-reading-guide p {margin:6px 0 2px;color:rgba(255,248,245,.84);line-height:1.45;}
+#view-mapa #map-legend.map-legend:not(.is-collapsed) {max-height:min(66dvh,550px);overflow-y:auto;overscroll-behavior:contain;}
+@media (max-width:960px) {
+  /* La leyenda plegada va abajo; el zoom se reserva en la esquina superior. */
+  #view-mapa #map-legend.map-legend.is-collapsed,
+  #view-mapa #map-legend.map-legend:not(.is-collapsed) {
+    top:auto;
+    bottom:24px;
+    right:9px;
+    left:auto;
+    max-width:calc(100% - 18px);
+  }
+  #view-mapa #map-legend.map-legend:not(.is-collapsed) {
+    max-height:min(45dvh,350px);
+    width:min(265px,calc(100% - 24px));
+    overflow-y:auto;
+  }
+  #view-mapa .leaflet-top.leaflet-right .leaflet-control-zoom {margin-top:10px;margin-right:10px;}
+}
+
+
+/* Mini mapa territorial dentro de la ficha estatal (independiente del mapa principal). */
+.atlas-state-sheet-map-section{margin:0 0 24px;min-width:0;}
+.atlas-state-map-heading{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;justify-content:space-between;margin-bottom:10px;}
+.atlas-state-map-heading h3{margin:0;}
+.atlas-state-map-heading span{font:.72rem/1.4 var(--font-body);color:#846774;}
+.atlas-state-mini-map{width:100%;height:310px;min-height:250px;border:1px solid #eadbe0;border-radius:11px;overflow:hidden;background:#e6f1f4;position:relative;z-index:0;}
+.atlas-state-mini-map .leaflet-container{font-family:var(--font-body);}
+.atlas-state-mini-map .leaflet-control-zoom a{width:32px;height:32px;line-height:32px;}
+.atlas-state-map-caption{font:.72rem/1.5 var(--font-body);color:#6e5864;margin:8px 0 2px;}
+.atlas-state-map-results{font:600 .73rem/1.4 var(--font-body);color:#8B0440;margin:5px 0 0;}
+.atlas-state-map-message{margin:0;padding:20px;min-height:190px;display:grid;place-items:center;text-align:center;font:.84rem var(--font-body);color:#6f5362;}
+.atlas-mini-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px;align-items:start;}
+.atlas-mini-filter{min-width:0;border:1px solid #dfc4cf;border-radius:8px;background:white;position:relative;}
+.atlas-mini-filter summary{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:38px;padding:8px 11px;font:700 .74rem/1.35 var(--font-body);color:#7c123e;list-style:none;}
+.atlas-mini-filter summary::-webkit-details-marker{display:none;}
+.atlas-mini-filter summary::after{content:'⌄';margin-left:auto;font-size:1rem;}
+.atlas-mini-filter[open] summary::after{content:'⌃';}
+.atlas-mini-filter-options{padding:5px 8px 9px;max-height:165px;overflow:auto;overscroll-behavior:contain;border-top:1px solid #f1e2e8;}
+.atlas-mini-filter-options label{display:flex;align-items:flex-start;gap:9px;padding:6px 2px;font:500 .72rem/1.4 var(--font-body);color:#463441;cursor:pointer;overflow-wrap:anywhere;}
+.atlas-mini-filter-options input{width:16px;height:16px;flex:none;accent-color:#8B0440;margin:1px 0 0;}
+.atlas-mini-filter-options .atlas-state-sheet-muted{padding:7px 3px;}
+.atlas-state-marker-popup{font:400 .75rem/1.4 var(--font-body);color:#251621;overflow-wrap:anywhere;}
+.atlas-state-marker-popup strong{font:700 1rem/1.2 var(--font-display);}
+.atlas-state-marker-popup p{margin:6px 0;}
+.atlas-state-marker-popup small{color:#816875;font:.66rem/1.4 var(--font-body);}
+@media(max-width:640px){
+  .atlas-state-sheet-map-section{margin-bottom:20px;}
+  .atlas-mini-filters{grid-template-columns:1fr;gap:6px;}
+  .atlas-mini-filter summary{min-height:35px;}
+  .atlas-mini-filter-options{max-height:126px;}
+  .atlas-state-mini-map{height:260px;min-height:260px;}
+  .atlas-state-map-heading span{font-size:.68rem;}
+  .atlas-state-map-caption{font-size:.69rem;}
+}
+
+.atlas-state-sheet-map-section .atlas-mini-filters{margin-top:12px;margin-bottom:0;}
+
+
+/* Vista local de respaldo de mapas estatales: no depende de mosaicos remotos. */
+.atlas-state-mini-map .atlas-state-map-fallback{position:absolute;inset:0;z-index:1300;background:#deedf3;overflow:hidden;border-radius:inherit;}
+.atlas-state-map-canvas{position:absolute;inset:0;overflow:hidden;touch-action:pan-y;cursor:grab;}
+.atlas-state-map-canvas:active{cursor:grabbing;}
+.atlas-state-map-svg{width:100%;height:100%;display:block;transition:transform .15s ease;transform-origin:center center;}
+.atlas-fallback-marker{cursor:pointer;outline:none;}
+.atlas-fallback-marker:hover,.atlas-fallback-marker:focus{fill:#ef7b24;stroke:#5d0a37;stroke-width:2.8;}
+.atlas-fallback-zoom{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;z-index:2;box-shadow:0 1px 5px #0003;border-radius:4px;overflow:hidden;}
+.atlas-fallback-zoom button{display:grid;place-items:center;background:white;border:1px solid #b2bdc0;color:#2e2929;font:700 21px/1 var(--font-body);height:33px;width:33px;cursor:pointer;}
+.atlas-fallback-zoom button + button{border-top:0;}
+.atlas-fallback-zoom button:disabled{color:#a5a5a5;cursor:default;background:#f4f4f4;}
+.atlas-fallback-notice{position:absolute;left:9px;bottom:8px;z-index:1;max-width:calc(100% - 24px);background:rgba(255,255,255,.88);padding:3px 7px;border-radius:4px;color:#705760;font:500 10px/1.3 var(--font-body);pointer-events:none;}
+.atlas-fallback-popup{position:absolute;top:14px;left:14px;z-index:4;padding:13px 15px;width:min(270px,calc(100% - 70px));max-height:78%;overflow:auto;background:white;border:1px solid #d7bdc8;border-radius:10px;box-shadow:0 8px 24px #0003;}
+.atlas-fallback-popup[hidden]{display:none!important;}
+@media(max-width:640px){.atlas-fallback-popup{width:min(235px,calc(100% - 64px));padding:10px;top:9px;left:8px;}.atlas-fallback-notice{font-size:9px;}}
+
+
+/* 2026-11-07 · Fichas estatales: filtros flotantes, sin empujar el contenido */
+.atlas-state-map-shell { position:relative; isolation:isolate; min-width:0; }
+.atlas-state-map-shell .atlas-mini-filters {
+  position:absolute; z-index:1800; top:10px; left:10px; right:58px;
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
+  align-items:start; gap:6px; margin:0; pointer-events:none;
+}
+.atlas-state-map-shell .atlas-mini-filter {
+  pointer-events:auto; position:relative; min-width:0;
+  background:rgba(255,255,255,.96);
+  box-shadow:0 1px 6px #0002;
+}
+.atlas-state-map-shell .atlas-mini-filter summary {
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  min-height:34px; padding:7px 8px; font-size:.68rem;
+}
+.atlas-state-map-shell .atlas-mini-filter-options {
+  position:absolute; z-index:2; left:0; top:calc(100% + 2px);
+  width:max(100%,min(225px,75vw)); max-width:none;
+  max-height:190px; overflow:auto; background:white;
+  border:1px solid #dfc4cf; border-radius:8px;
+  box-shadow:0 8px 22px #0003;
+}
+.atlas-state-map-shell .atlas-mini-filter:nth-child(2) .atlas-mini-filter-options {
+  left:50%; transform:translateX(-50%);
+}
+.atlas-state-map-shell .atlas-mini-filter:last-child .atlas-mini-filter-options {
+  left:auto;right:0;
+}
+.atlas-state-map-shell .atlas-mini-filter[open] { z-index:20; }
+.atlas-state-map-shell .atlas-state-mini-map { margin:0; }
+.atlas-state-mini-map .leaflet-control-attribution {
+  max-width:calc(100% - 10px); font-size:10px;
+}
+@media(max-width:640px) {
+ .atlas-state-map-shell .atlas-mini-filters {
+   display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
+   top:8px; left:7px; right:48px; gap:4px;
+ }
+ .atlas-state-map-shell .atlas-mini-filter summary {
+   font-size:.60rem; padding:6px 5px; min-height:32px; gap:2px;
+ }
+ .atlas-state-map-shell .atlas-mini-filter summary::after {
+   font-size:.8rem;
+ }
+ .atlas-state-map-shell .atlas-mini-filter-options {
+   width:max(100%,min(195px,calc(100vw - 63px)));
+   max-height:145px;
+ }
+ .atlas-state-map-shell .atlas-mini-filter-options label {
+   font-size:.69rem;
+ }
+}
+
+.atlas-mini-filter-label-short { display:none; }
+@media(max-width:640px) {
+ .atlas-mini-filter-label-full { display:none; }
+ .atlas-mini-filter-label-short { display:inline; }
+}
+
+
+/* 2026-11-07 · Fichas estatales: dos filtros y limpieza, con popup fijo abajo a la izquierda. */
+.atlas-state-map-shell .atlas-mini-filters {
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;
+  align-items:start;
+}
+.atlas-state-map-shell .atlas-mini-filter-reset {
+  pointer-events:auto;
+  min-height:35px;
+  padding:6px 10px;
+  border:1px solid #bd9ba9;
+  border-radius:8px;
+  background:#fff9fa;
+  color:#8b0440;
+  font:700 .69rem/1.35 var(--font-body);
+  cursor:pointer;
+  box-shadow:0 1px 6px #0002;
+}
+.atlas-state-map-shell .atlas-mini-filter-reset:disabled {
+  opacity:.65;
+  cursor:default;
+  color:#796a70;
+}
+.atlas-state-map-shell .atlas-mini-filter-reset:focus-visible,
+.atlas-state-map-shell .atlas-mini-filter summary:focus-visible {
+  outline:2px solid #8b0440;
+  outline-offset:2px;
+}
+.atlas-state-map-shell .atlas-mini-map-popup {
+  position:absolute;
+  left:12px;
+  bottom:12px;
+  top:auto;
+  z-index:1600;
+  box-sizing:border-box;
+  width:min(300px, calc(100% - 70px));
+  max-height:min(63%,200px);
+  overflow:auto;
+  padding:12px 38px 12px 13px;
+  background:#fff;
+  border:1px solid #d7bdc8;
+  border-radius:10px;
+  box-shadow:0 8px 24px #0003;
+  overscroll-behavior:contain;
+}
+.atlas-state-map-shell .atlas-mini-map-popup[hidden] {display:none!important;}
+.atlas-state-map-shell .atlas-mini-map-popup-close {
+  position:absolute;
+  right:7px;
+  top:6px;
+  width:25px;
+  height:25px;
+  display:grid;
+  place-items:center;
+  border:0;
+  border-radius:50%;
+  background:#f7e8ed;
+  color:#8b0440;
+  cursor:pointer;
+  font:700 18px/1 var(--font-body);
+}
+.atlas-state-map-shell .atlas-mini-map-popup-close:focus-visible {outline:2px solid #8b0440;outline-offset:1px;}
+@media(max-width:640px) {
+  .atlas-state-map-shell .atlas-mini-filters {
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;
+    right:48px;
+  }
+  .atlas-state-map-shell .atlas-mini-filter {
+    position:static; /* Desplegables alineados dentro del mapa, sin desbordar el móvil. */
+  }
+  .atlas-state-map-shell .atlas-mini-filter-options,
+  .atlas-state-map-shell .atlas-mini-filter:nth-child(2) .atlas-mini-filter-options {
+    left:0;
+    right:auto;
+    top:calc(100% + 3px);
+    transform:none;
+    width:min(230px,calc(100vw - 82px));
+    max-width:calc(100% + 42px);
+  }
+  .atlas-state-map-shell .atlas-mini-filter-reset {
+    min-height:32px;
+    padding:5px 6px;
+    font-size:.59rem;
+  }
+  .atlas-state-map-shell .atlas-mini-map-popup {
+    left:8px;
+    bottom:8px;
+    width:min(245px,calc(100% - 56px));
+    max-height:60%;
+    padding:10px 32px 10px 10px;
+  }
+}

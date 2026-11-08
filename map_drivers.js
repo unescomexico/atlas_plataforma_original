@@ -682,8 +682,8 @@ function applyStateCompositeFilter() {
       const name = layer.feature?.properties?.name || layer.feature?.properties?.NAME_1 || '';
       layer.setStyle(mapFilteredTecnicas ? filteredStateStyle(name) : stateStyle(layer.feature));
       layer.unbindTooltip();
-      const count = mapFilteredTecnicas ? countForEstadoFiltered(name) : countForEstado(name);
-      if (count > 0) layer.bindTooltip(`<b>${esc(name)}</b><br>${count} técnica${count !== 1 ? 's' : ''}`, { className: 'leaflet-tooltip-atlas', direction: 'top', sticky: true });
+      const count = countMapRecordsEstado(name, Boolean(mapFilteredTecnicas));
+      if (count > 0) layer.bindTooltip(`<b>${esc(name)}</b><br>${count} registro${count !== 1 ? 's' : ''}`, { className: 'leaflet-tooltip-atlas', direction: 'top', sticky: true });
     });
   }
 
@@ -797,26 +797,9 @@ function renderStateFilterDropdown() {
   });
   const ordered = [...new Set(names)].sort((a,b)=>a.localeCompare(b,'es'));
   wrap.innerHTML = '';
-  appendDriverSelectAllRow(
-    wrap,
-    ordered,
-    selectedStateNames,
-    checked => {
-      selectedStateNames.clear();
-      if (checked) ordered.forEach(name => selectedStateNames.add(name));
-      dismissInitialMapOverview?.();
-      selectedStateName = null;
-      selectedMunicipioKey = null;
-      updateStateSelectionStyles();
-      renderDriverList();
-      refreshCommunities();
-      updateStatePanel();
-      if (!checked) map.fitBounds(MX_BOUNDS);
-    },
-    'map-state-all'
-  );
+  // Un solo estado a la vez. El reinicio de la selección se realiza con «Limpiar».
   ordered.forEach((name, i) => {
-    const count = mapFilteredTecnicas ? countForEstadoFiltered(name) : countForEstado(name);
+    const count = countMapRecordsEstado(name, Boolean(mapFilteredTecnicas));
     const checked = isStateSelected(name);
     const row = document.createElement('div');
     row.className = 'filter-checkbox-item' + (count === 0 && !checked ? ' disabled' : '');
@@ -851,7 +834,7 @@ function renderDriverList() {
     const ordered = [...new Set(names)].sort((a,b)=>a.localeCompare(b,'es'));
     wrap.innerHTML = '';
     ordered.forEach(name => {
-      const count = mapFilteredTecnicas ? countForEstadoFiltered(name) : countForEstado(name);
+      const count = countMapRecordsEstado(name, Boolean(mapFilteredTecnicas));
       const btn = document.createElement('button');
       btn.className = 'state-item' + (isStateSelected(name) ? ' active' : '') + (count === 0 ? ' disabled' : '');
       btn.innerHTML = `<span>${esc(name)}</span><span class="state-count">${count}</span>`;
@@ -926,8 +909,10 @@ function updateTerritoryPanel() {
 onStateClick = function(name, layer, feat) {
   if (activeMapDriver !== 'estado') return;
   dismissInitialMapOverview?.();
-  const existing = [...selectedStateNames].find(item => normalizeEstado(item) === normalizeEstado(name));
-  if (existing) selectedStateNames.delete(existing); else selectedStateNames.add(name);
+  // Selección única: al elegir otro estado se reemplaza el anterior.
+  // Volver a pulsar el mismo estado no lo deselecciona; «Limpiar» sí lo hace.
+  selectedStateNames.clear();
+  selectedStateNames.add(name);
   selectedStateName = null;
   selectedMunicipioKey = null;
   updateStateSelectionStyles();
@@ -971,12 +956,17 @@ function updateLegend() {
   const title = document.getElementById('map-legend-title');
   const body = document.getElementById('map-legend-body');
   if (!title || !body) return;
+  const readingGuide = document.getElementById('map-reading-guide');
+  if (readingGuide) {
+    readingGuide.hidden = activeMapDriver !== 'estado';
+    if (readingGuide.hidden) readingGuide.open = false;
+  }
   body.replaceChildren();
   if (activeMapDriver==='estado') {
-    title.textContent='Técnicas por estado';
+    title.textContent='Registros por estado';
     atlasLegendList(body,[
-      {color:'#FCBC52',name:'20 o más'},
-      {color:'#A4D984',name:'10 – 19'},
+      {color:'#FCBC52',name:'50 o más'},
+      {color:'#A4D984',name:'10 – 49'},
       {color:'#F588AF',name:'1 – 9'}
     ]);
     atlasLegendNote(body,'Selecciona estados para consultar sus registros.');
@@ -1310,26 +1300,20 @@ function territoryInterpretationNote(type) {
 
 // ATLAS_POPUPS_SIMPLIFICADOS_V2
 function atlasStatePhoto(profile) {
-  if (!profile || typeof tecnicasMap === 'undefined') return '';
-  const raw=String(profile?.summary?.tecnicas_principales || '');
-  // Se utilizan las técnicas que el perfil documenta; no se atribuye la foto a un
-  // municipio concreto si el índice solo la asocia con la técnica.
-  const keys=Object.keys(tecnicasMap||{});
-  const canon=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
-  const photos=[];
-  for(const item of raw.split(';').map(x=>x.trim()).filter(Boolean)) {
-    const name=item.replace(/\s+\(\d+\)\s*$/,'').trim();
-    const matched=keys.find(k=>canon(k)===canon(name));
-    const tech=matched && tecnicasMap[matched];
-    for(const f of tech?.imagenes||[]) {
-      if(!photos.includes(f)) photos.push(f);
-    }
-  }
-  if(!photos.length)return '';
-  const photo=photos[Math.floor(Math.random()*photos.length)];
-  const url=typeof imgPath==='function'?imgPath(photo):'imagenes/'+encodeURIComponent(photo);
-  return `<figure class="atlas-state-photo"><img data-atlas-state-photo="${encodeURIComponent(photo)}" tabindex="0" role="button" title="Ver información de la fotografía" loading="lazy" src="${esc(url)}" alt="Fotografía de una técnica documentada en ${esc(profile.name||'este estado')}" onerror="this.closest('figure').remove()"></figure>`;
+  if (!profile || !Array.isArray(GALLERY_ITEMS)) return '';
+  // Solo imágenes que declaran expresamente este estado en el índice multimedia.
+  const allowed = window.ATLAS_AVAILABLE_IMAGES;
+  const photos = GALLERY_ITEMS.filter(item =>
+    item?.archivo && normalizeEstado(item.estado) === normalizeEstado(profile.name) &&
+    (!(allowed instanceof Set) || allowed.has(item.archivo))
+  );
+  if (!photos.length) return '';
+  const item = photos[Math.floor(Math.random() * photos.length)];
+  const photo = item.archivo;
+  const url = typeof imgPath === 'function' ? imgPath(photo) : 'imagenes/' + encodeURIComponent(photo);
+  return `<figure class="atlas-state-photo"><img data-atlas-state-photo="${encodeURIComponent(photo)}" tabindex="0" role="button" title="Ver información de la fotografía" loading="lazy" src="${esc(url)}" alt="Fotografía registrada en ${esc(profile.name || 'este estado')}" onerror="this.closest('figure').remove()"></figure>`;
 }
+
 function territoryProfileCard(profile, type) {
   const s = profile?.summary || {};
   const registros = Number(s.n_registros || 0);
@@ -1353,6 +1337,7 @@ function territoryProfileCard(profile, type) {
     <article class="territory-profile-card">
       <div class="territory-profile-kicker">Perfil del Atlas · ${esc(territoryTypeLabel(type))}</div>
       <h3>${esc(nombrePerfil || '')}</h3>
+      ${type === 'estado' ? `<button type="button" class="atlas-open-state-sheet" data-atlas-state-modal="${encodeURIComponent(profile.name || '')}" aria-label="Consultar ficha completa de ${esc(profile.name || '')}">Consultar ficha completa del estado <span aria-hidden="true">↗</span></button>` : ''}
       ${capaLengua ? `<div class="territory-profile-pueblo">Capa lingüística utilizada: ${esc(capaLengua.name)}</div>` : ''}
 
       ${type === 'estado' ? atlasStatePhoto(profile) : ''}

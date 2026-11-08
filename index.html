@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://raw.githubusercontent.com; frame-src 'self' https://ee.kobotoolbox.org; form-action 'self' https://ee.kobotoolbox.org; worker-src 'self' blob:; upgrade-insecure-requests">
-<meta name="description" content="Atlas Comunitario del Arte Textil de México — información construida a partir de testimonios de artesanas y artesanos">
+<meta name="description" content="Atlas del Arte Textil de México — información construida a partir de testimonios de artesanas y artesanos">
 <meta name="theme-color" content="#8B0440">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Atlas Textil">
-<title>Atlas Comunitario del Arte Textil de México</title>
+<title>Atlas del Arte Textil de México</title>
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,7 +31,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" data-security-review="version-pinned"></script>
 
 <!-- App styles -->
-<link rel="stylesheet" href="styles.css?v=atlas-pueblos-20261104">
+<link rel="stylesheet" href="styles.css?v=atlas-mini-filtros-popup-20261107">
 </head>
 <body>
 
@@ -68,11 +68,11 @@
       </div>
       <div class="atlas-intro-copy atlas-intro-copy-intro">
         <div class="atlas-intro-kicker">Introducción</div>
-        <h2 id="atlas-intro-title">Atlas Comunitario del Arte Textil de México</h2>
+        <h2 id="atlas-intro-title">Atlas del Arte Textil de México</h2>
         <h3 class="atlas-intro-subtitle">Registro de técnicas, puntadas y saberes textiles compartidos por las personas artesanas</h3>
         <div class="atlas-intro-text-flow">
 <p>Esta plataforma es una herramienta de consulta y documentación de los saberes, las técnicas y otros elementos culturales vinculados al arte textil mexicano. La información que contiene ha sido proporcionada directamente por las personas artesanas, quienes, a través de este espacio, han decidido compartir con el mundo sus conocimientos, sus técnicas, sus historias y los significados que dan sentido a su práctica cultural.</p>
-<p>El Atlas Comunitario del Arte Textil de México tiene como propósito reconocer la diversidad creativa de las comunidades artesanales del país y brindar un espacio para que sean ellas mismas quienes describan, nombren y transmitan sus conocimientos desde sus propias experiencias y perspectivas.</p>
+<p>El Atlas del Arte Textil de México tiene como propósito reconocer la diversidad creativa de las comunidades artesanales del país y brindar un espacio para que sean ellas mismas quienes describan, nombren y transmitan sus conocimientos desde sus propias experiencias y perspectivas.</p>
         </div>
       </div>
     </section>
@@ -183,7 +183,7 @@
 <header class="header">
   <div class="header-inner">
     <div class="header-wordmark">
-      <h1>Atlas <span class="word-highlight">Comunitario</span> del Arte Textil de México</h1>
+      <h1>Atlas del <span class="word-highlight">Arte Textil</span> de México</h1>
     </div>
     <div class="header-logos" aria-label="Secretaría de Cultura · Original · UNESCO">
       <img src="assets/atlas_plataforma_logos_cropped.png" alt="Secretaría de Cultura · Original · UNESCO" />
@@ -374,10 +374,14 @@
         <button type="button" id="map-legend-toggle" class="map-legend-toggle" aria-expanded="true" aria-controls="map-legend-body" aria-label="Contraer leyenda" title="Contraer leyenda">−</button>
       </div>
       <div id="map-legend-body">
-        <div class="legend-item"><div class="legend-dot" style="background:#FCBC52FF"></div><span>20 o más</span></div>
-        <div class="legend-item"><div class="legend-dot" style="background:#A4D984FF"></div><span>10 – 19</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#FCBC52FF"></div><span>50 o más</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#A4D984FF"></div><span>10 – 49</span></div>
         <div class="legend-item"><div class="legend-dot" style="background:#F588AFFF"></div><span>1 – 9</span></div>
       </div>
+      <details class="map-reading-guide" id="map-reading-guide">
+        <summary>¿Cómo leer el mapa?</summary>
+        <p>Los colores representan el número de registros por estado. Los puntos señalan de forma aproximada las comunidades de procedencia de las artesanas y artesanos participantes en el Atlas.</p>
+      </details>
     </div>
     <button type="button" id="map-legend-reopen" class="map-legend-reopen" aria-label="Mostrar leyenda del mapa" title="Mostrar la leyenda" hidden>
       <span aria-hidden="true">☷</span> Leyenda
@@ -852,8 +856,9 @@
 
 <!-- Scripts — NO atlas_data.js: los datos se leen desde los CSV -->
 <script src="atlas_info_embedded.js?v=atlas-pueblos-20261104"></script>
-<script src="main.js?v=atlas-pueblos-20261104"></script>
-<script src="map_drivers.js?v=atlas-pueblos-20261104"></script>
+<script src="main.js?v=atlas-mini-filtros-popup-20261107"></script>
+<script src="map_drivers.js?v=atlas-leyenda-20261107"></script>
+<script src="state_profile_modal.js?v=atlas-contexto-estatal-20261108"></script>
 <script src="aluvial.js?v=atlas-pueblos-20261104"></script>
 
 <!-- ═══════════════════════════════════════
