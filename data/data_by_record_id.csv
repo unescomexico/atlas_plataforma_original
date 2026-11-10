@@ -1,4 +1,4 @@
-﻿Sede,Genero,tecnica_grupo,Tecnica,Lengua,Estado,Municipio,Materiales,Temporalidad,Plantas,Minerales,Animales,Madre,Abuela,Tia,Hermana,Cunada,Instructora,Padre,Hijas,Hijos,Nietos,Sobrinos,Pareja,Estudiantes
+Sede,Genero,tecnica_grupo,Tecnica,Lengua,Estado,Municipio,Materiales,Temporalidad,Plantas,Minerales,Animales,Madre,Abuela,Tia,Hermana,Cunada,Instructora,Padre,Hijas,Hijos,Nietos,Sobrinos,Pareja,Estudiantes
 Mérida,mujer,Tejido a mano,Tejido anillado,Maya Yucateco,Yucatán,Chapab,"Hilos, telas, aguja",es_una_t_cnica_antigua,0,1,0,1,1,0,1,0,0,0,1,0,0,0,1,0
 Mérida,mujer,Telar de cintura,Telar de cintura,Tseltal,Chiapas,Comitán de Domínguez,,es_una_t_cnica_antigua,0,1,1,0,0,0,1,0,0,0,0,0,0,1,0,1
 Mérida,hombre,Bordado a mano,Relleno cruzado,,Hidalgo,Tenango de Doria,"manta de algodón, hilos de algodón o poliéster de colores brillantes, agujas, lápiz o marcador para el dibujo previo, bastidor (opcional), tijeras, y en ocasiones tela de lino o mezclilla para piezas más elaboradas.",es_una_t_cnica_antigua,1,1,1,0,1,0,0,0,1,0,1,0,0,1,0,0
@@ -500,7 +500,7 @@ Mérida,mujer,Bordado a mano,Bordado mazahua,Náhuatl,México,,Hilo y aguja,es_u
 Mérida,mujer,Bordado a máquina,Renacimiento,,Campeche,Dzitbalché,"Hilo de seda, tela",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
 Mérida,mujer,Bordado a mano,Mol miss,Maya Yucateco,Campeche,Palizada,"Tela,hilo e agujas",es_una_t_cnica_antigua,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0
 Mérida,hombre,Bordado a mano,Enrollado,Tsotsil,Chiapas,Chenalhó,lino y algodón,es_una_t_cnica_nueva,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
-Mérida,hombre,Bordado a mano,Anudado o empuntado,Tseltal,Chiapas,Tenejapa,"Hilo algodón, lana de australia, telar, unas tijeras, y masos",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+Mérida,hombre,Bordado a mano,Anudado,Tseltal,Chiapas,Tenejapa,"Hilo algodón, lana de australia, telar, unas tijeras, y masos",es_una_t_cnica_antigua,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
 Mérida,mujer,Bordado a máquina,Rejilla,Maya Yucateco,Yucatán,Valladolid,Tela,es_una_t_cnica_antigua,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0
 Mérida,mujer,Bordado a mano,"Polkan, baak kaan, puuch kaan",Maya Yucateco,Quintana Roo,Felipe Carrillo Puerto,"Caneva maya, estambre, tijera, metro.",es_una_t_cnica_antigua,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0
 Mérida,mujer,Bordado a máquina,Bot/vi Chuy,Maya Yucateco,Yucatán,Tekax,"Tela, hilos,  ilera ,aro ,tijeras",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
@@ -515,10 +515,9 @@ Mérida,mujer,Bordado a mano,Jolobil,Tsotsil,Chiapas,Zinacantán,Hilo algodón y
 Mérida,mujer,Bordado a máquina,Calado,Maya Yucateco,Yucatán,Acanceh,"Telas ,hilos ,hileras ,aro ,lápiz  máquina 20u, tijeras  reglas  cinta métrica  agujas ,encajes   Planchas ,",es_una_t_cnica_nueva,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
 Mérida,mujer,Bordado a máquina,Calado,,Yucatán,Maní,"Tela, aro, aguja y tijera",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
 Mérida,mujer,Bordado a mano,Xmanikté,Maya Yucateco,Yucatán,Maní,"Utilizo tela en lino ,hilos iris de varios colores ,aguja ,tijera ,descosedor,cinta métrica",es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0
-Mérida,mujer,Telar de cintura,Batzikop tzotsil,Tsotsil,Chiapas,Larráinzar,,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
 Mérida,mujer,Bordado a máquina,Sombreado,Maya Yucateco,Yucatán,Tekax,"Máquina industrial,telas,hilos,aro,lápiz,hilera,tijera,cinta métrica,encajes,plancha,",es_una_t_cnica_nueva,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
 Mérida,mujer,Bordado a máquina,Rejilla,Maya Yucateco,Yucatán,Muna,"Tela Kenia o lino,hilo alta seda, hilera blanca, aro, maquina de pedal y aguja num. 14",es_una_t_cnica_antigua,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0
-CDMX,mujer,,Trenza alzadas,,,,,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+CDMX,mujer,,Trenza alzada,,,,,,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 Mérida,mujer,Telar de cintura,Zarga,Náhuatl,Puebla,Tepexco,Algodón natural coyuchi en color café natural,es_una_t_cnica_antigua,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1
 Mérida,mujer,Bordado a mano,Hoja de pino,Tarahumara,Chihuahua,Urique,Tela hoja de pino,es_una_t_cnica_antigua,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0
 Mérida,mujer,Bordado a máquina,Rejilla,Maya Yucateco,Yucatán,Tekit,,es_una_t_cnica_nueva,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0
@@ -596,11 +595,11 @@ CDMX,mujer,,Malla o red,,Oaxaca,Loma Bonita,Aguja mallera y calibre,,0,0,0,0,0,0
 CDMX,mujer,,Costura,Tarahumara,Chihuahua,Urique,,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0
 CDMX,mujer,,Ita'a Kaxií,,Guerrero,Metlatónoc,Hilo de algodon,es_una_t_cnica_antigua,1,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0
 CDMX,mujer,,Bordado tradicional,,Puebla,,,,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0
-CDMX,mujer,,Empuntado,,México,Tenancingo,El lienzo k es el revozo,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
+CDMX,mujer,,Anudado,,México,Tenancingo,El lienzo k es el revozo,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
 CDMX,mujer,,Tejido de ojitos,Náhuatl,Veracruz de Ignacio de la Llave,Mixtla de Altamirano,"Lana, un poco de hilo",es_una_t_cnica_antigua,0,1,1,0,0,1,0,0,0,0,1,0,0,0,0,0
 CDMX,no_especificar,,Plisada,,Guerrero,Chilapa de Álvarez,"Tela Bombay, listones, encaje, hilo, agujas",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,0
 CDMX,mujer,,Bordado tradicional,Mazateco,Oaxaca,San Miguel Soyaltepec,,es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0
-CDMX,mujer,,Trenza alzadas,,Veracruz de Ignacio de la Llave,Zontecomatlán de López y Fuentes,"Hola de tres fibras, estambre gato, manta blanca",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,1,0,0,0,0
+CDMX,mujer,,Trenza alzada,,Veracruz de Ignacio de la Llave,Zontecomatlán de López y Fuentes,"Hola de tres fibras, estambre gato, manta blanca",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,1,1,0,0,0,0
 CDMX,mujer,,Bordado sobre tela y cesteria,Seri,Sonora,Hermosillo,Tela e hilo,es_una_t_cnica_antigua,0,0,0,1,0,1,0,0,0,0,1,0,0,1,0,0
 CDMX,mujer,,Bordados en chaquira,Náhuatl,Guerrero,Ometepec,"Agujas del número 15 ,etimina o cuadrille hilo Omega, chaquira en diferentes tonos y claro tenemos muestras antiguas heredadas por nuestras abuelas tías etc",es_una_t_cnica_antigua,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,1
 CDMX,hombre,,Tintes naturales,,Tlaxcala,Chiautempan,"Ollas, leña, agua, anafre",es_una_t_cnica_antigua,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0

@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "source": "Datos propios del Atlas de Técnicas del Arte Textil",
+    "source": "Aportaciones del Atlas del Arte Textil de México",
     "generated_from": [
       "data_by_record_id.csv",
       "data_by_technique_id.csv",
@@ -13,8 +13,8 @@
     "language_assignment": "Centroide municipal a <= 20 km de un punto de la nube lingüística, consistente con el filtro actual del mapa.",
     "ecological_assignment": "Centroide municipal contenido en el polígono territorial.",
     "caution": "Las asociaciones territoriales espaciales contextualizan los testimonios y no implican identidad lingüística, pertenencia cultural ni procedencia exacta de materiales.",
-    "total_records": 638,
-    "spatially_located_records": 609,
+    "total_records": 637,
+    "spatially_located_records": 608,
     "unlocated_records": 29,
     "privacy_note": "Los identificadores de registros individuales fueron eliminados de la versión pública."
   },
@@ -2723,9 +2723,9 @@
           "Telar de cintura",
           "Tlajkitilistli",
           "Tlapial",
-          "Trenza alzadas"
+          "Trenza alzada"
         ],
-        "tecnicas_principales": "Telar de cintura (12); Punto de cruz (7); Tejido tafetán (2); Talakaxtokgo da makan (2); Brocado (1); Labrado de urdimbre (1); Tejido de fibra natural (1); Hilvanado (1); Tlajkitilistli (1); Jun (1); Tejido de horquilla (1); Bordado tradicional (1); Tejido de ojitos (1); Trenza alzadas (1); Ojitos (1); Tlapial (1)",
+        "tecnicas_principales": "Telar de cintura (12); Punto de cruz (7); Tejido tafetán (2); Talakaxtokgo da makan (2); Brocado (1); Labrado de urdimbre (1); Tejido de fibra natural (1); Hilvanado (1); Tlajkitilistli (1); Jun (1); Tejido de horquilla (1); Bordado tradicional (1); Tejido de ojitos (1); Trenza alzada (1); Ojitos (1); Tlapial (1)",
         "categorias_tecnica": [
           "Tejido",
           "Teñidos",
@@ -7452,7 +7452,7 @@
           "Tlapial",
           "Trencilla",
           "Trencilla mazahua",
-          "Trenza alzadas",
+          "Trenza alzada",
           "Trenzado",
           "Tääsuun ekëëp",
           "Xmanikté",
@@ -7939,7 +7939,7 @@
           "Tlajkitilistli",
           "Trencilla",
           "Trencilla mazahua",
-          "Trenza alzadas"
+          "Trenza alzada"
         ],
         "tecnicas_principales": "Telar de cintura (19); Punto de cruz (17); Hilván (10); Pepenado (6); Telar de pedal (6); Lomillo (4); Pata de gallo (4); Bordado mazahua (3); Bordado tenango (2); Tejido de fibra natural (2)",
         "categorias_tecnica": [
@@ -9165,7 +9165,7 @@
           "Tejido en curva y brocado",
           "Telar de cintura",
           "Telar de pedal",
-          "Trenza alzadas"
+          "Trenza alzada"
         ],
         "tecnicas_principales": "Punto de cruz (5); Telar de cintura (5); Pata de gallo (3); Bordado tenango (2); Hilván (2); Bordado nahua (1); Relleno (1); Macizo (1); Bordado tradicional (1); Tejido en curva y brocado (1)",
         "categorias_tecnica": [
@@ -12588,7 +12588,7 @@
           "Telar de cintura",
           "Tinte natural y tejido",
           "Tlajkitilistli",
-          "Trenza alzadas"
+          "Trenza alzada"
         ],
         "tecnicas_principales": "Punto de cruz (10); Telar de cintura (9); Cadeneta o cadenilla (5); Bordado ch'ol tzeltal (2); Brocado (2); Hilván (2); Bordado tradicional (2); Talakaxtokgo da makan (2); Jun (1); Coralillo (1)",
         "categorias_tecnica": [

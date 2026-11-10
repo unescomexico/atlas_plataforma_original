@@ -24,12 +24,40 @@ const ALLUVIAL_COLORS = [
 
 const ALLUVIAL_NS = 'http://www.w3.org/2000/svg';
 let alluvialReady = false;
-const alluvialState = {
-  dims: ['categoria', 'estado', 'prenda'],
+const ALLUVIAL_DEFAULTS = Object.freeze({
+  dims: Object.freeze(['categoria', 'estado', 'prenda']),
   limit: 20,
+});
+const alluvialState = {
+  dims: [...ALLUVIAL_DEFAULTS.dims],
+  limit: ALLUVIAL_DEFAULTS.limit,
   search: '',
   focus: null,
 };
+
+function aluvialHasActiveFilters() {
+  return Boolean(alluvialState.focus || alluvialState.search ||
+    alluvialState.limit !== ALLUVIAL_DEFAULTS.limit ||
+    alluvialState.dims.some((dim, i) => dim !== ALLUVIAL_DEFAULTS.dims[i]));
+}
+
+function clearAlluvialFilters() {
+  // Restaurar todos los controles de esta vista, no solo la búsqueda o el nodo activo.
+  alluvialState.dims = [...ALLUVIAL_DEFAULTS.dims];
+  alluvialState.limit = ALLUVIAL_DEFAULTS.limit;
+  alluvialState.search = '';
+  alluvialState.focus = null;
+
+  const search = document.getElementById('alluvial-search');
+  if (search) search.value = '';
+  const limit = document.getElementById('alluvial-limit');
+  if (limit) limit.value = String(ALLUVIAL_DEFAULTS.limit);
+  aluvialHideTooltip();
+  refreshAlluvial();
+  const chart = document.getElementById('alluvial-chart-scroll');
+  if (chart) { chart.scrollLeft = 0; chart.scrollTop = 0; }
+}
+
 
 function aluvialCleanValues(input) {
   const values = Array.isArray(input) ? input : [input];
@@ -333,6 +361,7 @@ function refreshAlluvial() {
   const svg = document.getElementById('alluvial-svg');
   const tag = document.getElementById('alluvial-active-filter');
   const reset = document.getElementById('alluvial-reset');
+  const clearAll = document.getElementById('alluvial-clear-all');
   if (!svg || !ATLAS || !ATLAS.tecnicas) return;
   aluvialSetSelections();
   const query = alluvialState.search.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
@@ -348,6 +377,7 @@ function refreshAlluvial() {
   });
   const data = aluvialPrepare(entries,alluvialState.dims,alluvialState.limit);
   if (reset) reset.disabled=!alluvialState.focus && !query;
+  if (clearAll) clearAll.disabled=!aluvialHasActiveFilters();
   if (tag) {
     tag.hidden=!alluvialState.focus;
     if (alluvialState.focus) tag.textContent=`Filtrando por ${ALLUVIAL_DIMENSIONS.find(d=>d.key===alluvialState.dims[alluvialState.focus.stage]).short}: ${alluvialState.focus.label}`;
@@ -396,6 +426,7 @@ function initAlluvial() {
     alluvialState.focus=null;
     refreshAlluvial();
   });
+  document.getElementById('alluvial-clear-all')?.addEventListener('click', clearAlluvialFilters);
   document.getElementById('alluvial-reset')?.addEventListener('click',()=>{
     alluvialState.focus=null;alluvialState.search='';
     const search=document.getElementById('alluvial-search');if(search)search.value='';

@@ -4,7 +4,7 @@ from pathlib import Path
 import shutil,sys
 ROOT=Path(__file__).resolve().parents[1]
 DEST=ROOT/'_site'
-FILE_ALLOW=['index.html','atlas_textil_v2.html','styles.css','main.js','map_drivers.js','atlas_info_embedded.js','atlas_plataforma_logos.png','.nojekyll']
+FILE_ALLOW=['index.html','atlas_textil_v2.html','styles.css','main.js','map_drivers.js','state_profile_modal.js','aluvial.js','atlas_info_embedded.js','atlas_plataforma_logos.png','.nojekyll']
 DIR_ALLOW=['assets','data','geodata','imagenes','videos']
 EXCLUDE={'revision_nombres_pendientes.csv','indice_imagenes.csv.bak_multimedia'}
 if DEST.exists(): shutil.rmtree(DEST)

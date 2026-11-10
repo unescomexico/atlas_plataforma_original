@@ -33,7 +33,7 @@
       "artesano": "Antonia doña Ambrosio",
       "estado": "Hidalgo",
       "municipio": "Cardonal",
-      "localidad": "La vega",
+      "localidad": "La Vega",
       "tecnica": "Pepenado"
     },
     {
@@ -69,13 +69,13 @@
       "artesano": "Graciela Hernandez Perez",
       "estado": "Veracruz de Ignacio de la Llave",
       "municipio": "Papantla de Olarte",
-      "localidad": "Del tajin",
+      "localidad": "Del Tajin",
       "tecnica": "Jun"
     },
     {
       "archivo": "026-Merida-Luchbilltaaval.webp",
       "categoria": "Retratos",
-      "artesano": "Aida Griselda De Rosita Gómez Vázquez",
+      "artesano": "Aida Griselda de Rosita Gómez Vázquez",
       "estado": "Chiapas",
       "municipio": "",
       "localidad": "",
@@ -120,7 +120,7 @@
     {
       "archivo": "031-Merida-Taasuun_ekeep.webp",
       "categoria": "Vista general",
-      "artesano": "Diogenes gutierrez vasquez",
+      "artesano": "Diogenes Gutierrez Vasquez",
       "estado": "Oaxaca",
       "municipio": "Huautla de Jiménez",
       "localidad": "",
@@ -132,7 +132,7 @@
       "artesano": "Oliverio Gómez Pérez",
       "estado": "Chiapas",
       "municipio": "Chenalhó",
-      "localidad": "santha Martha",
+      "localidad": "Santha Martha",
       "tecnica": "Enrollado"
     },
     {
@@ -151,7 +151,7 @@
       "estado": "Chiapas",
       "municipio": "Tenejapa",
       "localidad": "Pajalton",
-      "tecnica": "Anudado o empuntado"
+      "tecnica": "Anudado"
     },
     {
       "archivo": "056-Merida-Rejilla.webp",
@@ -174,7 +174,7 @@
     {
       "archivo": "038-Merida-Polkan_baak_kaan_puuch_kaan.webp",
       "categoria": "Detalles",
-      "artesano": "María Julia may ku",
+      "artesano": "María Julia May Ku",
       "estado": "Quintana Roo",
       "municipio": "Felipe Carrillo Puerto",
       "localidad": "",
@@ -204,7 +204,7 @@
       "artesano": "Ceyda Julieta Nicolas Inocente",
       "estado": "Oaxaca",
       "municipio": "San Juan Cotzocón",
-      "localidad": "San Juan Cotzocon, mixes",
+      "localidad": "San Juan Cotzocon, Mixes",
       "tecnica": "Telar de cintura"
     },
     {
@@ -222,7 +222,7 @@
       "artesano": "Alicia Martínez Hernández",
       "estado": "Hidalgo",
       "municipio": "San Salvador",
-      "localidad": "El mezquital",
+      "localidad": "El Mezquital",
       "tecnica": "Tejido de fibra natural"
     },
     {
@@ -294,7 +294,7 @@
       "artesano": "Juana Ramírez Ramírez",
       "estado": "Oaxaca",
       "municipio": "San Juan Bautista Tuxtepec",
-      "localidad": "San Juan bautista",
+      "localidad": "San Juan Bautista",
       "tecnica": "Telar de cintura"
     },
     {
@@ -309,7 +309,7 @@
     {
       "archivo": "062-Merida-Macizo.webp",
       "categoria": "Vista general",
-      "artesano": "Manuela de Jesús Uicab chale",
+      "artesano": "Manuela de Jesús Uicab Chale",
       "estado": "Yucatán",
       "municipio": "Acanceh",
       "localidad": "",
@@ -339,13 +339,13 @@
       "artesano": "Guadalupe Espinosa Giron",
       "estado": "Chiapas",
       "municipio": "Venustiano Carranza",
-      "localidad": "El puerto municipio de venustiano carranza",
+      "localidad": "El Puerto municipio de Venustiano Carranza",
       "tecnica": "Rococó"
     },
     {
       "archivo": "074-Merida-Punto_de_Cruz.webp",
       "categoria": "Detalles",
-      "artesano": "Anahi Julian pascual",
+      "artesano": "Anahi Julian Pascual",
       "estado": "Querétaro",
       "municipio": "Amealco de Bonfil",
       "localidad": "",
@@ -363,7 +363,7 @@
     {
       "archivo": "080-Merida-Zarga.webp",
       "categoria": "Detalles",
-      "artesano": "Maria de la luz Aguilar Adorno",
+      "artesano": "Maria de la Luz Aguilar Adorno",
       "estado": "Puebla",
       "municipio": "Tepexco",
       "localidad": "Calmeca",
@@ -372,7 +372,7 @@
     {
       "archivo": "081-Merida-Telar_de_cintura.webp",
       "categoria": "",
-      "artesano": "Francisca perez gomez",
+      "artesano": "Francisca Perez Gomez",
       "estado": "Chiapas",
       "municipio": "Larráinzar",
       "localidad": "Cabecera municipal",
@@ -381,7 +381,7 @@
     {
       "archivo": "102-Merida-Rejilla.webp",
       "categoria": "Retratos",
-      "artesano": "Zelmy Olivia Dominguez chan",
+      "artesano": "Zelmy Olivia Dominguez Chan",
       "estado": "Yucatán",
       "municipio": "Tekit",
       "localidad": "",
@@ -399,7 +399,7 @@
     {
       "archivo": "083-Merida-Hoja_de_pino.webp",
       "categoria": "",
-      "artesano": "María monarca lazaro",
+      "artesano": "María Monarca Lazaro",
       "estado": "Chihuahua",
       "municipio": "Urique",
       "localidad": "",
@@ -417,7 +417,7 @@
     {
       "archivo": "255-CDMX-Hilvan.webp",
       "categoria": "",
-      "artesano": "Eloisa juarez",
+      "artesano": "Eloisa Juarez",
       "estado": "Chihuahua",
       "municipio": "Ojinaga",
       "localidad": "",
@@ -465,7 +465,7 @@
       "artesano": "Juana Martha Valencia Sánchez",
       "estado": "Oaxaca",
       "municipio": "San Antonino Castillo Velasco",
-      "localidad": "San antonino castillo Velasco",
+      "localidad": "San Antonino Castillo Velasco",
       "tecnica": "Hilván"
     },
     {
@@ -492,7 +492,7 @@
       "artesano": "Ayde Airam Acosta Fuentes",
       "estado": "Yucatán",
       "municipio": "Chacsinkín",
-      "localidad": "mucuyche",
+      "localidad": "Mucuyche",
       "tecnica": "Hilo contado"
     },
     {
@@ -510,7 +510,7 @@
       "artesano": "Josefina Martinez Contreras",
       "estado": "México",
       "municipio": "San Felipe y Santiago",
-      "localidad": "San Felipe Santiago municipio villa de Allende Edo de México",
+      "localidad": "San Felipe Santiago Municipio Villa de Allende Edo de México",
       "tecnica": "Pepenado"
     },
     {
@@ -534,7 +534,7 @@
     {
       "archivo": "101-Merida-Punto_de_Cruz.webp",
       "categoria": "Detalles",
-      "artesano": "Beatriz del socorro yervez vera",
+      "artesano": "Beatriz del Socorro Yervez Vera",
       "estado": "Yucatán",
       "municipio": "Tahdziú",
       "localidad": "",
@@ -561,10 +561,10 @@
     {
       "archivo": "108-Merida-Telar_de_cintura.webp",
       "categoria": "Usos y costumbres",
-      "artesano": "Julia catalina Perez Hernandez",
+      "artesano": "Julia Catalina Perez Hernandez",
       "estado": "Chiapas",
       "municipio": "Zinacantán",
-      "localidad": "Zinacantan, chiapas",
+      "localidad": "Zinacantan, Chiapas",
       "tecnica": "Telar de cintura"
     },
     {
@@ -588,7 +588,7 @@
     {
       "archivo": "112-Merida-Hilvan.webp",
       "categoria": "",
-      "artesano": "Leticia garcia garcia",
+      "artesano": "Leticia Garcia Garcia",
       "estado": "Oaxaca",
       "municipio": "Huautla de Jiménez",
       "localidad": "",
@@ -606,10 +606,10 @@
     {
       "archivo": "115-Merida-Telar_de_cintura.webp",
       "categoria": "Vista general",
-      "artesano": "Pedro santiz Gomez.",
+      "artesano": "Pedro Santiz Gomez.",
       "estado": "Chiapas",
       "municipio": "Aldama",
-      "localidad": "Municipio de Aldama chiapas",
+      "localidad": "Municipio de Aldama Chiapas",
       "tecnica": "Telar de cintura"
     },
     {
@@ -624,7 +624,7 @@
     {
       "archivo": "118-Merida-Punto_de_Cruz.webp",
       "categoria": "Vista general",
-      "artesano": "Maria  feliciana montejo manzanero",
+      "artesano": "Maria  Feliciana Montejo Manzanero",
       "estado": "Yucatán",
       "municipio": "Tahdziú",
       "localidad": "Tahdziú",
@@ -636,7 +636,7 @@
       "artesano": "Macrina Fuentes Cruz",
       "estado": "Puebla",
       "municipio": "Cuetzalan del Progreso",
-      "localidad": "Chicueyaco, xiloxochico, cuetzalan",
+      "localidad": "Chicueyaco, Xiloxochico, Cuetzalan",
       "tecnica": "Gasa fina y técnica de gasa"
     },
     {
@@ -651,7 +651,7 @@
     {
       "archivo": "121-Merida-Telar_de_cintura.webp",
       "categoria": "Vista general",
-      "artesano": "Maria Luisa mendosa basquez",
+      "artesano": "Maria Luisa Mendosa Basquez",
       "estado": "Chiapas",
       "municipio": "Venustiano Carranza",
       "localidad": "",
@@ -696,7 +696,7 @@
     {
       "archivo": "128-Merida-Seri.webp",
       "categoria": "",
-      "artesano": "Dahana dalila Morales",
+      "artesano": "Dahana Dalila Morales",
       "estado": "Sonora",
       "municipio": "Hermosillo",
       "localidad": "",
@@ -705,7 +705,7 @@
     {
       "archivo": "129-Merida-Telar_de_cintura.webp",
       "categoria": "Retratos",
-      "artesano": "Bertha Estrada huipe",
+      "artesano": "Bertha Estrada Huipe",
       "estado": "Michoacán de Ocampo",
       "municipio": "Paracho",
       "localidad": "Ahuiran, municipio de Paracho Michoacán",
@@ -726,7 +726,7 @@
       "artesano": "Rosa Elvia Leyva Antonio",
       "estado": "Oaxaca",
       "municipio": "San Juan Bautista Valle Nacional",
-      "localidad": "Rancho grande",
+      "localidad": "Rancho Grande",
       "tecnica": "Punto de cruz"
     },
     {
@@ -750,7 +750,7 @@
     {
       "archivo": "137-Merida-Telar_de_cintura.webp",
       "categoria": "Usos y costumbres",
-      "artesano": "Elvira martina ruiz gomez",
+      "artesano": "Elvira Martina Ruiz Gomez",
       "estado": "Chiapas",
       "municipio": "Larráinzar",
       "localidad": "Oventic",
@@ -777,7 +777,7 @@
     {
       "archivo": "150-Merida-Telar_de_cintura.webp",
       "categoria": "Detalles",
-      "artesano": "Marcela gomez diaz",
+      "artesano": "Marcela Gomez Diaz",
       "estado": "Chiapas",
       "municipio": "Larráinzar",
       "localidad": "Luquilo",
@@ -795,16 +795,16 @@
     {
       "archivo": "145-Merida-Lomillo.webp",
       "categoria": "Vista general",
-      "artesano": "Rosa Elvira piña Martinez",
+      "artesano": "Rosa Elvira Piña Martinez",
       "estado": "México",
       "municipio": "San Felipe Santiago",
-      "localidad": "San Felipe Santiago municipio Villa de Allende",
+      "localidad": "San Felipe Santiago Municipio Villa de Allende",
       "tecnica": "Lomillo"
     },
     {
       "archivo": "146-Merida-Sombreado.webp",
       "categoria": "Vista general",
-      "artesano": "María de Lourdes Fernández can",
+      "artesano": "María de Lourdes Fernández Can",
       "estado": "Yucatán",
       "municipio": "Teabo",
       "localidad": "",
@@ -822,7 +822,7 @@
     {
       "archivo": "149-Merida-Punto_de_Cruz.webp",
       "categoria": "Detalles",
-      "artesano": "Glendy Del Rosario May May",
+      "artesano": "Glendy del Rosario May May",
       "estado": "Yucatán",
       "municipio": "Hoctún",
       "localidad": "San José Oriente",
@@ -921,7 +921,7 @@
     {
       "archivo": "168-Merida-Brocado.webp",
       "categoria": "",
-      "artesano": "Fidencia perez hernadez",
+      "artesano": "Fidencia Perez Hernadez",
       "estado": "Chiapas",
       "municipio": "Larráinzar",
       "localidad": "",
@@ -930,7 +930,7 @@
     {
       "archivo": "169-Merida-Brocado.webp",
       "categoria": "Detalles",
-      "artesano": "Francisca perez gomez",
+      "artesano": "Francisca Perez Gomez",
       "estado": "Chiapas",
       "municipio": "Larráinzar",
       "localidad": "",
@@ -1281,7 +1281,7 @@
     {
       "archivo": "016-Tijuana-Punto_de_Cruz.webp",
       "categoria": "",
-      "artesano": "Martha edith arcos salvador",
+      "artesano": "Martha Edith Arcos Salvador",
       "estado": "Campeche",
       "municipio": "Palizada",
       "localidad": "Maya",
@@ -1356,7 +1356,7 @@
       "artesano": "Rosa Ambrosio Nava",
       "estado": "Baja California",
       "municipio": "Tijuana",
-      "localidad": "Mina vieja municipio villa victoria",
+      "localidad": "Mina Vieja Municipio Villa Victoria",
       "tecnica": "Trencilla"
     },
     {
@@ -1371,10 +1371,10 @@
     {
       "archivo": "028-Tijuana-Deshilado.webp",
       "categoria": "Retratos",
-      "artesano": "JUANA GÓMEZ RAMÍREZ",
+      "artesano": "Juana Gómez Ramírez",
       "estado": "Chiapas",
       "municipio": "Amatenango del Valle",
-      "localidad": "Barrio pie de cerro",
+      "localidad": "Barrio Pie de Cerro",
       "tecnica": "Deshilado"
     },
     {
@@ -1398,7 +1398,7 @@
     {
       "archivo": "031-Tijuana-Croche.webp",
       "categoria": "",
-      "artesano": "Fausto galvan ino",
+      "artesano": "Fausto Galvan Ino",
       "estado": "Oaxaca",
       "municipio": "Santa Ana Zegache",
       "localidad": "",
@@ -1416,16 +1416,16 @@
     {
       "archivo": "035-Tijuana-Telar_de_pedal.webp",
       "categoria": "Usos y costumbres",
-      "artesano": "Paula Guadalupe Hernández rojas",
+      "artesano": "Paula Guadalupe Hernández Rojas",
       "estado": "Oaxaca",
       "municipio": "Oaxaca de Juárez",
-      "localidad": "Pueblo nuevo",
+      "localidad": "Pueblo Nuevo",
       "tecnica": "Telar de pedal"
     },
     {
       "archivo": "045-Tijuana-Hilvan.webp",
       "categoria": "Vista general",
-      "artesano": "Mónica de Jesús López sosa",
+      "artesano": "Mónica de Jesús López Sosa",
       "estado": "Campeche",
       "municipio": "Calkiní",
       "localidad": "Calkini",
@@ -1434,7 +1434,7 @@
     {
       "archivo": "039-Tijuana-Punto_de_Cruz.webp",
       "categoria": "Vista general",
-      "artesano": "Inés Castelan flores",
+      "artesano": "Inés Castelan Flores",
       "estado": "Puebla",
       "municipio": "Yaonáhuac",
       "localidad": "Yaonahuac",
@@ -1443,10 +1443,10 @@
     {
       "archivo": "040-Tijuana-Telar_de_pedal.webp",
       "categoria": "Vista general",
-      "artesano": "FROYLAN SERVIN ORNELAS",
+      "artesano": "Froylan Servin Ornelas",
       "estado": "Michoacán de Ocampo",
       "municipio": "Salvador Escalante",
-      "localidad": "Santa clara del cobre",
+      "localidad": "Santa Clara del Cobre",
       "tecnica": "Telar de pedal"
     },
     {
@@ -1455,13 +1455,13 @@
       "artesano": "Magdalena Pineda Santiago",
       "estado": "Guerrero",
       "municipio": "Ometepec",
-      "localidad": "San José ejido",
+      "localidad": "San José Ejido",
       "tecnica": "Bordado de chaquira"
     },
     {
       "archivo": "042-Tijuana-Telar_de_cintura.webp",
       "categoria": "Vista general",
-      "artesano": "Adelina Lopez perez",
+      "artesano": "Adelina Lopez Perez",
       "estado": "Chiapas",
       "municipio": "Larráinzar",
       "localidad": "Talonhuitz",
@@ -1470,7 +1470,7 @@
     {
       "archivo": "051-Tijuana-Puntada_de_rescate_u_hoja_de_platano.webp",
       "categoria": "Retratos",
-      "artesano": "Martha edith arcos salvador",
+      "artesano": "Martha Edith Arcos Salvador",
       "estado": "Campeche",
       "municipio": "Palizada",
       "localidad": "",
@@ -1482,13 +1482,13 @@
       "artesano": "Gabael González Aranda",
       "estado": "Oaxaca",
       "municipio": "San Pablo Tijaltepec",
-      "localidad": "El porvenir",
+      "localidad": "El Porvenir",
       "tecnica": "Pepenado"
     },
     {
       "archivo": "060-Tijuana-Tenerife.webp",
       "categoria": "Vista general",
-      "artesano": "Mónica de Jesús López sosa",
+      "artesano": "Mónica de Jesús López Sosa",
       "estado": "Campeche",
       "municipio": "Calkiní",
       "localidad": "",
@@ -1509,7 +1509,7 @@
       "artesano": "Anastacia Marín García",
       "estado": "Veracruz de Ignacio de la Llave",
       "municipio": "Santiago Tuxtla",
-      "localidad": "Santiago tuxtla",
+      "localidad": "Santiago Tuxtla",
       "tecnica": "Tejido de horquilla"
     },
     {
@@ -1533,10 +1533,10 @@
     {
       "archivo": "052-Tijuana-Deshilado.webp",
       "categoria": "Usos y costumbres",
-      "artesano": "Roberta Ángeles ojeda#",
+      "artesano": "Roberta Ángeles Ojeda#",
       "estado": "Oaxaca",
       "municipio": "San Martín Tilcajete",
-      "localidad": "San martín tilcajete",
+      "localidad": "San Martín Tilcajete",
       "tecnica": "Deshilado"
     },
     {
@@ -1572,7 +1572,7 @@
       "artesano": "Marco Antonio Correa Sánchez",
       "estado": "Michoacán de Ocampo",
       "municipio": "Pátzcuaro",
-      "localidad": "Pátzcuaro, centro",
+      "localidad": "Pátzcuaro, Centro",
       "tecnica": "Telar de pedal"
     },
     {
@@ -1590,7 +1590,7 @@
       "artesano": "Estela Antonio Santiago",
       "estado": "Oaxaca",
       "municipio": "San Vicente Coatlán",
-      "localidad": "San Vicente coatlan Ejutla Oaxaca",
+      "localidad": "San Vicente Coatlan Ejutla Oaxaca",
       "tecnica": "Punto de cruz"
     },
     {
@@ -1605,7 +1605,7 @@
     {
       "archivo": "067-Tijuana-Telar_de_pedal.webp",
       "categoria": "Vista general",
-      "artesano": "Manuel lazo martinez",
+      "artesano": "Manuel Lazo Martinez",
       "estado": "Oaxaca",
       "municipio": "Teotitlán del Valle",
       "localidad": "",
@@ -1614,10 +1614,10 @@
     {
       "archivo": "068-Tijuana-Puntada_de_satin.webp",
       "categoria": "Detalles",
-      "artesano": "Fausto galvan ino",
+      "artesano": "Fausto Galvan Ino",
       "estado": "Oaxaca",
       "municipio": "Santa Ana Zegache",
-      "localidad": "Santa ana zegache y valle de ocotlan (distrito de ocotlan)",
+      "localidad": "Santa Ana Zegache y Valle de Ocotlan (Distrito de Ocotlan)",
       "tecnica": "Puntada de satín"
     },
     {
@@ -1635,13 +1635,13 @@
       "artesano": "Rosa Josefina Ruiz Ruiz",
       "estado": "Chiapas",
       "municipio": "Larráinzar",
-      "localidad": "San Andrés larrainzar",
+      "localidad": "San Andrés Larrainzar",
       "tecnica": "Telar de cintura"
     },
     {
       "archivo": "079-Tijuana-Telar_de_pedal.webp",
       "categoria": "Vista general",
-      "artesano": "FROYLAN SERVIN ORNELAS",
+      "artesano": "Froylan Servin Ornelas",
       "estado": "Michoacán de Ocampo",
       "municipio": "Salvador Escalante",
       "localidad": "",
@@ -1659,7 +1659,7 @@
     {
       "archivo": "073-Tijuana-Croche.webp",
       "categoria": "Usos y costumbres",
-      "artesano": "Erica lopez sanchez",
+      "artesano": "Erica Lopez Sanchez",
       "estado": "Puebla",
       "municipio": "Zacatlán",
       "localidad": "Cuacuila",
@@ -1671,7 +1671,7 @@
       "artesano": "Isabel Gutiérrez Nochebuena",
       "estado": "Puebla",
       "municipio": "Hueyapan",
-      "localidad": "Buena vista",
+      "localidad": "Buena Vista",
       "tecnica": "Hilván"
     },
     {
@@ -1707,7 +1707,7 @@
       "artesano": "Marco Antonio Correa Sánchez",
       "estado": "Michoacán de Ocampo",
       "municipio": "Pátzcuaro",
-      "localidad": "Pátzcuaro, centro",
+      "localidad": "Pátzcuaro, Centro",
       "tecnica": "Telar de pedal"
     },
     {
@@ -1731,10 +1731,10 @@
     {
       "archivo": "082-Tijuana-Cadeneta_o_cadenilla.webp",
       "categoria": "Vista general",
-      "artesano": "Claudia vasquez aquino",
+      "artesano": "Claudia Vasquez Aquino",
       "estado": "Oaxaca",
       "municipio": "Santa María Xadani",
-      "localidad": "Santa maria xadani",
+      "localidad": "Santa Maria Xadani",
       "tecnica": "Cadeneta o cadenilla"
     },
     {
@@ -1752,7 +1752,7 @@
       "artesano": "Seliflora Angela Sánchez López",
       "estado": "Oaxaca",
       "municipio": "San Antonino Castillo Velasco",
-      "localidad": "Sanantonino castillo velazco",
+      "localidad": "Sanantonino Castillo Velazco",
       "tecnica": "Bordado de San Antonio"
     },
     {
@@ -1803,7 +1803,7 @@
     {
       "archivo": "094-Tijuana-Hazme_si_puedes.webp",
       "categoria": "",
-      "artesano": "Fausto galvan ino",
+      "artesano": "Fausto Galvan Ino",
       "estado": "Oaxaca",
       "municipio": "Santa Ana Zegache",
       "localidad": "",
@@ -1812,7 +1812,7 @@
     {
       "archivo": "035-CDMX-Punto_de_Cruz.webp",
       "categoria": "Vista general",
-      "artesano": "Fortino lorenzo Martinez",
+      "artesano": "Fortino Lorenzo Martinez",
       "estado": "Guerrero",
       "municipio": "Ometepec",
       "localidad": "",
@@ -1821,10 +1821,10 @@
     {
       "archivo": "096-Tijuana-Costura.webp",
       "categoria": "Vista general",
-      "artesano": "Sofía fierro gonzalez",
+      "artesano": "Sofía Fierro Gonzalez",
       "estado": "Chihuahua",
       "municipio": "Bocoyna",
-      "localidad": "Bosque San Elías repechique",
+      "localidad": "Bosque San Elías Repechique",
       "tecnica": "Costura"
     },
     {
@@ -1839,7 +1839,7 @@
     {
       "archivo": "098-Tijuana-Telar_de_cintura.webp",
       "categoria": "Vista general",
-      "artesano": "Cecilia Pérez cruz",
+      "artesano": "Cecilia Pérez Cruz",
       "estado": "Chiapas",
       "municipio": "Pantelhó",
       "localidad": "",
@@ -1848,10 +1848,10 @@
     {
       "archivo": "099-Tijuana-Trencilla.webp",
       "categoria": "Retratos",
-      "artesano": "Maria contreras colin",
+      "artesano": "Maria Contreras Colin",
       "estado": "México",
       "municipio": "San Felipe del Progreso",
-      "localidad": "El Fresno nichi",
+      "localidad": "El Fresno Nichi",
       "tecnica": "Trencilla"
     },
     {
@@ -1884,7 +1884,7 @@
     {
       "archivo": "104-Tijuana-Telar_de_cintura.webp",
       "categoria": "Retratos",
-      "artesano": "Erica lopez sanchez",
+      "artesano": "Erica Lopez Sanchez",
       "estado": "Puebla",
       "municipio": "Zacatlán",
       "localidad": "Cuacuila",
@@ -1896,7 +1896,7 @@
       "artesano": "Verónica Herrera Ávila",
       "estado": "Oaxaca",
       "municipio": "Santiago Pinotepa Nacional",
-      "localidad": "Pinotepa nacional",
+      "localidad": "Pinotepa Nacional",
       "tecnica": "Cadeneta o cadenilla"
     },
     {
@@ -1938,7 +1938,7 @@
     {
       "archivo": "113-Tijuana-Hilvan.webp",
       "categoria": "Detalles",
-      "artesano": "Magdalena jarilla Mejía",
+      "artesano": "Magdalena Jarilla Mejía",
       "estado": "Oaxaca",
       "municipio": "San Bartolomé Ayautla",
       "localidad": "",
@@ -1947,7 +1947,7 @@
     {
       "archivo": "114-Tijuana-Brocado.webp",
       "categoria": "",
-      "artesano": "Nidia yetzeli salinas Hernández",
+      "artesano": "Nidia Yetzeli Salinas Hernández",
       "estado": "Oaxaca",
       "municipio": "San Juan Colorado",
       "localidad": "",
@@ -1995,7 +1995,7 @@
       "artesano": "Lourdes Inés Merino Hernández",
       "estado": "Oaxaca",
       "municipio": "San Pedro Amuzgos",
-      "localidad": "San Pedro amuzgos Oaxaca",
+      "localidad": "San Pedro Amuzgos Oaxaca",
       "tecnica": "Telar de cintura"
     },
     {
@@ -2028,7 +2028,7 @@
     {
       "archivo": "003-CDMX-Contabilidad_y_vuelta_por_hilo.webp",
       "categoria": "Vista general",
-      "artesano": "Clara cruz puyicatla",
+      "artesano": "Clara Cruz Puyicatla",
       "estado": "Puebla",
       "municipio": "Tlaola",
       "localidad": "Chicahuaxtla",
@@ -2037,7 +2037,7 @@
     {
       "archivo": "005-CDMX-Aplique.webp",
       "categoria": "Vista general",
-      "artesano": "VIRGINIA NEVAREZ DURÁN",
+      "artesano": "Virginia Nevarez Durán",
       "estado": "Chihuahua",
       "municipio": "Bocoyna",
       "localidad": "",
@@ -2073,7 +2073,7 @@
     {
       "archivo": "013-CDMX-Brocado.webp",
       "categoria": "Vista general",
-      "artesano": "Araceli López Del Rosario",
+      "artesano": "Araceli López del Rosario",
       "estado": "Guerrero",
       "municipio": "Xochistlahuaca",
       "localidad": "",
@@ -2118,7 +2118,7 @@
     {
       "archivo": "019-CDMX-Relleno.webp",
       "categoria": "Vista general",
-      "artesano": "Antonia de Jesús Loeza caamal",
+      "artesano": "Antonia de Jesús Loeza Caamal",
       "estado": "Yucatán",
       "municipio": "Tekit",
       "localidad": "Tekit Yucatán",
@@ -2136,7 +2136,7 @@
     {
       "archivo": "022-CDMX-Telar_de_cintura.webp",
       "categoria": "Vista general",
-      "artesano": "Amelia Victoria casmiro",
+      "artesano": "Amelia Victoria Casmiro",
       "estado": "Michoacán de Ocampo",
       "municipio": "Pátzcuaro",
       "localidad": "",
@@ -2157,13 +2157,13 @@
       "artesano": "Irene Soila Vazquez Lopez",
       "estado": "Oaxaca",
       "municipio": "San José del Progreso",
-      "localidad": "OCOTLAN",
+      "localidad": "Ocotlan",
       "tecnica": "Deshilado"
     },
     {
       "archivo": "025-CDMX-Piquitos.webp",
       "categoria": "",
-      "artesano": "Maria Cristina hernandez",
+      "artesano": "Maria Cristina Hernandez",
       "estado": "Chiapas",
       "municipio": "Las Margaritas",
       "localidad": "",
@@ -2172,7 +2172,7 @@
     {
       "archivo": "033-CDMX-Sueter_de_lana.webp",
       "categoria": "Vista general",
-      "artesano": "Maecelino patishtan patishtan",
+      "artesano": "Maecelino Patishtan Patishtan",
       "estado": "Chiapas",
       "municipio": "Chamula",
       "localidad": "",
@@ -2199,10 +2199,10 @@
     {
       "archivo": "027-CDMX-Cadeneta_o_cadenilla.webp",
       "categoria": "",
-      "artesano": "Glafira olmedo mendoza",
+      "artesano": "Glafira Olmedo Mendoza",
       "estado": "Oaxaca",
       "municipio": "Santiago Pinotepa Nacional",
-      "localidad": "Santiago pinotepa nacional oaxaca",
+      "localidad": "Santiago Pinotepa Nacional Oaxaca",
       "tecnica": "Cadeneta o cadenilla"
     },
     {
@@ -2235,7 +2235,7 @@
     {
       "archivo": "031-CDMX-Bordado_libre_en_maquina_de_pedal.webp",
       "categoria": "",
-      "artesano": "Luis alberto pat carrillo",
+      "artesano": "Luis Alberto Pat Carrillo",
       "estado": "Yucatán",
       "municipio": "Izamal",
       "localidad": "",
@@ -2244,7 +2244,7 @@
     {
       "archivo": "034-CDMX-Telar_de_cintura.webp",
       "categoria": "Detalles",
-      "artesano": "JUANA AMADO BRAVO",
+      "artesano": "Juana Amado Bravo",
       "estado": "Michoacán de Ocampo",
       "municipio": "Uruapan",
       "localidad": "",
@@ -2253,7 +2253,7 @@
     {
       "archivo": "039-CDMX-Telar_de_cintura.webp",
       "categoria": "",
-      "artesano": "Adolfo vazquez Garcia",
+      "artesano": "Adolfo Vazquez Garcia",
       "estado": "Puebla",
       "municipio": "Cuetzalan del Progreso",
       "localidad": "Ixtahuata",
@@ -2325,7 +2325,7 @@
     {
       "archivo": "047-CDMX-Telar_de_cintura.webp",
       "categoria": "Vista general",
-      "artesano": "Eder Leopoldo Cardoso perez",
+      "artesano": "Eder Leopoldo Cardoso Perez",
       "estado": "Oaxaca",
       "municipio": "Santa María Tlahuitoltepec",
       "localidad": "",
@@ -2337,7 +2337,7 @@
       "artesano": "Joan Joyce Dominguez Martinez",
       "estado": "Veracruz de Ignacio de la Llave",
       "municipio": "Cosoleacaque",
-      "localidad": "Sur de veracruz",
+      "localidad": "Sur de Veracruz",
       "tecnica": "Brocado"
     },
     {
@@ -2352,7 +2352,7 @@
     {
       "archivo": "051-CDMX-Telar_de_pedal.webp",
       "categoria": "Usos y costumbres",
-      "artesano": "Marcela Vicente sosa",
+      "artesano": "Marcela Vicente Sosa",
       "estado": "Oaxaca",
       "municipio": "Teotitlán del Valle",
       "localidad": "",
@@ -2364,7 +2364,7 @@
       "artesano": "",
       "estado": "Michoacán de Ocampo",
       "municipio": "Tzintzuntzan",
-      "localidad": "Nuevo rodeo",
+      "localidad": "Nuevo Rodeo",
       "tecnica": "Bordado tradicional"
     },
     {
@@ -2397,10 +2397,10 @@
     {
       "archivo": "057-CDMX-Punto_de_Cruz.webp",
       "categoria": "Vista general",
-      "artesano": "Rubí alhelí Gonzalez Lopez",
+      "artesano": "Rubí Alhelí Gonzalez Lopez",
       "estado": "Jalisco",
       "municipio": "Mezquitic",
-      "localidad": "San Sebastián teponahuaxtlan",
+      "localidad": "San Sebastián Teponahuaxtlan",
       "tecnica": "Punto de cruz"
     },
     {
@@ -2409,7 +2409,7 @@
       "artesano": "Jaime González Torres",
       "estado": "Veracruz de Ignacio de la Llave",
       "municipio": "Cosoleacaque",
-      "localidad": "El piñal",
+      "localidad": "El Piñal",
       "tecnica": "Contado"
     },
     {
@@ -2424,7 +2424,7 @@
     {
       "archivo": "062-CDMX-Contabilidad_y_vuelta_por_hilo.webp",
       "categoria": "Vista general",
-      "artesano": "Jose Alejandro Onofre carrillo",
+      "artesano": "Jose Alejandro Onofre Carrillo",
       "estado": "Guanajuato",
       "municipio": "Jerécuaro",
       "localidad": "Puruagua",
@@ -2454,7 +2454,7 @@
       "artesano": "Javier Israel Méndez Lozano",
       "estado": "Tlaxcala",
       "municipio": "Tlaxcala",
-      "localidad": "Técnica del municipio Contla de Juan Cuamantzi",
+      "localidad": "Técnica del Municipio Contla de Juan Cuamantzi",
       "tecnica": "Telar de pedal"
     },
     {
@@ -2469,7 +2469,7 @@
     {
       "archivo": "068-CDMX-Telar_de_cintura.webp",
       "categoria": "",
-      "artesano": "Maria francisca amado bravo",
+      "artesano": "Maria Francisca Amado Bravo",
       "estado": "Michoacán de Ocampo",
       "municipio": "Uruapan",
       "localidad": "",
@@ -2478,7 +2478,7 @@
     {
       "archivo": "084-CDMX-Bordado_tradicional.webp",
       "categoria": "Vista general",
-      "artesano": "Claudaveronica martinez medrano",
+      "artesano": "Claudaveronica Martinez Medrano",
       "estado": "Coahuila de Zaragoza",
       "municipio": "",
       "localidad": "Negros Mascogos",
@@ -2487,16 +2487,16 @@
     {
       "archivo": "069-CDMX-Telar_de_cintura.webp",
       "categoria": "Usos y costumbres",
-      "artesano": "Laura perez espinoza",
+      "artesano": "Laura Perez Espinoza",
       "estado": "Morelos",
       "municipio": "Hueyapan",
-      "localidad": "Municipio indijena de hueyapan barrio san miguel",
+      "localidad": "Municipio Indijena de Hueyapan Barrio San Miguel",
       "tecnica": "Telar de cintura"
     },
     {
       "archivo": "070-CDMX-Telar_de_cintura.webp",
       "categoria": "",
-      "artesano": "Sandra Mónica Juan calvillo",
+      "artesano": "Sandra Mónica Juan Calvillo",
       "estado": "Michoacán de Ocampo",
       "municipio": "Aquila",
       "localidad": "",
@@ -2505,10 +2505,10 @@
     {
       "archivo": "071-CDMX-Telar_de_cintura.webp",
       "categoria": "Vista general",
-      "artesano": "UZIEL FRAGOSO OCHOA",
+      "artesano": "Uziel Fragoso Ochoa",
       "estado": "Oaxaca",
       "municipio": "San Mateo del Mar",
-      "localidad": "San Mateo del mar",
+      "localidad": "San Mateo del Mar",
       "tecnica": "Telar de cintura"
     },
     {
@@ -2523,16 +2523,16 @@
     {
       "archivo": "079-CDMX-Cadeneta_o_cadenilla.webp",
       "categoria": "Retratos",
-      "artesano": "Angelina Gomez patishtan",
+      "artesano": "Angelina Gomez Patishtan",
       "estado": "Chiapas",
       "municipio": "Chamula",
-      "localidad": "Bautista chico",
+      "localidad": "Bautista Chico",
       "tecnica": "Cadeneta o cadenilla"
     },
     {
       "archivo": "080-CDMX-Telar_de_cintura.webp",
       "categoria": "",
-      "artesano": "BEATRIZ DE LA CRUZ HERNÁNDEZ",
+      "artesano": "Beatriz de la Cruz Hernández",
       "estado": "Puebla",
       "municipio": "Pahuatlán",
       "localidad": "",
@@ -2559,7 +2559,7 @@
     {
       "archivo": "087-CDMX-Tafetan.webp",
       "categoria": "Retratos",
-      "artesano": "49",
+      "artesano": "",
       "estado": "Guanajuato",
       "municipio": "Victoria",
       "localidad": "",
@@ -2577,7 +2577,7 @@
     {
       "archivo": "089-CDMX-Punto_de_Cruz.webp",
       "categoria": "Detalles",
-      "artesano": "Magdalena Aguilar govea",
+      "artesano": "Magdalena Aguilar Govea",
       "estado": "",
       "municipio": "",
       "localidad": "Tarecuato Michoacán",
@@ -2595,10 +2595,10 @@
     {
       "archivo": "091-CDMX-Telar_de_cintura.webp",
       "categoria": "Vista general",
-      "artesano": "Maria apolinar trejo ortiz",
+      "artesano": "Maria Apolinar Trejo Ortiz",
       "estado": "Hidalgo",
       "municipio": "Chilcuautla",
-      "localidad": "El mejay",
+      "localidad": "El Mejay",
       "tecnica": "Telar de cintura"
     },
     {
@@ -2607,16 +2607,16 @@
       "artesano": "Ma. Felipa Peña Pérez",
       "estado": "Querétaro",
       "municipio": "Tolimán",
-      "localidad": "Tierra volteada",
+      "localidad": "Tierra Volteada",
       "tecnica": "Telar de cintura"
     },
     {
       "archivo": "094-CDMX-Bordado_de_dos_agujas.webp",
       "categoria": "Vista general",
-      "artesano": "Angelica reyes martinez",
+      "artesano": "Angelica Reyes Martinez",
       "estado": "",
       "municipio": "",
-      "localidad": "San Felipe Santiago villa de Allende estado de México",
+      "localidad": "San Felipe Santiago Villa de Allende Estado de México",
       "tecnica": "Bordado de dos agujas"
     },
     {
@@ -2625,7 +2625,7 @@
       "artesano": "Rosa González Hernández",
       "estado": "Hidalgo",
       "municipio": "Tulancingo de Bravo",
-      "localidad": "Sierra otomí Tepehua",
+      "localidad": "Sierra Otomí Tepehua",
       "tecnica": "Pata de gallo"
     },
     {
@@ -2640,7 +2640,7 @@
     {
       "archivo": "099-CDMX-Telar_de_cintura.webp",
       "categoria": "",
-      "artesano": "Agatolia Valentín flores",
+      "artesano": "Agatolia Valentín Flores",
       "estado": "Nayarit",
       "municipio": "Del Nayar",
       "localidad": "",
@@ -2649,7 +2649,7 @@
     {
       "archivo": "101-CDMX-Telar_de_cintura.webp",
       "categoria": "Usos y costumbres",
-      "artesano": "Elisabet  Vásquez  jimenez",
+      "artesano": "Elisabet  Vásquez  Jimenez",
       "estado": "Oaxaca",
       "municipio": "Putla Villa de Guerrero",
       "localidad": "",
@@ -2688,7 +2688,7 @@
       "artesano": "Ma Auxilio Martínez Gonzalez",
       "estado": "Aguascalientes",
       "municipio": "Calvillo",
-      "localidad": "desilado",
+      "localidad": "Desilado",
       "tecnica": "Deshilado"
     },
     {
@@ -2706,7 +2706,7 @@
       "artesano": "Cira Rodriguez  Rosales",
       "estado": "Morelos",
       "municipio": "Hueyapan",
-      "localidad": "Localidad.indijina de.HUeyapan bario de san.andres",
+      "localidad": "Localidad.indijina De.HUeyapan Bario de San.andres",
       "tecnica": "Telar de cintura"
     },
     {
@@ -2730,10 +2730,10 @@
     {
       "archivo": "112-CDMX-Punto_de_Cruz.webp",
       "categoria": "Vista general",
-      "artesano": "Rubi del socorro yam ramirez",
+      "artesano": "Rubi del Socorro Yam Ramirez",
       "estado": "Campeche",
       "municipio": "Hopelchén",
-      "localidad": "Bolonchen de rejon",
+      "localidad": "Bolonchen de Rejon",
       "tecnica": "Punto de cruz"
     },
     {
@@ -2778,13 +2778,13 @@
       "artesano": "Cecilia Gómez Díaz",
       "estado": "Chiapas",
       "municipio": "Larráinzar",
-      "localidad": "centro del pueblo",
+      "localidad": "Centro del pueblo",
       "tecnica": "Telar de cintura"
     },
     {
       "archivo": "120-CDMX-Cadeneta_o_cadenilla.webp",
       "categoria": "Detalles",
-      "artesano": "Ivan alexis Noriega santiago",
+      "artesano": "Ivan Alexis Noriega Santiago",
       "estado": "Oaxaca",
       "municipio": "San Juan Guichicovi",
       "localidad": "",
@@ -2838,7 +2838,7 @@
     {
       "archivo": "138-CDMX-Telar_de_cintura.webp",
       "categoria": "Usos y costumbres",
-      "artesano": "Sonia castellanos López",
+      "artesano": "Sonia Castellanos López",
       "estado": "Morelos",
       "municipio": "Hueyapan",
       "localidad": "Hueyapan Morelos",
@@ -2874,16 +2874,16 @@
     {
       "archivo": "136-CDMX-Empuntado.webp",
       "categoria": "Detalles",
-      "artesano": "Blanca estela loro jimenez",
+      "artesano": "Blanca Estela Loro Jimenez",
       "estado": "México",
       "municipio": "Tenancingo",
       "localidad": "Acatzingo",
-      "tecnica": "Empuntado"
+      "tecnica": "Anudado"
     },
     {
       "archivo": "137-CDMX-Punto_de_Cruz.webp",
       "categoria": "Vista general",
-      "artesano": "Loida raquel yam",
+      "artesano": "Loida Raquel Yam",
       "estado": "Campeche",
       "municipio": "Hopelchén",
       "localidad": "Bolonchen de Rejon",
@@ -2910,7 +2910,7 @@
     {
       "archivo": "145-CDMX-Punto_de_Cruz.webp",
       "categoria": "Vista general",
-      "artesano": "Virginia Martinez hernandez",
+      "artesano": "Virginia Martinez Hernandez",
       "estado": "Veracruz de Ignacio de la Llave",
       "municipio": "Chicontepec",
       "localidad": "Ixcacuatitla",
@@ -2946,7 +2946,7 @@
     {
       "archivo": "152-CDMX-Bordado_de_dos_agujas.webp",
       "categoria": "Usos y costumbres",
-      "artesano": "DELIA Cenobio Cruz",
+      "artesano": "Delia Cenobio Cruz",
       "estado": "México",
       "municipio": "Villa de Allende",
       "localidad": "San Felipe Santiago",
@@ -2955,19 +2955,19 @@
     {
       "archivo": "153-CDMX-Pepenado_en_pliegue.webp",
       "categoria": "Vista general",
-      "artesano": "Alma Celia Márquez de luna",
+      "artesano": "Alma Celia Márquez de Luna",
       "estado": "Tlaxcala",
       "municipio": "Ixtenco",
-      "localidad": "ixtenco",
+      "localidad": "Ixtenco",
       "tecnica": "Pepenado en pliegue"
     },
     {
       "archivo": "154-CDMX-Plisada.webp",
       "categoria": "Retratos",
-      "artesano": "Cecilia Bernardino enabe",
+      "artesano": "Cecilia Bernardino Enabe",
       "estado": "Guerrero",
       "municipio": "Chilapa de Álvarez",
-      "localidad": "tepozonalco",
+      "localidad": "Tepozonalco",
       "tecnica": "Plisada"
     },
     {
@@ -2985,16 +2985,16 @@
       "artesano": "María de Jesús Balcazar Arcos",
       "estado": "Chiapas",
       "municipio": "Palenque",
-      "localidad": "Localidad profesor Roberto barrios",
+      "localidad": "Localidad Profesor Roberto Barrios",
       "tecnica": "Bordado ch'ol tzeltal"
     },
     {
       "archivo": "158-CDMX-Relleno.webp",
       "categoria": "Vista general",
-      "artesano": "ELSA JANNET BAUTISTA GARCÍA",
+      "artesano": "Elsa Jannet Bautista García",
       "estado": "Oaxaca",
       "municipio": "San Bartolomé Ayautla",
-      "localidad": "SAN BARTOLOMÉ AYAUTLA",
+      "localidad": "San Bartolomé Ayautla",
       "tecnica": "Relleno"
     },
     {
@@ -3021,35 +3021,35 @@
       "artesano": "Angélica María Hernández Gómez",
       "estado": "Chiapas",
       "municipio": "Villaflores",
-      "localidad": "Colonia ejido nueva palestina... municipio Villaflores",
+      "localidad": "Colonia Ejido Nueva Palestina... Municipio Villaflores",
       "tecnica": "Bordados de chamula y larrainzar"
     },
     {
       "archivo": "168-CDMX-Hilvan.webp",
       "categoria": "Usos y costumbres",
-      "artesano": "Marina palacios lopez",
+      "artesano": "Marina Palacios Lopez",
       "estado": "Oaxaca",
       "municipio": "San Pedro Ixcatlán",
-      "localidad": "San pedro Ixcatlan Oaxaca",
+      "localidad": "San Pedro Ixcatlan Oaxaca",
       "tecnica": "Hilván"
     },
     {
       "archivo": "169-CDMX-Punto_de_Cruz.webp",
       "categoria": "",
-      "artesano": "MARTHA ESCAREÑO ENRIQUEZ",
+      "artesano": "Martha Escareño Enriquez",
       "estado": "Jalisco",
       "municipio": "Mezquitic",
-      "localidad": "SAN SEBASTIAN",
+      "localidad": "San Sebastian",
       "tecnica": "Punto de cruz"
     },
     {
       "archivo": "170-CDMX-Trenza_alzadas.webp",
       "categoria": "Usos y costumbres",
-      "artesano": "María Dominga albino",
+      "artesano": "María Dominga Albino",
       "estado": "Veracruz de Ignacio de la Llave",
       "municipio": "Zontecomatlán de López y Fuentes",
       "localidad": "",
-      "tecnica": "Trenza alzadas"
+      "tecnica": "Trenza alzada"
     },
     {
       "archivo": "171-CDMX-Punto_de_Cruz.webp",
@@ -3072,16 +3072,16 @@
     {
       "archivo": "175-CDMX-Bordado_sobre_tela_y_cesteria.webp",
       "categoria": "Detalles",
-      "artesano": "Francisca Gastelum Me dez",
+      "artesano": "Francisca Gastelum Me Dez",
       "estado": "Sonora",
       "municipio": "Hermosillo",
-      "localidad": "Punta chueca",
+      "localidad": "Punta Chueca",
       "tecnica": "Bordado sobre tela y cesteria"
     },
     {
       "archivo": "176-CDMX-Telar_de_cintura.webp",
       "categoria": "Usos y costumbres",
-      "artesano": "Margarita Bernabé merino",
+      "artesano": "Margarita Bernabé Merino",
       "estado": "Oaxaca",
       "municipio": "San Pedro Amuzgos",
       "localidad": "",
@@ -3147,13 +3147,13 @@
       "artesano": "Ella Bautista",
       "estado": "Veracruz de Ignacio de la Llave",
       "municipio": "Chalma",
-      "localidad": "San pedro Coyutla",
+      "localidad": "San Pedro Coyutla",
       "tecnica": "Tafetán"
     },
     {
       "archivo": "183-CDMX-Punto_de_Cruz.webp",
       "categoria": "Detalles",
-      "artesano": "Erika salvador garcia",
+      "artesano": "Erika Salvador Garcia",
       "estado": "Puebla",
       "municipio": "Pahuatlán",
       "localidad": "",
@@ -3162,7 +3162,7 @@
     {
       "archivo": "184-CDMX-Mananita.webp",
       "categoria": "Detalles",
-      "artesano": "Marcelino patishtan patishtan",
+      "artesano": "Marcelino Patishtan Patishtan",
       "estado": "Chiapas",
       "municipio": "Chamula",
       "localidad": "",
@@ -3171,7 +3171,7 @@
     {
       "archivo": "185-CDMX-Telar_de_cintura.webp",
       "categoria": "Vista general",
-      "artesano": "María margarita Pérez Pérez",
+      "artesano": "María Margarita Pérez Pérez",
       "estado": "Chiapas",
       "municipio": "Zinacantán",
       "localidad": "",
@@ -3192,13 +3192,13 @@
       "artesano": "Manuela Rodríguez Hernández",
       "estado": "Chiapas",
       "municipio": "Chilón",
-      "localidad": "Santa cruz la reforma,chilon",
+      "localidad": "Santa Cruz la Reforma,Chilon",
       "tecnica": "Lomillo"
     },
     {
       "archivo": "188-CDMX-Telar_de_cintura.webp",
       "categoria": "Usos y costumbres",
-      "artesano": "Pedro de Jesús de los santos",
+      "artesano": "Pedro de Jesús de los Santos",
       "estado": "Veracruz de Ignacio de la Llave",
       "municipio": "Soledad Atzompa",
       "localidad": "Loc Tepexpan",
@@ -3234,7 +3234,7 @@
     {
       "archivo": "194-CDMX-Telar_de_pedal.webp",
       "categoria": "Retratos",
-      "artesano": "BONIFACIO VASQUEZ PACHECO",
+      "artesano": "Bonifacio Vasquez Pacheco",
       "estado": "",
       "municipio": "",
       "localidad": "",
@@ -3252,7 +3252,7 @@
     {
       "archivo": "198-CDMX-Bordado_a_mano_con_aguja_chica.webp",
       "categoria": "",
-      "artesano": "Guadalupe ordon talin",
+      "artesano": "Guadalupe Ordon Talin",
       "estado": "",
       "municipio": "",
       "localidad": "",
@@ -3261,7 +3261,7 @@
     {
       "archivo": "200-CDMX-Telar_de_cintura.webp",
       "categoria": "Vista general",
-      "artesano": "Isidoro Méndez apanecatl",
+      "artesano": "Isidoro Méndez Apanecatl",
       "estado": "Veracruz de Ignacio de la Llave",
       "municipio": "Texhuacán",
       "localidad": "San Juan Texuacan",
@@ -3345,7 +3345,7 @@
       "artesano": "Juana Manuela Cruz Reyes",
       "estado": "México",
       "municipio": "Tenancingo",
-      "localidad": "Acatcingo de la piedra ,Tenancingo EDOMex",
+      "localidad": "Acatcingo de la Piedra ,Tenancingo EDOMex",
       "tecnica": "Anudado"
     },
     {
@@ -3360,7 +3360,7 @@
     {
       "archivo": "212-CDMX-Telar_de_cintura.webp",
       "categoria": "Vista general",
-      "artesano": "Marcela Esteban patrocio",
+      "artesano": "Marcela Esteban Patrocio",
       "estado": "Puebla",
       "municipio": "Cuetzalan del Progreso",
       "localidad": "",
@@ -3369,7 +3369,7 @@
     {
       "archivo": "213-CDMX-Bordado_libre_en_maquina_de_pedal.webp",
       "categoria": "Usos y costumbres",
-      "artesano": "HONORINA GOMEZ MARTINEZ",
+      "artesano": "Honorina Gomez Martinez",
       "estado": "Oaxaca",
       "municipio": "Santa María Tlahuitoltepec",
       "localidad": "",
@@ -3432,7 +3432,7 @@
     {
       "archivo": "221-CDMX-Cadeneta_o_cadenilla.webp",
       "categoria": "",
-      "artesano": "Sandra gloria López monroy",
+      "artesano": "Sandra Gloria López Monroy",
       "estado": "Sonora",
       "municipio": "Hermosillo",
       "localidad": "",
@@ -3444,13 +3444,13 @@
       "artesano": "Pedro Jiménez Vicente",
       "estado": "Oaxaca",
       "municipio": "Santa María Xadani",
-      "localidad": "Santa María xadani",
+      "localidad": "Santa María Xadani",
       "tecnica": "Cadeneta o cadenilla"
     },
     {
       "archivo": "224-CDMX-Tejido_de_fibra_natural.webp",
       "categoria": "",
-      "artesano": "Cira del ángel bautista",
+      "artesano": "Cira del Ángel Bautista",
       "estado": "Veracruz de Ignacio de la Llave",
       "municipio": "Tantoyuca",
       "localidad": "",
@@ -3459,19 +3459,19 @@
     {
       "archivo": "225-CDMX-Telar_de_cintura.webp",
       "categoria": "Detalles",
-      "artesano": "Angelina hernández hernández",
+      "artesano": "Angelina Hernández Hernández",
       "estado": "Chiapas",
       "municipio": "Larráinzar",
-      "localidad": "Larrainzar en paraje tzuzben",
+      "localidad": "Larrainzar En Paraje Tzuzben",
       "tecnica": "Telar de cintura"
     },
     {
       "archivo": "226-CDMX-Cadeneta_o_cadenilla.webp",
       "categoria": "Usos y costumbres",
-      "artesano": "Veronica Lorena Barrett diaz",
+      "artesano": "Veronica Lorena Barrett Diaz",
       "estado": "Sonora",
       "municipio": "Hermosillo",
-      "localidad": "punta chueca",
+      "localidad": "Punta Chueca",
       "tecnica": "Cadeneta o cadenilla"
     },
     {
@@ -3495,7 +3495,7 @@
     {
       "archivo": "230-CDMX-Rejilla.webp",
       "categoria": "Detalles",
-      "artesano": "Jaqueline acosta López",
+      "artesano": "Jaqueline Acosta López",
       "estado": "Oaxaca",
       "municipio": "Loma Bonita",
       "localidad": "Loma Bonita",
@@ -3516,7 +3516,7 @@
       "artesano": "Luz María López Palma",
       "estado": "Sonora",
       "municipio": "Hermosillo",
-      "localidad": "Punta chueca",
+      "localidad": "Punta Chueca",
       "tecnica": "Cadeneta o cadenilla"
     },
     {
@@ -3531,7 +3531,7 @@
     {
       "archivo": "235-CDMX-Ivan_bordado.webp",
       "categoria": "",
-      "artesano": "Carmen dolores vecino armendariz",
+      "artesano": "Carmen Dolores Vecino Armendariz",
       "estado": "Chihuahua",
       "municipio": "Bocoyna",
       "localidad": "",
@@ -3558,7 +3558,7 @@
     {
       "archivo": "236-CDMX-Trenzado.webp",
       "categoria": "Vista general",
-      "artesano": "Antonio cornelio rendon",
+      "artesano": "Antonio Cornelio Rendon",
       "estado": "Michoacán de Ocampo",
       "municipio": "Tzintzuntzan",
       "localidad": "",
@@ -3585,10 +3585,10 @@
     {
       "archivo": "241-CDMX-Telar_de_cintura.webp",
       "categoria": "",
-      "artesano": "Jazmin azucena pinzón Palafox",
+      "artesano": "Jazmin Azucena Pinzón Palafox",
       "estado": "Oaxaca",
       "municipio": "San Mateo del Mar",
-      "localidad": "San mateo del mar",
+      "localidad": "San Mateo del Mar",
       "tecnica": "Telar de cintura"
     },
     {
@@ -3606,7 +3606,7 @@
       "artesano": "Zita González García",
       "estado": "Hidalgo",
       "municipio": "Chilcuautla",
-      "localidad": "El mejay chilacuatla, hidalgo",
+      "localidad": "El Mejay Chilacuatla, Hidalgo",
       "tecnica": "Telar de cintura"
     },
     {
@@ -3615,7 +3615,7 @@
       "artesano": "Francisca Rafael Santiago",
       "estado": "Oaxaca",
       "municipio": "Santa María Zacatepec",
-      "localidad": "Santa María Zacatepec putla Oaxaca",
+      "localidad": "Santa María Zacatepec Putla Oaxaca",
       "tecnica": "Telar de cintura"
     },
     {
@@ -3642,7 +3642,7 @@
       "artesano": "Antonia Isidro Inocente",
       "estado": "Oaxaca",
       "municipio": "San Felipe Usila",
-      "localidad": "san felipe usila",
+      "localidad": "San Felipe Usila",
       "tecnica": "Punto de cruz"
     },
     {
@@ -3684,7 +3684,7 @@
     {
       "archivo": "254-CDMX-Punto_atras.webp",
       "categoria": "Vista general",
-      "artesano": "Yolanda Rodriguez lopez",
+      "artesano": "Yolanda Rodriguez Lopez",
       "estado": "Oaxaca",
       "municipio": "San Felipe Jalapa de Díaz",
       "localidad": "",
@@ -3702,7 +3702,7 @@
     {
       "archivo": "257-CDMX-Telar_de_cintura.webp",
       "categoria": "Detalles",
-      "artesano": "Nicolaza Cruz vargas",
+      "artesano": "Nicolaza Cruz Vargas",
       "estado": "Puebla",
       "municipio": "Huauchinango",
       "localidad": "Tlajomulco",
@@ -3711,7 +3711,7 @@
     {
       "archivo": "260-CDMX-Telar_de_cintura.webp",
       "categoria": "Detalles",
-      "artesano": "Martha Bautista cruz",
+      "artesano": "Martha Bautista Cruz",
       "estado": "Puebla",
       "municipio": "Cuetzalan del Progreso",
       "localidad": "",
@@ -3741,7 +3741,7 @@
       "artesano": "Idolina López Ramos",
       "estado": "Guerrero",
       "municipio": "Ometepec",
-      "localidad": "En mi municipio",
+      "localidad": "En Mi Municipio",
       "tecnica": "Telar de cintura"
     },
     {
@@ -3750,7 +3750,7 @@
       "artesano": "Adelaida Diaz Hernandez",
       "estado": "Chiapas",
       "municipio": "",
-      "localidad": "Chiapa de corzo",
+      "localidad": "Chiapa de Corzo",
       "tecnica": "Petatillo"
     },
     {
@@ -3759,7 +3759,7 @@
       "artesano": "Reina Martinez Vasquez",
       "estado": "Oaxaca",
       "municipio": "Santa María Tlahuitoltepec",
-      "localidad": "Santa María tlahuitoltepec",
+      "localidad": "Santa María Tlahuitoltepec",
       "tecnica": "Telar de pedal"
     },
     {
@@ -3804,13 +3804,13 @@
       "artesano": "Irene Zoila Vasquez López",
       "estado": "Oaxaca",
       "municipio": "",
-      "localidad": "San José del progreso Ocotlan",
+      "localidad": "San José del Progreso Ocotlan",
       "tecnica": "Semilla"
     },
     {
       "archivo": "274-CDMX-Telar_de_cintura.webp",
       "categoria": "Usos y costumbres",
-      "artesano": "Margarita torres Aragon",
+      "artesano": "Margarita Torres Aragon",
       "estado": "Morelos",
       "municipio": "Hueyapan",
       "localidad": "",
@@ -3828,10 +3828,10 @@
     {
       "archivo": "276-CDMX-Telar_de_cintura.webp",
       "categoria": "Usos y costumbres",
-      "artesano": "Nancy Ignacia carvajal Garcia",
+      "artesano": "Nancy Ignacia Carvajal Garcia",
       "estado": "Veracruz de Ignacio de la Llave",
       "municipio": "Tlaquilpa",
-      "localidad": "Veracruz centro",
+      "localidad": "Veracruz Centro",
       "tecnica": "Telar de cintura"
     },
     {
@@ -3840,7 +3840,7 @@
       "artesano": "Susana Hernández Núñez",
       "estado": "Hidalgo",
       "municipio": "Tenango de Doria",
-      "localidad": "El dequeña",
+      "localidad": "El Dequeña",
       "tecnica": "Pata de gallo"
     },
     {
@@ -3873,10 +3873,10 @@
     {
       "archivo": "282-CDMX-Hilvan.webp",
       "categoria": "Retratos",
-      "artesano": "Amalia fernandez reyes",
+      "artesano": "Amalia Fernandez Reyes",
       "estado": "Puebla",
       "municipio": "",
-      "localidad": "Naupan puebla",
+      "localidad": "Naupan Puebla",
       "tecnica": "Hilván"
     },
     {
@@ -3885,13 +3885,13 @@
       "artesano": "Avelina Martínez García",
       "estado": "Puebla",
       "municipio": "Tochimilco",
-      "localidad": "Santa cruz cuahutomatitla",
+      "localidad": "Santa Cruz Cuahutomatitla",
       "tecnica": "Telar de cintura"
     },
     {
       "archivo": "284-CDMX-Punto_de_Cruz.webp",
       "categoria": "Vista general",
-      "artesano": "Gonzalo paz Aguilera",
+      "artesano": "Gonzalo Paz Aguilera",
       "estado": "Michoacán de Ocampo",
       "municipio": "Los Reyes",
       "localidad": "Zacan",
@@ -3963,10 +3963,10 @@
     {
       "archivo": "299-CDMX-Punto_de_Cruz.webp",
       "categoria": "",
-      "artesano": "HILARIA GUTIÉRREZ ALVARADO",
+      "artesano": "Hilaria Gutiérrez Alvarado",
       "estado": "Oaxaca",
       "municipio": "Huautla de Jiménez",
-      "localidad": "Llano viejo",
+      "localidad": "Llano Viejo",
       "tecnica": "Punto de cruz"
     },
     {

@@ -646,7 +646,7 @@ async function loadCSVs() {
     const nEstados = estadosRegistrados.size;
     // El CSV reducido de la interfaz no incluye la columna Artesano.
     // 503 procede de la base completa: 600 fichas con nombre, 503 nombres distintos normalizados.
-    const nParticipantes = 503; // Cifra agregada: 503 nombres únicos normalizados entre 600 aportaciones con nombre (638 total).
+    const nParticipantes = 503; // Cifra agregada: 503 nombres únicos normalizados entre 600 aportaciones con nombre (637 total).
     const nTecnicas = ATLAS.tecnicas.length;
     const nRegistros = ATLAS.tecnicas.reduce((s, t) => s + t.n_fichas, 0);
     updateIntroStats(Math.round(nRegistros), nEstados, nTecnicas, nParticipantes);
@@ -948,6 +948,7 @@ function initMap() {
     minZoom: 5,
     maxBounds: MX_BOUNDS,
     maxBoundsViscosity: 1.0, // 1.0 = el mapa rebota al borde, no se sale
+    doubleClickZoom: false, // evita cambios de encuadre inesperados al seleccionar un estado
   });
   // Capas con orden explícito: contexto territorial < comunidades.
   map.createPane('atlasTerritoryPane');
@@ -1524,7 +1525,7 @@ function applyMapFilter() {
   if (typeof refreshCommunities === 'function') refreshCommunities();
   if (typeof updateStatePanel === 'function') updateStatePanel();
   else {
-    document.getElementById('panel-title').textContent='Estados de la República';
+    document.getElementById('panel-title').textContent='Estados de la república';
     document.getElementById('panel-subtitle').textContent=hasFilter?`Mostrando ${filtered.length} técnicas filtradas`:'Selecciona uno o varios estados';
     document.getElementById('panel-body').innerHTML=`<div class="welcome-state"><h3>${hasFilter?'Filtro activo':'Explora el mapa'}</h3><p>${hasFilter?'Selecciona uno o varios estados para combinar el filtro territorial con la clasificación activa.':'Puedes seleccionar más de un estado en el mapa o en la lista.'}</p></div>`;
   }
@@ -1816,7 +1817,7 @@ function renderCatalog() {
     const color = getCatColor(t);
     const catLabel = [t.cat1, t.cat2].filter(Boolean).join(' › ');
     const estados = (t.estados || []).slice(0, 3).join(', ');
-    return `<div class="tec-card" onclick="openFicha('${escJs(t.tecnica)}')">
+    return `<div class="tec-card" role="group" aria-label="Registro: ${esc(t.tecnica)}">
       <div class="tec-card-img" style="background:${COLORS.negro}">
         ${img ? `<img src="${esc(imgPath(img))}" alt="${esc(t.tecnica)}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="tec-card-no-img" hidden aria-hidden="true">&#129525;</span>` : `<span class="tec-card-no-img">&#129525;</span>`}
         <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${color}"></div>
@@ -1824,9 +1825,10 @@ function renderCatalog() {
       <div class="tec-card-body">
         <div class="tec-card-grupo">${esc(catLabel)}</div>
         <div class="tec-card-name">${esc(t.tecnica)}</div>
-        <div class="tec-card-meta">
-          ${estados ? `<span class="tec-card-tag">${esc(estados)}</span>` : ''}
-          <span class="tec-card-tag">${t.n_fichas} registro${t.n_fichas !== 1 ? 's' : ''}</span>
+        ${estados ? `<div class="tec-card-estado">${esc(estados)}</div>` : ''}
+        <div class="tec-card-footer">
+          <span class="tec-card-count">${t.n_fichas} registro${t.n_fichas !== 1 ? 's' : ''}</span>
+          <button type="button" class="tec-card-action" onclick="openFicha('${escJs(t.tecnica)}')" aria-label="Ver registros de ${esc(t.tecnica)}">Ver registros <span aria-hidden="true">↗</span></button>
         </div>
       </div>
     </div>`;
@@ -2242,14 +2244,14 @@ function renderFichaBody(t, source = 'testimonio') {
 
   if (t.pueblos_indigenas && t.pueblos_indigenas.length > 0) {
     html += `<div style="margin-bottom:18px">
-      <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--arena);margin-bottom:7px">Pueblos indígenas de referencia</div>
+      <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--arena);margin-bottom:7px">Pueblos indígenas identificados</div>
       <div class="tags-row">${t.pueblos_indigenas.map(p => `<button type="button" class="lengua-tag catalog-link-tag" onclick="goToCatalogFilter('pueblos', '${escJs(p)}')">${esc(p)}</button>`).join('')}</div>
     </div>`;
   }
 
   if (t.historia) {
     html += `<div class="section">
-      <div class="section-head"><span class="section-title">Historia y Origen</span></div>
+      <div class="section-head"><span class="section-title">Historia y origen</span></div>
       <p class="ficha-parrafo">${esc(t.historia)}</p>
     </div>`;
   }
@@ -2260,7 +2262,7 @@ function renderFichaBody(t, source = 'testimonio') {
       .map(s => s.trim())
       .filter(Boolean);
     html += `<div class="section">
-      <div class="section-head"><span class="section-title">Significado y Simbolismo</span></div>
+      <div class="section-head"><span class="section-title">Significado y simbolismo</span></div>
       ${parrafos.map(p => `<p class="ficha-parrafo">${esc(p)}</p>`).join('')}
     </div>`;
   }
@@ -2316,7 +2318,7 @@ function renderFichaBody(t, source = 'testimonio') {
   const ensTotal = Object.values(ens).filter((_, i) => Object.keys(ens)[i] !== 'no_ensena').reduce((a, b) => a + b, 0);
   if (aprTotal > 0 || ensTotal > 0) {
     html += `<div class="section">
-      <div class="section-head"><span class="section-title">Transmisión del Conocimiento</span></div>
+      <div class="section-head"><span class="section-title">Transmisión del conocimiento</span></div>
       ${aprTotal > 0 ? `
         <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--arena);margin-bottom:8px">Aprendieron de…</div>
         <div class="bar-chart" style="margin-bottom:16px">

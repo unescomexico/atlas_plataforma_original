@@ -779,7 +779,7 @@ function updateStatePanel() {
     const materialSet = materialTechniqueSet('estado');
     return !materialSet || materialSet.has(t.tecnica);
   }).map(t=>t.tecnica) : [];
-  if (title) title.textContent = 'Estados de la República';
+  if (title) title.textContent = 'Estados de la república';
   if (subtitle) subtitle.textContent = hasFilter
     ? `${techniques.length} técnica${techniques.length !== 1 ? 's' : ''} coincide${techniques.length !== 1 ? 'n' : ''} con los filtros`
     : 'Selecciona uno o varios estados';

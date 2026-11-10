@@ -1,11 +1,9 @@
-﻿tecnica_norm,prendas_normalizadas,ceremonias_normalizadas,materiales_normalizados
+tecnica_norm,prendas_normalizadas,ceremonias_normalizadas,materiales_normalizados
 Afelpado,,,Algodón; Ixtle; Lana; Lino; Seda
 Animalitos de lana,,,Lana de borrego
-Anudado,Rebozos,,Agujas; Algodón; Plancha; Tela
-Anudado o empuntado,,,Algodón; Hilo de algodón; Lana; Telar; Tijeras
+Anudado,Rebozos; Blusas; Camisas; Quechquémitl; Vestidos,Celebraciones religiosas; Fiestas tradicionales,Agujas; Algodón; Plancha; Tela; Hilo de algodón; Lana; Telar; Tijeras
 Apliqué,Blusas; Bolsas; Diademas; Llaveros; Vestidos,,Agujas; Botones; Leña; Manta; Plancha; Tela; Tijeras
 Baimkal,Blusas; Faldas,,
-Batzikop tzotsil,Huipiles,,
 Bordado a mano con aguja chica,,,
 Bordado a mano con puntada lineal continua,Blusas; Camisas; Guayaberas; Manteles; Rebozos; Vestidos,,
 Bordado camisas de lavor,,Bodas; Danzas tradicionales; Ferias,Agujas; Cuadrillé; Estambre; Manta
@@ -44,7 +42,6 @@ Delineado (a máquina de pedal),Blusas; Bolsas; Camisas; Diademas; Faldas; Panta
 Deshilado y zurcido,Blusas; Bolsas; Bufandas; Caminos de mesa; Camisas; Chalinas; Chamarras; Cojines; Cortinas; Faldas; Fundas; Guayaberas; Huipiles; Manteles; Monederos; Pantalones; Pañuelos; Quechquémitl; Rebozos; Sábanas; Sacos; Servilletas; Vestidos,Bautizos; Bodas; Celebraciones religiosas; Confirmaciones; Fiestas patronales; Graduaciones; Primeras comuniones,Agujas; Algodón; Hilaza; Hilo de algodón; Lino; Manta; Popelina; Tela; Tijeras
 Deslizado,Almohadas; Aretes; Blusas; Cuadros; Estandartes; Huipiles; Pañales; Sábanas; Servilletas; Ternos; Vestidos,Celebraciones religiosas; Festivales culturales,Máquina industrial; Tela
 Dibujo de ika,Chalecos; Rebozos; Ruanas,Fiestas patronales; Procesiones,Algodón
-Empuntado,Blusas; Camisas; Quechquémitl; Vestidos,Celebraciones religiosas; Fiestas tradicionales,Tela
 Enrollado,Blusas; Camisas; Huipiles; Manteles,Celebraciones religiosas,Agujas; Algodón; Aro; Lino; Tela
 Espiguilla,Aretes; Bolsas; Cuadros; Llaveros; Manteles; Tapices,Bodas,Agujas; Algodón; Aro; Hilaza; Hilo de algodón; Manta; Tela
 Esterilla,Blusas; Caminos de mesa; Chalecos; Chales; Huipiles; Morrales; Rebozos; Vestidos,Danzas tradicionales; Fiestas tradicionales; Mayordomías; Primeras comuniones,Algodón; Estambre; Hilo de algodón; Ixtle; Lana
@@ -138,7 +135,7 @@ Tintes naturales,Cobijas; Cojines; Gabanes; Huipiles; Rebozos; Sarapes,,Leña; O
 Tlajkitilistli,Rebozos; Servilletas,Rituales,Algodón; Hilo de algodón
 Tlapial,Aretes; Collares; Pulseras,,Agujas; Lana de borrego
 Trama suplementaria,Camisas; Huipiles; Pañuelos,Bodas; Celebraciones religiosas; Ferias,Algodón; Hilo de algodón
-Trenza alzadas,Batas; Blusas; Camisas; Huipiles,,Estambre; Manta
+Trenza alzada,Batas; Blusas; Camisas; Huipiles,,Estambre; Manta
 Xaam nïxuy,Aretes; Blusas; Bolsas; Camisas; Monederos; Vestidos,Bodas; Cambio de autoridades; Fiestas patronales,
 Xmanikté,Blusas; Camisas; Guayaberas; Huipiles; Manteles; Servilletas; Vestidos,Bautizos; Bodas; Vaquerías,Agujas; Algodón; Cinta métrica; Descosedor; Hilo de algodón; Hilo de lana; Lana de borrego; Lino; Tela; Tijeras
 Zarga,Rebozos,Bautizos,Algodón
