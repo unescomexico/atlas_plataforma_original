@@ -1,5 +1,5 @@
 /* ================================================
-   ATLAS COMUNITARIO DEL ARTE TEXTIL DE MÉXICO — MAIN JS
+   ATLAS DEL ARTE TEXTIL DE MÉXICO — MAIN JS
    Lee los datos directamente desde los CSV.
    Para actualizar: reemplaza los CSV y recarga.
    ================================================ */
@@ -4696,7 +4696,7 @@ function construirReporteHTML(subset) {
   html += `
     <footer class="rep-footer">
       <div class="rep-footer-line"></div>
-      <p>Generado el ${esc(fecha)} a partir del Atlas Comunitario del Arte Textil de México.<br>
+      <p>Generado el ${esc(fecha)} a partir del Atlas del Arte Textil de México.<br>
       Encuentro Nacional de Arte Textil "Original" · Secretaría de Cultura · UNESCO México.</p>
     </footer>
   `;
@@ -4720,7 +4720,7 @@ function construirPortada(titulo, autor, fecha, filtrosResumen, subset) {
       <div class="rep-cover-logos">
         <img src="assets/atlas_plataforma_logos_cropped.png" alt="Logos institucionales" />
       </div>
-      <div class="rep-cover-eyebrow">Atlas Comunitario del Arte Textil de México</div>
+      <div class="rep-cover-eyebrow">Atlas del Arte Textil de México</div>
       <h1 class="rep-cover-title">${esc(titulo)}</h1>
       <div class="rep-cover-subtitle">${esc(filtrosResumen)}</div>
       <div class="rep-cover-stats">
@@ -5301,7 +5301,7 @@ function descargarReporteWord() {
 
     // Portada
     children.push(new Paragraph({
-      text: 'Atlas Comunitario del Arte Textil de México',
+      text: 'Atlas del Arte Textil de México',
       alignment: AlignmentType.CENTER,
       spacing: { before: 1200, after: 400 },
     }));
@@ -5345,7 +5345,7 @@ function descargarReporteWord() {
 
     // Pie
     children.push(new Paragraph({
-      text: `Generado el ${fecha} a partir del Atlas Comunitario del Arte Textil de México. Encuentro Nacional de Arte Textil "Original" · Secretaría de Cultura · UNESCO México.`,
+      text: `Generado el ${fecha} a partir del Atlas del Arte Textil de México. Encuentro Nacional de Arte Textil "Original" · Secretaría de Cultura · UNESCO México.`,
       alignment: AlignmentType.CENTER,
       spacing: { before: 800 },
     }));

@@ -6396,3 +6396,55 @@ button.atlas-legend-action:hover,button.atlas-legend-action:focus-visible {backg
     padding:10px 32px 10px 10px;
   }
 }
+
+
+/* ATLAS_MOBILE_INTRO_STATS_20261110
+   Las tres tarjetas no deben comprimirse en la misma fila en pantallas estrechas.
+   Dos tarjetas arriba y una completa debajo; mantiene lectura y desplazamiento de la introducción. */
+@media (max-width: 760px) {
+  .atlas-intro-slide[data-intro-slide="1"] .atlas-intro-copy {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas: "kicker" "title" "text" "stats" !important;
+    min-width: 0;
+  }
+  .atlas-intro-slide[data-intro-slide="1"] .atlas-intro-stat-panel {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin-top: 16px;
+    padding-top: 0;
+  }
+  .atlas-intro-slide[data-intro-slide="1"] .atlas-intro-stat-card {
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 76px;
+    padding: 11px 9px;
+    align-items: center;
+    text-align: center;
+  }
+  .atlas-intro-slide[data-intro-slide="1"] .atlas-intro-stat-card:last-child {
+    grid-column: 1 / -1;
+    min-height: 67px;
+  }
+  .atlas-intro-slide[data-intro-slide="1"] .atlas-intro-stat-card strong {
+    font-size: clamp(1.6rem, 7vw, 2.2rem);
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+  .atlas-intro-slide[data-intro-slide="1"] .atlas-intro-stat-card span {
+    font-size: .71rem;
+    letter-spacing: .35px;
+    line-height: 1.25;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    max-width: 100%;
+  }
+}
+@media (max-width: 350px) {
+  .atlas-intro-slide[data-intro-slide="1"] .atlas-intro-stat-panel { gap: 8px !important; }
+  .atlas-intro-slide[data-intro-slide="1"] .atlas-intro-stat-card { padding: 10px 6px; }
+  .atlas-intro-slide[data-intro-slide="1"] .atlas-intro-stat-card span { font-size: .67rem; letter-spacing: .15px; }
+}
