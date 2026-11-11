@@ -216,6 +216,19 @@
     return centroidPromise;
   }
 
+  // Utiliza las mismas entidades de la capa de puntos del mapa principal.
+  // Se unen a los registros por estado y municipio normalizados, sin generar
+  // coordenadas distintas de las que ya existen en esa capa.
+  function miniMapPointFeatures(source, state, groups) {
+    return (source?.features || []).filter(feature =>
+      feature?.geometry?.type === 'Point' &&
+      sameState(feature.properties?.estado_nombre, state) &&
+      groups.has(norm(feature.properties?.NOMGEO)) &&
+      Number.isFinite(feature.geometry.coordinates?.[0]) &&
+      Number.isFinite(feature.geometry.coordinates?.[1])
+    );
+  }
+
   function activeRow(row) {
     const sel = stateMapSelection;
     return (!sel.pueblos.size || sel.pueblos.has(row.pueblo)) &&
@@ -325,14 +338,11 @@
     const contextPath = contextRings.map(ringPath).join(' ');
     const markers = [];
     const used = new Set();
-    (centroids?.features || []).forEach(f => {
-      if (!sameState(f.properties?.estado_nombre,profile.name) || f.geometry?.type!=='Point') return;
-      const key=norm(f.properties?.NOMGEO);
-      if (!groups.has(key) || used.has(key)) return;
-      const coords=f.geometry.coordinates;
-      if (!Number.isFinite(coords?.[0]) || !Number.isFinite(coords?.[1])) return;
+    miniMapPointFeatures(centroids, profile.name, groups).forEach(feature => {
+      const key = norm(feature.properties.NOMGEO);
+      if (used.has(key)) return;
       used.add(key);
-      const [x,y]=toXY(coords[0],coords[1]);
+      const [x,y] = toXY(...feature.geometry.coordinates);
       markers.push({key,x,y,group:groups.get(key)});
     });
     const node=document.createElement('div');
@@ -425,7 +435,8 @@
         const matched = group.rows.filter(activeRow);
         if (matched.length) {
           if (!stateMap.hasLayer(marker)) marker.addTo(stateMap);
-          marker.setStyle({radius:typeof COMUNIDAD_STYLE !== 'undefined' ? COMUNIDAD_STYLE.radius : 4});
+          marker.setStyle({radius:5.5, fillColor:'#B50552', fillOpacity:1, color:'#FFFFFF'});
+          marker.bringToFront();
           // El popup es un panel fijo en la esquina inferior izquierda.
           // El contenido se calcula al hacer clic, respetando los filtros actuales.
           visible++; count+=matched.length;
@@ -505,6 +516,9 @@
       try {
         stateMap=L.map(holder,{zoomControl:false,scrollWheelZoom:window.matchMedia('(min-width: 768px)').matches,
           minZoom:1,maxZoom:17,zoomSnap:0.25,zoomDelta:1,maxBoundsViscosity:1});
+        // Oculta el logotipo de Leaflet (azul y amarillo) sin eliminar la
+        // atribución obligatoria a OpenStreetMap ni la de sus colaboradores.
+        stateMap.attributionControl?.setPrefix(false);
         const tiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
           attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>',
           maxZoom:19,minZoom:1,
@@ -525,24 +539,38 @@
         const bounds=border.getBounds();
         const contextBounds=bounds.pad(0.18);
         if (!bounds.isValid()) throw new Error('El polígono no tiene límites válidos');
-        (centroids.features || []).forEach(f => {
-          if (!sameState(f.properties?.estado_nombre, profile.name) || f.geometry?.type!=='Point') return;
-          const group=stateMapRows.get(norm(f.properties?.NOMGEO));
-          if(!group) return;
-          const coords=f.geometry.coordinates;
-          if (!Number.isFinite(coords?.[0]) || !Number.isFinite(coords?.[1])) return;
-          const marker=L.circleMarker([coords[1],coords[0]],
-            typeof COMUNIDAD_STYLE !== 'undefined' ? { ...COMUNIDAD_STYLE } :
-              { color:'#FFFFFF',weight:1.2,fillColor:'#B50552',fillOpacity:.85,radius:4 }
-          ).addTo(stateMap);
-          marker.bindTooltip(safe(group.name),{direction:'top'});
-          marker.on('click', event => {
-            if (event.originalEvent && L.DomEvent?.stopPropagation) L.DomEvent.stopPropagation(event.originalEvent);
-            const selected = group.rows.filter(activeRow);
-            if (selected.length) showMapPopup(markerPopup(profile.name,group,selected));
-          });
-          stateMapMarkers.push({marker,group,state:profile.name});
-        });
+        // Dibujar los mismos puntos que usa el mapa principal sobre un pane
+        // propio: el polígono y las líneas estatales no deben taparlos.
+        const pointsPane = stateMap.createPane('atlasStateCommunityPoints');
+        pointsPane.style.zIndex = '650';
+        pointsPane.style.pointerEvents = 'auto';
+        const pointStyle = {
+          radius: 5.5, color: '#FFFFFF', weight: 1.5, opacity: 1,
+          fillColor: '#B50552', fillOpacity: 1,
+          pane: 'atlasStateCommunityPoints', interactive: true
+        };
+        const matchedFeatures = miniMapPointFeatures(centroids, profile.name, stateMapRows);
+        const pointLayer = L.geoJSON({type:'FeatureCollection',features:matchedFeatures}, {
+          pointToLayer: (feature, latlng) => L.circleMarker(latlng, {...pointStyle}),
+          onEachFeature: (feature, marker) => {
+            const group = stateMapRows.get(norm(feature.properties.NOMGEO));
+            if (!group) return;
+            marker.bindTooltip(safe(group.name), {direction:'top'});
+            marker.on('click', event => {
+              if (event.originalEvent && L.DomEvent?.stopPropagation) {
+                L.DomEvent.stopPropagation(event.originalEvent);
+              }
+              const selected = group.rows.filter(activeRow);
+              if (selected.length) showMapPopup(markerPopup(profile.name,group,selected));
+            });
+            stateMapMarkers.push({marker,group,state:profile.name});
+          }
+        }).addTo(stateMap);
+        // Dejar los puntos por encima de los límites, incluso tras filtrar.
+        pointLayer.bringToFront();
+        if (!stateMapMarkers.length && stateMapRows.size) {
+          console.warn(`Sin coincidencias geográficas para los registros de ${profile.name}`);
+        }
         stateMap.on('click', hideMapPopup);
         // Espera a un tamaño real y luego fija el zoom mínimo del estado.
         stateMap.invalidateSize({pan:false});

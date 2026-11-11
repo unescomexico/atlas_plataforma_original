@@ -6475,3 +6475,105 @@ button.atlas-legend-action:hover,button.atlas-legend-action:focus-visible {backg
   .tec-card-footer { gap: 7px; }
   .tec-card-action { width: 100%; }
 }
+
+
+/* V33 — Acceso global a la introducción en la cinta de navegación. */
+.atlas-nav-shell {
+  display: flex;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 1500;
+  width: 100%;
+  min-width: 0;
+  background: var(--negro);
+  border-top: 1px solid rgba(255,255,255,.07);
+}
+.atlas-nav-shell .nav-tabs {
+  flex: 1 1 auto;
+  min-width: 0;
+  border-top: 0;
+  scrollbar-width: thin;
+}
+.atlas-nav-shell .atlas-map-info-button {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin: 0 14px 0 8px;
+  padding: 0;
+  border: 2px solid rgba(255,255,255,.92);
+  border-radius: 50%;
+  background: #c21770;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(0,0,0,.3);
+  cursor: pointer;
+  transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.atlas-nav-shell .atlas-map-info-button span {
+  display: block;
+  font: italic 800 24px/1 Georgia,serif;
+  transform: translateY(-1px);
+}
+.atlas-nav-shell .atlas-map-info-button:hover {
+  background: #a71261;
+  box-shadow: 0 3px 12px rgba(194,23,112,.44);
+  transform: scale(1.06);
+}
+.atlas-nav-shell .atlas-map-info-button:focus-visible {
+  outline: 3px solid #ffdc8b;
+  outline-offset: 2px;
+}
+/* El zoom vuelve a la esquina superior derecha del mapa. */
+#view-mapa .leaflet-top.leaflet-right .leaflet-control-zoom {
+  margin-top: 12px;
+  margin-right: 12px;
+}
+.atlas-intro-overlay.atlas-intro-is-closing { pointer-events: none; }
+@keyframes atlas-info-arrival {
+  0%, 100% { box-shadow: 0 2px 10px rgba(0,0,0,.3); }
+  40% { box-shadow: 0 0 0 8px rgba(194,23,112,.22), 0 3px 16px rgba(0,0,0,.38); }
+}
+.atlas-nav-shell .atlas-map-info-button.atlas-map-info-arrived {
+  animation: atlas-info-arrival .55s ease-out;
+}
+@media (max-width: 960px) {
+  .atlas-nav-shell .atlas-map-info-button {
+    width: 34px;
+    height: 34px;
+    margin: 0 10px 0 6px;
+  }
+  #view-mapa .leaflet-top.leaflet-right .leaflet-control-zoom {
+    margin-top: 10px;
+    margin-right: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .atlas-nav-shell .atlas-map-info-button { transition: none; }
+  .atlas-nav-shell .atlas-map-info-button.atlas-map-info-arrived { animation: none; }
+}
+
+
+/* Ficha ampliada por pueblo indígena — comparte el lenguaje visual de las fichas estatales. */
+.atlas-pueblo-sheet-overlay .atlas-pueblo-sheet-language {
+  margin-top:7px;color:#6c5260;font:600 .78rem/1.4 var(--font-body);
+}
+.atlas-pueblo-sheet-overlay .atlas-state-sheet-kpis>div {min-width:0;}
+.atlas-pueblo-sheet-overlay .atlas-state-sheet-kpis span {overflow-wrap:anywhere;}
+.atlas-pueblo-sheet-overlay .atlas-state-sheet-chips .atlas-pueblo-tech-btn {
+  display:inline-flex;align-items:center;gap:6px;padding:7px 10px;
+  border:1px solid #d8a6bb;color:#8b0440;background:white;
+  border-radius:6px;font:600 .72rem/1.4 var(--font-body);
+  cursor:pointer;text-align:left;overflow-wrap:anywhere;
+}
+.atlas-pueblo-sheet-overlay .atlas-pueblo-tech-btn:hover {background:#f9e7ef;}
+/* Los registros aparecen completos en una sección única, sin listas duplicadas. */
+.atlas-pueblo-sheet-overlay .atlas-pueblo-sheet-registros { grid-column: 1 / -1; }
+/* Ficha por pueblo: detalles ampliables sin mapa, aptos para móvil. */
+.atlas-pueblo-sheet-more {margin-top:9px;min-width:0;}
+.atlas-pueblo-sheet-more summary {cursor:pointer;color:#8b0440;font:600 .74rem/1.45 var(--font-body);padding:5px 0;}
+.atlas-pueblo-sheet-more[open] .atlas-state-sheet-chips {margin-top:9px;}
+@media(max-width:640px) {
+  .atlas-pueblo-sheet-overlay .atlas-state-sheet-kpis span {font-size:.66rem;}
+}

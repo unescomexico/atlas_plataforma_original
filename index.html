@@ -31,7 +31,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" data-security-review="version-pinned"></script>
 
 <!-- App styles -->
-<link rel="stylesheet" href="styles.css?v=atlas-limpiar-relaciones-20261110">
+<link rel="stylesheet" href="styles.css?v=atlas-pueblos-registros-unificados-20261111">
 </head>
 <body>
 
@@ -194,7 +194,8 @@
 <!-- ═══════════════════════════════════════
      NAVIGATION
 ════════════════════════════════════════ -->
-<nav class="nav-tabs">
+<div class="atlas-nav-shell">
+<nav class="nav-tabs" aria-label="Secciones del Atlas">
   <button class="nav-tab active" data-tab="mapa">Mapa interactivo</button>
   <button class="nav-tab" data-tab="arbol">Clasificación de textiles</button>
   <button class="nav-tab" data-tab="catalogo">Catálogo de registros</button>
@@ -203,9 +204,12 @@
   <button class="nav-tab" data-tab="aluvial">Explorar relaciones</button>
   <button class="nav-tab" data-tab="reporte">Reporte</button>
   <button class="nav-tab nav-tab-contribuir" data-tab="contribuir">Contribuir</button>
-  <button class="nav-tab nav-tab-info nav-tab-info-first" type="button" onclick="reopenAtlasIntro()">Info</button>
   <button class="nav-tab nav-tab-info" type="button" onclick="openInfo()">Acerca del Atlas</button>
 </nav>
+<button class="atlas-map-info-button" id="atlas-map-info-button" type="button"
+  onclick="reopenAtlasIntro()" aria-label="Abrir introducción y guía del Atlas"
+  title="Información y guía del Atlas"><span aria-hidden="true">i</span></button>
+</div>
 
 <!-- ═══════════════════════════════════════
      VIEW: MAPA
@@ -361,12 +365,6 @@
     <div id="map"></div>
 
 
-    <!-- Créditos visibles exclusivamente en los enfoques Lengua y Ecosistema -->
-    <div class="map-source-credits" aria-label="Fuentes de las capas cartográficas">
-      <p class="map-source-credit map-source-lengua">Fuentes: denominaciones de pueblos del INPI; distribución geográfica de lenguas según las capas INPI, INALI e INEGI.</p>
-      <p class="map-source-credit map-source-ecosistema">Fuentes de las capas de ecosistemas y vegetación: SEMARNAT e INEGI. Elaboración para el Atlas.</p>
-    </div>
-
     <div class="map-legend" id="map-legend">
       <div class="map-legend-heading">
         <h4 id="map-legend-title">Registros por estado</h4>
@@ -379,8 +377,8 @@
         <div class="legend-item"><div class="legend-dot" style="background:#F588AFFF"></div><span>1 – 9</span></div>
       </div>
       <details class="map-reading-guide" id="map-reading-guide">
-        <summary>¿Cómo leer el mapa?</summary>
-        <p>Los colores representan el número de registros por estado. Los puntos señalan de forma aproximada las comunidades de procedencia de las artesanas y artesanos participantes en el Atlas.</p>
+        <summary>Información del mapa</summary>
+        <p id="map-reading-guide-text">Los colores representan el número de registros por estado. Los puntos señalan de forma aproximada las comunidades de procedencia de las artesanas y artesanos participantes en el Atlas.</p>
       </details>
     </div>
     <button type="button" id="map-legend-reopen" class="map-legend-reopen" aria-label="Mostrar leyenda del mapa" title="Mostrar la leyenda" hidden>
@@ -858,8 +856,9 @@
 <!-- Scripts — NO atlas_data.js: los datos se leen desde los CSV -->
 <script src="atlas_info_embedded.js?v=atlas-normalizacion-20261110"></script>
 <script src="main.js?v=atlas-normalizacion-20261110"></script>
-<script src="map_drivers.js?v=atlas-normalizacion-20261110"></script>
-<script src="state_profile_modal.js?v=atlas-contexto-estatal-20261108"></script>
+<script src="map_drivers.js?v=atlas-pueblos-comunidades-20261111"></script>
+<script src="state_profile_modal.js?v=atlas-puntos-estatales-20261111"></script>
+<script src="pueblo_profile_modal.js?v=atlas-pueblos-comunidades-20261111"></script>
 <script src="aluvial.js?v=atlas-limpiar-relaciones-20261110"></script>
 
 <!-- ═══════════════════════════════════════
@@ -1004,8 +1003,10 @@ function closeInfo(e) {
 }
 
 let atlasIntroIndex = 0;
+let atlasIntroClosing = false;
 
 function reopenAtlasIntro() {
+  if (atlasIntroClosing) return;
   atlasIntroIndex = 0;
   document.getElementById('atlas-intro-overlay')?.classList.add('open');
   renderAtlasIntro();
@@ -1064,9 +1065,64 @@ function atlasIntroPrev() {
   renderAtlasIntro();
 }
 function closeAtlasIntro() {
-  document.getElementById('atlas-intro-overlay')?.classList.remove('open');
-  document.body.classList.remove('atlas-intro-open');
-  refreshMapViewport({ refit: true });
+  const overlay = document.getElementById('atlas-intro-overlay');
+  if (!overlay || !overlay.classList.contains('open') || atlasIntroClosing) return;
+
+  const target = document.getElementById('atlas-map-info-button');
+  const card = overlay.querySelector('.atlas-intro-card');
+  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  const rect = card?.getBoundingClientRect();
+  const end = target?.getBoundingClientRect();
+  const targetVisible = end && end.width > 0 && end.height > 0 &&
+    end.top >= 0 && end.left >= 0 && end.bottom <= window.innerHeight &&
+    end.right <= window.innerWidth;
+
+  function finishClosing() {
+    overlay.classList.remove('open', 'atlas-intro-is-closing');
+    document.body.classList.remove('atlas-intro-open');
+    atlasIntroClosing = false;
+    refreshMapViewport({ refit: true });
+    if (targetVisible && !reduceMotion) {
+      target.classList.remove('atlas-map-info-arrived');
+      // Reiniciar el pulso si la introducción se abre otra vez.
+      void target.offsetWidth;
+      target.classList.add('atlas-map-info-arrived');
+    }
+  }
+
+  if (reduceMotion || !card?.animate || !overlay.animate || !targetVisible ||
+      !rect?.width || !rect.height || document.hidden) {
+    finishClosing();
+    return;
+  }
+
+  atlasIntroClosing = true;
+  overlay.classList.add('atlas-intro-is-closing');
+  const dx = end.left + end.width / 2 - (rect.left + rect.width / 2);
+  const dy = end.top + end.height / 2 - (rect.top + rect.height / 2);
+  const scale = Math.min(0.10, Math.max(0.025, end.width / rect.width));
+  const timing = { duration: 540, easing: 'cubic-bezier(.6,.08,.22,1)', fill: 'forwards' };
+  const cardAnim = card.animate([
+    { transform: 'translate3d(0,0,0) scale(1)', opacity: 1, offset: 0 },
+    { transform: 'translate3d(0,-7px,0) scale(.94)', opacity: 1, offset: .22 },
+    { transform: `translate3d(${dx}px,${dy}px,0) scale(${scale})`, opacity: .16, offset: 1 }
+  ], timing);
+  const veilAnim = overlay.animate([
+    { backgroundColor: 'rgba(26,16,24,.78)', backdropFilter: 'blur(8px)', offset: 0 },
+    { backgroundColor: 'rgba(26,16,24,0)', backdropFilter: 'blur(0px)', offset: 1 }
+  ], timing);
+
+  let settled = false;
+  const timer = window.setTimeout(done, 680);
+  function done() {
+    if (settled) return;
+    settled = true;
+    clearTimeout(timer);
+    cardAnim.cancel();
+    veilAnim.cancel();
+    finishClosing();
+  }
+  Promise.all([cardAnim.finished, veilAnim.finished]).then(done, done);
 }
 
 window.addEventListener('resize', () => { refreshMapViewport(); syncMapLegendReopen(); });

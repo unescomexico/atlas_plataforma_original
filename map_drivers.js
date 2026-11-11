@@ -957,9 +957,22 @@ function updateLegend() {
   const body = document.getElementById('map-legend-body');
   if (!title || !body) return;
   const readingGuide = document.getElementById('map-reading-guide');
+  const readingGuideText = document.getElementById('map-reading-guide-text');
   if (readingGuide) {
-    readingGuide.hidden = activeMapDriver !== 'estado';
-    if (readingGuide.hidden) readingGuide.open = false;
+    // La explicación/fuente puede desplegarse en cualquiera de las tres vistas.
+    readingGuide.hidden = false;
+    // Al cambiar de enfoque, plegar la guía sin cerrar el resto de la leyenda.
+    if (readingGuide.dataset.driver !== activeMapDriver) {
+      readingGuide.open = false;
+      readingGuide.dataset.driver = activeMapDriver;
+    }
+    if (readingGuideText) {
+      readingGuideText.textContent = activeMapDriver === 'lengua'
+        ? 'Fuentes: denominaciones de los pueblos del INPI; distribución geográfica de acuerdo con datos del INPI, INALI e INEGI.'
+        : activeMapDriver === 'ecosistema'
+          ? 'Fuentes de las capas de vegetación y ecosistemas: SEMARNAT e INEGI.'
+          : 'Los colores representan el número de registros por estado. Los puntos señalan de forma aproximada las comunidades de procedencia de las artesanas y artesanos participantes en el Atlas.';
+    }
   }
   body.replaceChildren();
   if (activeMapDriver==='estado') {
@@ -980,7 +993,6 @@ function updateLegend() {
       color: group.color, name: group.name,
       onClick: () => selectPueblo(group.name)
     })));
-    atlasLegendNote(body, 'Los colores representan pueblos de referencia del INPI. Los puntos proceden de capas de distribución lingüística; no prueban la pertenencia de una persona o comunidad a un pueblo.');
     return;
   }
   const source=activeEcosystemSource;
@@ -1022,7 +1034,7 @@ function atlasClickLanguageCloud(ev) {
   const count=profile?.summary?.n_registros;
   sub.textContent=Number.isFinite(Number(count)) && count !== undefined && count !== null
     ? `${Number(count).toLocaleString('es-MX')} aportación${Number(count)===1?'':'es'} asociada${Number(count)===1?'':'s'}`
-    : `Capa lingüística de referencia: ${nearest.name}`;
+    : `Lengua: ${nearest.name}`;
   wrap.append(label,sub);
   L.popup({maxWidth:270}).setLatLng(ev.latlng).setContent(wrap).openOn(map);
 }
@@ -1338,14 +1350,15 @@ function territoryProfileCard(profile, type) {
       <div class="territory-profile-kicker">Perfil del Atlas · ${esc(territoryTypeLabel(type))}</div>
       <h3>${esc(nombrePerfil || '')}</h3>
       ${type === 'estado' ? `<button type="button" class="atlas-open-state-sheet" data-atlas-state-modal="${encodeURIComponent(profile.name || '')}" aria-label="Consultar ficha completa de ${esc(profile.name || '')}">Consultar ficha completa del estado <span aria-hidden="true">↗</span></button>` : ''}
-      ${capaLengua ? `<div class="territory-profile-pueblo">Capa lingüística utilizada: ${esc(capaLengua.name)}</div>` : ''}
+      ${type === 'lengua' ? `<button type="button" class="atlas-open-state-sheet atlas-open-pueblo-sheet" data-atlas-pueblo-modal="${encodeURIComponent(profile.id || '')}" aria-label="Consultar ficha completa del pueblo ${esc(nombrePerfil || '')}">Consultar ficha completa del pueblo <span aria-hidden="true">↗</span></button>` : ''}
+      ${capaLengua ? `<div class="territory-profile-pueblo">Lengua: ${esc(capaLengua.name)}</div>` : ''}
 
       ${type === 'estado' ? atlasStatePhoto(profile) : ''}
 
       <div class="territory-profile-stats">
-        <div><strong>${registros.toLocaleString('es-MX')}</strong><span>registros de técnicas</span></div>
-        <div><strong>${comunidades.toLocaleString('es-MX')}</strong><span>comunidades</span></div>
-        <div><strong>${tecnicas.toLocaleString('es-MX')}</strong><span>técnicas documentadas</span></div>
+        <div><strong>${registros.toLocaleString('es-MX')}</strong><span>${type === 'lengua' ? 'Aportaciones' : 'registros de técnicas'}</span></div>
+        <div><strong>${comunidades.toLocaleString('es-MX')}</strong><span>${'Comunidades'}</span></div>
+        <div><strong>${tecnicas.toLocaleString('es-MX')}</strong><span>${type === 'lengua' ? 'Registros documentados' : 'técnicas documentadas'}</span></div>
       </div>
 
       <p class="territory-profile-method">${esc(territoryInterpretationNote(type))}</p>
