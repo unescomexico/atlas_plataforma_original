@@ -4759,8 +4759,8 @@ function construirReporteHTML(subset) {
   html += `
     <footer class="rep-footer">
       <div class="rep-footer-line"></div>
-      <p>Generado el ${esc(fecha)} a partir del Atlas del Arte Textil de México.<br>
-      Encuentro Nacional de Arte Textil "Original" · Secretaría de Cultura · UNESCO México.</p>
+      <p>Generado el ${esc(fecha)}, a partir del Atlas de Arte Textil de México.<br>
+      Original. Encuentro de Arte Textil Mexicano. Secretaría de Cultura. UNESCO México</p>
     </footer>
   `;
 
@@ -5408,7 +5408,7 @@ function descargarReporteWord() {
 
     // Pie
     children.push(new Paragraph({
-      text: `Generado el ${fecha} a partir del Atlas del Arte Textil de México. Encuentro Nacional de Arte Textil "Original" · Secretaría de Cultura · UNESCO México.`,
+      text: `Generado el ${fecha}, a partir del Atlas de Arte Textil de México. Original. Encuentro de arte textil mexicano. Secretaría de Cultura. UNESCO México`,
       alignment: AlignmentType.CENTER,
       spacing: { before: 800 },
     }));
