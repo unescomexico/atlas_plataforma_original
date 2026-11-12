@@ -1,5 +1,5 @@
 material_nombre_atlas,tecnicas_publicadas
-aguja,Bordado camisas de lavor; Bordado ch'ol tzeltal; Bordado de San Antonio; Bordado libre en maquina de pedal; Bordado mazahua; Bordado primavera; Bordado tradicional; Bordados de chamula y larrainzar; Bordados en chaquira; Calado; Coralillo; Costura; Enrollado; Hazme si puedes; Lomillo; Macizo; Malla o red; Otomí; Petatillo; Puntada de rescate u hoja de platano; Puntada de satín; Puntada frontal; Punto atrás; Punto de cruz; Randa de aguja; Rejilla; Relleno; Seri; Swikili; Tejido de semilla; Tejido tradicional; Xmanikté
+aguja,Bordado camisas de lavor; Bordado ch'ol tzeltal; Bordado de San Antonio; Bordado libre en máquina de pedal; Bordado mazahua; Bordado primavera; Bordado tradicional; Bordados de chamula y larrainzar; Bordados en chaquira; Calado; Coralillo; Costura; Enrollado; Hazme si puedes; Lomillo; Macizo; Malla o red; Otomí; Petatillo; Puntada de rescate u hoja de platano; Puntada de satín; Puntada frontal; Punto atrás; Punto de cruz; Randa de aguja; Rejilla; Relleno; Seri; Swikili; Tejido de semilla; Tejido tradicional; Xmanikté
 algodón,Afelpado; Anudado; Bordado de manta; Bordado de Xochicuahuitl; Bordado elevado de contado; Bordado mazahua; Bordado tradicional; Brocado; Coralillo; Costura; Dibujo de ika; Enrollado; Filigrana; Flor de palma; Hazme si puedes; Huipil seremonial; Ita'a Kaxií; Jaspeado; Jolobil; Ju ech'el o tamulamb'il; Jun; Luchbilltaaval; Macrame; Media puntada; Nii rididiva lunaá; Pete; Pinitos; Punto atrás; Purépecha; Randa de aguja; Renacimiento; Swikili; Talakaxtokgo da makan; Tejido cerrado; Tejido de gancho; Tejido de patakua; Tejido en curva y brocado; Tejido tradicional; Telar de cajón; Telar de cintura; Telar de pedal; Trama suplementaria; Xmanikté; Zarga; Zigzag
 algodón coyuche,Telar de cintura
 aro,Bordado primavera; Bot/vi Chuy; Calado; Enrollado; Rejilla; Renacimiento; Sombreado; Tejido de semilla
@@ -25,10 +25,10 @@ hilaza,Bordado ch'ol tzeltal; Ju ech'el o tamulamb'il; Lomillo; Macizo; Puntada 
 hilera,Deslizado; Puntada de red; Puntada de rescate u hoja de platano; Rejilla; Sombreado
 hilo,Anudado; Bordado camisas de lavor; Bordado de San Antonio; Bordado elevado de contado; Bordado mazahua; Bordado Nahua; Bordado raramuri; Bordado sobre tela y cesteria; Bordado tradicional; Bordados en chaquira; Cocoleado; Costura; Filigrana; Hazme si puedes; Horquilla; Ita'a Kaxií; Jaspeado; Jolobil; Ju ech'el o tamulamb'il; Jun; Mol miss; Nii rididiva lunaá; Piquitos; Plisada; Puntada de rescate u hoja de platano; Puntada frontal; Punto atrás; Randa de aguja; Rectas; Rejilla; Renacimiento; Seri; Sombreado; Tejido de gancho; Tejido de ojitos; Tejido de patakua; Tejido de semilla; Tejido tradicional; Trama suplementaria; Zigzag
 hilo crochet,
-hilo de algodón,Bordado ch'ol tzeltal; Bordado elevado de contado; Bordado libre en maquina de pedal; Bordado mazahua; Bordado primavera; Brocado; Culebrilla; Filigrana; Hazme si puedes; Ita'a Kaxií; Jaspeado; Ju ech'el o tamulamb'il; Jun; Lomillo; Luchbilltaaval; Macizo; Nii rididiva lunaá; Otomí; Puntada de satín; Punto de cruz; Purépecha; Randa de aguja; Rayado; Relleno; Talakaxtokgo da makan; Tejido de fibra natural; Tejido de patakua; Tejido tradicional; Telar de cintura; Telar de pedal; Tlajkitilistli; Trama suplementaria; Zigzag
+hilo de algodón,Bordado ch'ol tzeltal; Bordado elevado de contado; Bordado libre en máquina de pedal; Bordado mazahua; Bordado primavera; Brocado; Culebrilla; Filigrana; Hazme si puedes; Ita'a Kaxií; Jaspeado; Ju ech'el o tamulamb'il; Jun; Lomillo; Luchbilltaaval; Macizo; Nii rididiva lunaá; Otomí; Puntada de satín; Punto de cruz; Purépecha; Randa de aguja; Rayado; Relleno; Talakaxtokgo da makan; Tejido de fibra natural; Tejido de patakua; Tejido tradicional; Telar de cintura; Telar de pedal; Tlajkitilistli; Trama suplementaria; Zigzag
 hilo de algodón de colores,Bordados de chamula y larrainzar
 hilo de seda,Bordado de San Antonio; Brocado; Hazme si puedes; Puntada de satín; Rayado; Renacimiento; Sombreado; Telar de cintura
-hilo industrial,Bordado libre en maquina de pedal
+hilo industrial,Bordado libre en máquina de pedal
 hilo iris,Deslizado; Puntada de red
 hilo mish,Bordados de chamula y larrainzar
 hilo vela,Ju ech'el o tamulamb'il; Otomí
@@ -48,7 +48,7 @@ manta prelavada,
 mecapal,Telar de cintura
 mostacilla,
 máquina de coser,
-máquina de pedal,Bordado libre en maquina de pedal; Rejilla
+máquina de pedal,Bordado libre en máquina de pedal; Rejilla
 máquina industrial,Deslizado; Puntada de red; Sombreado
 ollas,Puntada frontal; Tintes naturales
 palma,Tejido de fibra natural
@@ -62,7 +62,7 @@ plantas tintóreas,
 popelina,Costura; Hazme si puedes; Ivan bordado; Lomillo; Macizo; Relleno; Swikili
 rayón,Culebrilla; Hazme si puedes; Rococó
 seda,Afelpado; Bordado de San Antonio; Bordado Nahua; Culebrilla; Hazme si puedes; Nii rididiva lunaá; Rejilla; Renacimiento; Sombreado; Técnica macizo
-tela,Anudado; Apliqué; Bordado ch'ol tzeltal; Bordado libre en maquina de pedal; Bordado mazahua; Bordado primavera; Bordado raramuri; Bordado sobre tela y cesteria; Bordado tradicional; Bordados de chamula y larrainzar; Bot/vi Chuy; Calado; Costura; Enrollado; Hoja de pino; Mol miss; Nii rididiva lunaá; Plisada; Puntada de rescate u hoja de platano; Puntada de satín; Puntada frontal; Randa de aguja; Rectas; Rejilla; Renacimiento; Rococó; Sombreado; Swikili; Tejido de semilla; Tenerife; Xmanikté; Zigzag
+tela,Anudado; Apliqué; Bordado ch'ol tzeltal; Bordado libre en máquina de pedal; Bordado mazahua; Bordado primavera; Bordado raramuri; Bordado sobre tela y cesteria; Bordado tradicional; Bordados de chamula y larrainzar; Bot/vi Chuy; Calado; Costura; Enrollado; Hoja de pino; Mol miss; Nii rididiva lunaá; Plisada; Puntada de rescate u hoja de platano; Puntada de satín; Puntada frontal; Randa de aguja; Rectas; Rejilla; Renacimiento; Rococó; Sombreado; Swikili; Tejido de semilla; Tenerife; Xmanikté; Zigzag
 tela blanca o de color,Deslizado; Puntada de red
 tela de cuadrillé,
 tela de manta,Lomillo; Macizo; Punto de cruz; Relleno

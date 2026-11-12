@@ -664,6 +664,21 @@ function renderEcosystemUnits() {
   }
 }
 
+// ---------- Shared filter criteria for map and territory carousel ----------
+// La búsqueda por nombre filtra los puntos y los perfiles, además del listado
+// de opciones. Se respeta el AND entre niveles y el OR dentro de cada nivel.
+function atlasActiveTechniqueCriteria() {
+  const query = normalizeDriverText(document.getElementById('map-filter-search')?.value || '');
+  const hasChosenLevels = typeof mapFilterHasSelection === 'function' && mapFilterHasSelection();
+  const rows = typeof getFilteredTecnicas === 'function' ? getFilteredTecnicas() : (ATLAS?.tecnicas || []);
+  const matches = query ? rows.filter(row => normalizeDriverText(row.tecnica).includes(query)) : rows;
+  return {
+    active: Boolean(hasChosenLevels || query),
+    names: new Set(matches.map(row => row.tecnica)),
+    query,
+  };
+}
+
 // ---------- State composite filter ----------
 function stateHasBaseFilter() {
   return typeof mapFilterHasSelection === 'function' ? mapFilterHasSelection() : false;
@@ -671,10 +686,11 @@ function stateHasBaseFilter() {
 
 function applyStateCompositeFilter() {
   if (!ATLAS) return;
-  let names = new Set(getFilteredTecnicas().map(t => t.tecnica));
+  const criteria = atlasActiveTechniqueCriteria();
+  let names = criteria.names;
   const materialSet = materialTechniqueSet('estado');
   if (materialSet) names = new Set([...names].filter(t => materialSet.has(t)));
-  const hasFilter = stateHasBaseFilter() || selectedMaterials.estado.size > 0;
+  const hasFilter = criteria.active || selectedMaterials.estado.size > 0;
   mapFilteredTecnicas = hasFilter ? names : null;
 
   if (geojsonLayer) {
@@ -692,8 +708,10 @@ function applyStateCompositeFilter() {
   if (activeEl) activeEl.style.display = hasFilter ? '' : 'none';
   if (activeText && hasFilter) {
     const parts = typeof mapFilterSummaryParts === 'function' ? mapFilterSummaryParts() : [];
+    if (criteria.query) parts.unshift(`Búsqueda: ${document.getElementById('map-filter-search')?.value.trim()}`);
     if (selectedMaterials.estado.size) parts.push(`${selectedMaterials.estado.size} categoría${selectedMaterials.estado.size !== 1 ? 's' : ''} de materiales`);
-    activeText.textContent = `${parts.join(' · ')} · ${names.size} técnica${names.size !== 1 ? 's' : ''}`;
+    parts.push(`${names.size} registro${names.size !== 1 ? 's' : ''} coincidente${names.size !== 1 ? 's' : ''}`);
+    activeText.textContent = parts.join(' · ');
   }
 
   selectedStateName = null;
@@ -707,13 +725,18 @@ function applyStateCompositeFilter() {
 }
 
 function syncSharedTechniqueFilter() {
-  const filtered = getFilteredTecnicas();
-  const hasFilter = mapFilterHasSelection();
-  mapFilteredTecnicas = hasFilter ? new Set(filtered.map(t => t.tecnica)) : null;
+  const criteria = atlasActiveTechniqueCriteria();
+  const hasFilter = criteria.active;
+  mapFilteredTecnicas = hasFilter ? criteria.names : null;
   const activeEl = document.getElementById('map-filter-active');
   const activeText = document.getElementById('map-filter-active-text');
   if (activeEl) activeEl.style.display = hasFilter ? '' : 'none';
-  if (activeText && hasFilter) activeText.textContent = `${mapFilterSummaryParts().join(' · ')} · ${filtered.length} técnica${filtered.length !== 1 ? 's' : ''}`;
+  if (activeText && hasFilter) {
+    const parts = typeof mapFilterSummaryParts === 'function' ? mapFilterSummaryParts() : [];
+    if (criteria.query) parts.unshift(`Búsqueda: ${document.getElementById('map-filter-search')?.value.trim()}`);
+    const total = criteria.names.size;
+    activeText.textContent = `${parts.join(' · ')} · ${total} registro${total !== 1 ? 's' : ''} coincidente${total !== 1 ? 's' : ''}`;
+  }
 }
 
 applyMapFilter = function() {
@@ -1176,6 +1199,16 @@ function initMapDriverEnhancements() {
   document.querySelectorAll('[data-ecosystem-source]').forEach(btn => btn.addEventListener('click', () => setEcosystemSource(btn.dataset.ecosystemSource)));
   const languageSearch = document.getElementById('map-language-search');
   if (languageSearch) languageSearch.addEventListener('input', () => { languageSearchText = languageSearch.value || ''; renderLanguageChips(); });
+  // En main.js el campo actualiza el listado de opciones; aquí sincroniza
+  // también los puntos del mapa y el carrusel a medida que se escribe.
+  const recordSearch = document.getElementById('map-filter-search');
+  if (recordSearch && !recordSearch.dataset.carouselSyncBound) {
+    recordSearch.dataset.carouselSyncBound = '1';
+    recordSearch.addEventListener('input', () => {
+      dismissInitialMapOverview?.();
+      applyMapFilter();
+    });
+  }
   ['estado', 'lengua', 'ecosistema'].forEach(bindMaterialSearch);
 
   // Comunidades: capa principal, siempre visible.
@@ -1241,6 +1274,21 @@ function hasTechniqueRecords(profile) {
   return Number(profile?.summary?.n_registros || 0) > 0;
 }
 
+// Usar las listas de técnicas documentadas en datos_territoriales.json.
+// Para lenguas y ecosistemas estas listas ya provienen de sus respectivas
+// asociaciones territoriales; no se infiere pertenencia étnica individual.
+function matchedTerritoryTechniques(profile) {
+  const all = Array.isArray(profile?.summary?.tecnicas) ? profile.summary.tecnicas : [];
+  if (!(mapFilteredTecnicas instanceof Set)) return all;
+  const selected = new Set([...mapFilteredTecnicas].map(normalizeDriverText));
+  return all.filter(name => selected.has(normalizeDriverText(name)));
+}
+
+function territoryHasActiveResults(profile) {
+  return hasTechniqueRecords(profile) &&
+    (!(mapFilteredTecnicas instanceof Set) || matchedTerritoryTechniques(profile).length > 0);
+}
+
 function selectedTerritoryProfiles() {
   if (!territoryProfileData) return [];
   const type = territoryCarouselPreviewType || territoryProfileType();
@@ -1262,7 +1310,7 @@ function selectedTerritoryProfiles() {
   }
 
   return items
-    .filter(hasTechniqueRecords)
+    .filter(territoryHasActiveResults)
     .sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'es'));
 }
 
@@ -1338,6 +1386,9 @@ function territoryProfileCard(profile, type) {
   const municipios = s.municipios_reportados || [];
   const capaLengua = type === 'lengua' ? languageCloudData.find(item => String(item.id) === String(profile.id)) : null;
   const nombrePerfil = capaLengua ? (capaLengua.pueblo_inpi || capaLengua.pueblo) : profile.name;
+  const matching = matchedTerritoryTechniques(profile);
+  const filterNote = mapFilteredTecnicas instanceof Set ? `
+    <p class="territory-profile-method">Coincidencias con los filtros: <strong>${esc(matching.slice(0, 3).join(' · '))}${matching.length > 3 ? ` y ${matching.length - 3} más` : ''}</strong>. Los indicadores corresponden al total documentado en este perfil, no solo a la selección actual.</p>` : '';
 
   const empty = registros === 0 ? `
     <div class="territory-profile-empty">
@@ -1357,11 +1408,12 @@ function territoryProfileCard(profile, type) {
 
       <div class="territory-profile-stats">
         <div><strong>${registros.toLocaleString('es-MX')}</strong><span>${type === 'lengua' ? 'Aportaciones' : 'registros de técnicas'}</span></div>
-        <div><strong>${comunidades.toLocaleString('es-MX')}</strong><span>${'Comunidades'}</span></div>
+        <div><strong>${comunidades.toLocaleString('es-MX')}</strong><span>${comunidades === 1 ? 'Comunidad' : 'Comunidades'}</span></div>
         <div><strong>${tecnicas.toLocaleString('es-MX')}</strong><span>${type === 'lengua' ? 'Registros documentados' : 'técnicas documentadas'}</span></div>
       </div>
 
       <p class="territory-profile-method">${esc(territoryInterpretationNote(type))}</p>
+      ${filterNote}
       ${empty}
 
       ${registros && s.tecnicas_principales ? `<section class="territory-profile-section"><h4>Técnicas más registradas</h4>${principalTechniqueItems(profile)}</section>` : ''}
@@ -1430,7 +1482,7 @@ function renderTerritoryProfileCarousel(options = {}) {
   subtitle.textContent = '';
 
   if (!items.length) {
-    body.innerHTML = '<div class="welcome-state"><h3>Sin registros de técnicas</h3><p>No hay perfiles con registros de técnicas para la selección actual.</p></div>';
+    body.innerHTML = '<div class="welcome-state"><h3>Sin coincidencias</h3><p>No hay perfiles territoriales que contengan registros compatibles con los filtros activos. Prueba otra búsqueda o utiliza «Limpiar».</p></div>';
     stopTerritoryCarousel();
     return;
   }
@@ -1444,7 +1496,7 @@ function renderTerritoryProfileCarousel(options = {}) {
     <div class="territory-carousel" onmouseenter="stopTerritoryCarousel()" onmouseleave="scheduleTerritoryCarousel(${items.length})">
       <div class="territory-carousel-toolbar">
         <button class="territory-carousel-btn" onclick="territoryCarouselGo(-1)" ${items.length <= 1 ? 'disabled' : ''} aria-label="Perfil anterior">‹</button>
-        <span>${territoryCarouselIndex + 1} / ${items.length}</span>
+        <span class="territory-carousel-position" aria-live="polite">${esc(territoryTypeLabel(type))} ${territoryCarouselIndex + 1} de ${items.length}</span>
         <button class="territory-carousel-btn" onclick="territoryCarouselGo(1)" ${items.length <= 1 ? 'disabled' : ''} aria-label="Perfil siguiente">›</button>
       </div>
       ${territoryProfileCard(item, type)}

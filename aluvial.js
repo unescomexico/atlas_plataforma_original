@@ -26,7 +26,7 @@ const ALLUVIAL_NS = 'http://www.w3.org/2000/svg';
 let alluvialReady = false;
 const ALLUVIAL_DEFAULTS = Object.freeze({
   dims: Object.freeze(['categoria', 'estado', 'prenda']),
-  limit: 20,
+  limit: 10,
 });
 const alluvialState = {
   dims: [...ALLUVIAL_DEFAULTS.dims],
@@ -437,8 +437,33 @@ function initAlluvial() {
     help.hidden=!help.hidden;
     this.setAttribute('aria-expanded',String(!help.hidden));
   });
-  // La guía se muestra inicialmente al entrar a la sección, sin cubrir el gráfico.
-  const help=document.getElementById('alluvial-help');
-  if(help){help.hidden=false;document.getElementById('alluvial-help-toggle')?.setAttribute('aria-expanded','true');}
+  // En pantallas pequeñas el gráfico se consulta primero; filtros e instrucciones
+  // siguen disponibles desde el botón visible del panel lateral.
+  const mobileLayout=window.matchMedia('(max-width: 1080px)');
+  const controls=document.getElementById('alluvial-sidebar-controls');
+  const sidebarToggle=document.getElementById('alluvial-sidebar-toggle');
+  function setSidebarOpen(isOpen) {
+    if (!controls || !sidebarToggle) return;
+    controls.hidden=!isOpen;
+    sidebarToggle.setAttribute('aria-expanded',String(isOpen));
+    sidebarToggle.textContent=isOpen?'Ocultar filtros':'Mostrar filtros';
+  }
+  function updateSidebarLayout() {
+    setSidebarOpen(!mobileLayout.matches);
+    const help=document.getElementById('alluvial-help');
+    if (help) {
+      help.hidden=mobileLayout.matches;
+      document.getElementById('alluvial-help-toggle')?.setAttribute('aria-expanded',String(!help.hidden));
+    }
+  }
+  sidebarToggle?.addEventListener('click',()=>setSidebarOpen(controls?.hidden));
+  document.getElementById('alluvial-show-diagram')?.addEventListener('click', () => {
+    if (mobileLayout.matches) setSidebarOpen(false);
+    document.querySelector('.alluvial-visualization')?.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+  if (mobileLayout.addEventListener) mobileLayout.addEventListener('change',updateSidebarLayout);
+  else mobileLayout.addListener?.(updateSidebarLayout);
+  updateSidebarLayout();
+
   refreshAlluvial();
 }

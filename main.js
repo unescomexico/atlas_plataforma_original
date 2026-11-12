@@ -218,35 +218,38 @@ function buildAtlasFromCSV(techRows, recordRows, imgRows) {
   // indice_imagenes.csv  →  mapeo archivo → técnica para imágenes.
   // ════════════════════════════════════════════════════
 
-  // ── 1. Índice de imágenes ─────────────────────────
-  // La clave se normaliza para que diferencias de mayúsculas/acentos no dejen
-  // una técnica sin fotografía (p. ej. "Sarape Fino..." vs "Sarape fino...").
+  // ── 1. Índice fotográfico con créditos ───────────────────────────
+  // indice_imagenes.csv conserva relaciones históricas (incluidos originales
+  // de Kobo sin ficha). galeria.json es la fuente de metadatos fotográficos.
+  // Una fotografía solo se publica en carruseles si tiene una entrada de
+  // metadatos en la galería: así nunca aparece primero sin ficha y después
+  // como una segunda imagen con créditos. No se borran archivos fuente.
   const imageKey = value => String(value || '')
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
   const imgByTech = {};
-  (imgRows || []).forEach(r => {
-    const tecnica = (r['Tecnica'] || '').trim();
-    const archivo = (r['archivo_descargado'] || '').trim();
-    const status  = (r['status'] || '').toLowerCase().trim();
-    if (!archivo || status === 'error' ||
-        (window.ATLAS_AVAILABLE_IMAGES && !window.ATLAS_AVAILABLE_IMAGES.has(archivo))) return;
-    if (tecnica) {
-      const key = imageKey(tecnica);
-      if (!imgByTech[key]) imgByTech[key] = [];
-      imgByTech[key].push(archivo);
-    }
-  });
+  const photographedFiles = new Set(GALLERY_ITEMS
+    .map(item => String(item?.archivo || '').trim()).filter(Boolean));
+  const filesAssignedToTechnique = new Set();
+  const addVerifiedImage = (technique, file) => {
+    const key = imageKey(technique);
+    if (!key || !file || !photographedFiles.has(file) ||
+        filesAssignedToTechnique.has(file) ||
+        (window.ATLAS_AVAILABLE_IMAGES && !window.ATLAS_AVAILABLE_IMAGES.has(file))) return;
+    (imgByTech[key] ||= []).push(file);
+    filesAssignedToTechnique.add(file);
+  };
 
-  // La galería contiene registros multimedia que no figuraban en indice_imagenes.csv.
-  // Reconciliar por denominación normalizada y eliminar duplicados al preparar la ficha.
+  // Preservar primero la asociación editorial del índice de imágenes.
+  (imgRows || []).forEach(row => {
+    const status = String(row.status || '').toLowerCase().trim();
+    if (status === 'error') return;
+    addVerifiedImage(String(row.Tecnica || '').trim(), String(row.archivo_descargado || '').trim());
+  });
+  // Completar solo fotografías no asignadas, sin insertar el mismo archivo
+  // también bajo un nombre de técnica alternativo de la galería.
   GALLERY_ITEMS.forEach(item => {
-    const archivo = String(item?.archivo || '').trim();
-    const key = imageKey(item?.tecnica);
-    if (!key || !archivo ||
-        (window.ATLAS_AVAILABLE_IMAGES && !window.ATLAS_AVAILABLE_IMAGES.has(archivo))) return;
-    const files = (imgByTech[key] ||= []);
-    if (!files.includes(archivo)) files.push(archivo);
+    addVerifiedImage(String(item?.tecnica || '').trim(), String(item?.archivo || '').trim());
   });
 
   // Índice independiente de videos; sus notas internas nunca se muestran.
@@ -1400,9 +1403,9 @@ function renderTechniqueFilterList() {
     wrap.appendChild(row);
   });
   const summary = document.getElementById('map-tecs-summary');
-  if (summary) summary.textContent = selected.size
-    ? checkboxSummary(selected, 'Todas')
-    : `${base.length} disponibles`;
+  if (summary) summary.textContent = q
+    ? `${rows.length} ${rows.length === 1 ? 'hallazgo' : 'hallazgos'}`
+    : (selected.size ? checkboxSummary(selected, 'Todas') : `${base.length} disponibles`);
 }
 
 function initMapFilter() {
@@ -1567,7 +1570,7 @@ const CATALOG_GROUPS = [
 ];
 const CATALOG_FILTERS = CATALOG_GROUPS.flatMap(group => group.fields);
 let activeSearch = '';
-let catalogShowAll = false;
+let catalogShowAll = true; // Mostrar todas las entradas desde el primer acceso al catálogo.
 const catalogSelected = Object.fromEntries(CATALOG_FILTERS.map(([k]) => [k, new Set()]));
 
 function catalogNorm(v) {
@@ -1585,8 +1588,29 @@ function catalogValues(t, field) {
   if (field === 'pueblos') return t.pueblos_indigenas || [];
   return t[field] || [];
 }
+// Índice de búsqueda transversal del catálogo. La página agrupa entradas por
+// registro, pero el texto libre debe buscar también en todas las dimensiones
+// documentadas y accesibles al público. Se genera de forma diferida, una vez
+// enriquecidos los registros con prendas, materiales y territorio.
+function catalogSearchIndex(t) {
+  if (typeof t._catalogSearchIndex === 'string') return t._catalogSearchIndex;
+  const values = [
+    t.tecnica, t.grupo, t.cat1, t.cat2, t.cat3, t.cat4,
+    t.prenda_principal, t.prendas_resumen, t.ceremonias_resumen,
+    t.materiales, t.historia, t.temporalidad,
+    ...(t.significados || []), ...(t.lenguas || []),
+    ...(t.manufactura_tipos || []), ...(t.tenido_tipos || []),
+    ...CATALOG_FILTERS.flatMap(([field]) => catalogValues(t, field)),
+    ...(t.localidades || []).flatMap(loc => [loc.localidad, loc.municipio, loc.estado, loc.etiqueta]),
+    ...(t.territorios || []).flatMap(loc => [loc.municipio, loc.estado]),
+  ];
+  t._catalogSearchIndex = catalogNorm(values.filter(v => typeof v === 'string' && v.trim()).join(' '));
+  return t._catalogSearchIndex;
+}
+
 function matchesCatalog(t) {
-  if (activeSearch && !catalogNorm(t.tecnica).includes(catalogNorm(activeSearch))) return false;
+  const terms = catalogNorm(activeSearch).split(/\s+/).filter(Boolean);
+  if (terms.length && !terms.every(term => catalogSearchIndex(t).includes(term))) return false;
   const estados = catalogSelected.estados;
   const comunidades = catalogSelected.comunidades;
   if (comunidades.size && estados.size && !(t.localidades || []).some(loc =>
@@ -1639,9 +1663,9 @@ function renderCatalogFilters() {
   const wrap = document.getElementById('catalog-filters');
   if (!wrap) return;
   const previousOpen = wrap.querySelector('.catalog-filter-dropdown[open]')?.dataset.filter;
-  const mobileCollapsed = wrap.dataset.initialized ? wrap.classList.contains('catalog-filters-collapsed') : true;
+  const filtersCollapsed = wrap.dataset.initialized ? wrap.classList.contains('catalog-filters-collapsed') : true;
   wrap.dataset.initialized = 'true';
-  wrap.innerHTML = `<button type="button" class="catalog-mobile-toggle" aria-expanded="${!mobileCollapsed}" aria-controls="catalog-filter-groups"><span aria-hidden="true">☰</span> Filtros del catálogo <span class="catalog-mobile-toggle-count"></span></button><div id="catalog-filter-groups" class="catalog-filter-groups">` + CATALOG_GROUPS.map(group => `<section class="catalog-filter-group">
+  wrap.innerHTML = `<button type="button" class="catalog-mobile-toggle" aria-expanded="${!filtersCollapsed}" aria-controls="catalog-filter-groups"><span aria-hidden="true">☰</span><span class="catalog-mobile-toggle-text">${filtersCollapsed ? 'Mostrar filtros' : 'Ocultar filtros'}</span><span class="catalog-mobile-toggle-count"></span></button><div id="catalog-filter-groups" class="catalog-filter-groups">` + CATALOG_GROUPS.map(group => `<section class="catalog-filter-group">
     <h3>${esc(group.title)}</h3>
     <div class="catalog-filter-group-grid">${group.fields.map(([field, label]) => {
       const values = availableCatalogOptions(field);
@@ -1659,11 +1683,20 @@ function renderCatalogFilters() {
       </details>`;
     }).join('')}</div>
   </section>`).join('') + '</div>';
-  wrap.classList.toggle('catalog-filters-collapsed', mobileCollapsed);
-  wrap.querySelector('.catalog-mobile-toggle')?.addEventListener('click', () => {
-    const collapsed = wrap.classList.toggle('catalog-filters-collapsed');
-    wrap.querySelector('.catalog-mobile-toggle').setAttribute('aria-expanded', String(!collapsed));
+  wrap.classList.toggle('catalog-filters-collapsed', filtersCollapsed);
+  const toggleButton = wrap.querySelector('.catalog-mobile-toggle');
+  const syncCatalogToggle = () => {
+    if (!toggleButton) return;
+    const collapsed = wrap.classList.contains('catalog-filters-collapsed');
+    toggleButton.setAttribute('aria-expanded', String(!collapsed));
+    const label = toggleButton.querySelector('.catalog-mobile-toggle-text');
+    if (label) label.textContent = collapsed ? 'Mostrar filtros' : 'Ocultar filtros';
+  };
+  toggleButton?.addEventListener('click', () => {
+    wrap.classList.toggle('catalog-filters-collapsed');
+    syncCatalogToggle();
   });
+  syncCatalogToggle();
   wrap.querySelectorAll('.catalog-filter-dropdown').forEach(details => {
     details.addEventListener('toggle', () => {
       if (!details.open) return;
@@ -1812,7 +1845,7 @@ function renderCatalog() {
   if (resultLabel) resultLabel.textContent = `${tecnicas.length} entrada${tecnicas.length !== 1 ? 's' : ''} del catálogo`;
   const button = document.getElementById('catalog-to-map');
   if (button) button.disabled = tecnicas.length === 0;
-  document.getElementById('tecnicas-grid').innerHTML = tecnicas.map(t => {
+  document.getElementById('tecnicas-grid').innerHTML = tecnicas.length ? tecnicas.map(t => {
     const img = t.imagenes && t.imagenes.length ? t.imagenes[0] : null;
     const color = getCatColor(t);
     const catLabel = [t.cat1, t.cat2].filter(Boolean).join(' › ');
@@ -1832,7 +1865,10 @@ function renderCatalog() {
         </div>
       </div>
     </div>`;
-  }).join('');
+  }).join('') : `<div class="catalog-no-results" role="status">
+    <strong>Sin registros coincidentes</strong>
+    <p>No encontramos registros relacionados con la búsqueda o los filtros seleccionados. Prueba otro término o utiliza «Limpiar filtros».</p>
+  </div>`;
 }
 document.getElementById('catalog-show-all')?.addEventListener('change', function() {
   catalogShowAll = this.checked; renderCatalog();
@@ -2003,7 +2039,8 @@ function atlasGalleryEntries() {
     .filter(row => row.archivo && String(row.publicar || '').toLowerCase() === 'si')
     .map(row => ({tipo: 'video', archivo: row.archivo, tecnica: row.tecnica || row.Tecnica || '',
        categoria: 'Videos', artesano: row.artesano || '', estado: row.estado || '', municipio: row.municipio || '', localidad: row.localidad || ''}));
-  return [...photos, ...videos];
+  // Una tarjeta por archivo físico: el mismo medio no suma dos veces.
+  return atlasUniqueMedia([...photos, ...videos]);
 }
 function atlasGalleryMedia(item) {
   return {tipo: item.tipo === 'video' ? 'video' : 'imagen', archivo: item.archivo,
@@ -2066,10 +2103,10 @@ function openFicha(tecnicaNombre) {
 
   // ── HERO — Carrusel ──
   const hero = document.getElementById('modal-hero');
-  const slidesMedia = [
+  const slidesMedia = atlasUniqueMedia([
     ...(t.videos || []).map(fn => ({tipo: 'video', archivo: fn})),
     ...(t.imagenes || []).map(fn => ({tipo: 'imagen', archivo: fn}))
-  ];
+  ]);
   if (slidesMedia.length > 0) {
     const slides = slidesMedia.map((m, i) =>
       `<div class="carousel-slide" data-index="${i}">
@@ -2479,8 +2516,27 @@ document.addEventListener('keydown', e => {
 let _lbImages = [];
 let _lbCurrent = 0;
 function atlasLbItem(entry) {
-  if (typeof entry==='string') return {tipo:'imagen', archivo:entry};
+  if (typeof entry === 'string') return {tipo:'imagen', archivo:entry};
   return entry || {tipo:'imagen', archivo:''};
+}
+function atlasMediaBasename(filename) {
+  const raw = String(filename || '').split(/[?#]/)[0].replace(/\\/g, '/');
+  const name = raw.slice(raw.lastIndexOf('/') + 1);
+  try { return decodeURIComponent(name); } catch (_) { return name; }
+}
+function atlasMediaKey(entry) {
+  const item = atlasLbItem(entry);
+  const kind = item.tipo === 'video' ? 'video' : 'imagen';
+  return `${kind}:${atlasMediaBasename(item.archivo).toLowerCase()}`;
+}
+function atlasUniqueMedia(items) {
+  const found = new Set();
+  return (items || []).map(atlasLbItem).filter(item => {
+    const key = atlasMediaKey(item);
+    if (!atlasMediaBasename(item.archivo) || found.has(key)) return false;
+    found.add(key);
+    return true;
+  });
 }
 function atlasLbPhotoUrl(filename) {
   const s=String(filename||'');
@@ -2492,64 +2548,62 @@ function atlasCloseLightbox() {
   document.getElementById('lightbox').classList.remove('open');
 }
 function openLightbox(src, images, index) {
-  _lbImages=(images && images.length ? images : [src]).map(atlasLbItem);
-  _lbCurrent=Math.min(Math.max(Number(index)||0,0),_lbImages.length-1);
+  const original = (images && images.length ? images : [src]).map(atlasLbItem);
+  const selected = original[Math.min(Math.max(Number(index) || 0, 0), original.length - 1)];
+  const selectedKey = atlasMediaKey(selected);
+  _lbImages = atlasUniqueMedia(original);
+  _lbCurrent = Math.max(0, _lbImages.findIndex(item => atlasMediaKey(item) === selectedKey));
+  if (!_lbImages.length) return;
   document.getElementById('lightbox').classList.add('open');
   _renderLightbox();
 }
 function _renderLightbox() {
-  const item=atlasLbItem(_lbImages[_lbCurrent]);
-  const isVideo=item.tipo==='video';
-  const image=document.getElementById('lightbox-img');
-  const video=document.getElementById('lightbox-video');
-  if (video) { video.pause(); video.removeAttribute('src'); video.load(); video.hidden=!isVideo; }
+  const item = atlasLbItem(_lbImages[_lbCurrent]);
+  const isVideo = item.tipo === 'video';
+  const image = document.getElementById('lightbox-img');
+  const video = document.getElementById('lightbox-video');
+  if (video) { video.pause(); video.removeAttribute('src'); video.load(); video.hidden = !isVideo; }
   if (image) {
-    image.hidden=isVideo;
+    image.hidden = isVideo;
     if (!isVideo) {
-      image.src=atlasLbPhotoUrl(item.archivo);
-      image.alt=item.tecnica ? `Fotografía de ${item.tecnica}` : 'Fotografía del Atlas';
+      image.src = atlasLbPhotoUrl(item.archivo);
+      image.alt = item.tecnica ? `Fotografía de ${item.tecnica}` : 'Fotografía del Atlas';
     } else image.removeAttribute('src');
   }
   if (isVideo && video) {
-    video.src=atlasVideoUrl(item.archivo);
-    video.load(); // la reproducción requiere una acción del visitante
+    video.src = atlasVideoUrl(item.archivo);
+    video.load(); // La reproducción requiere una acción del visitante.
   }
-  const counter=document.getElementById('lightbox-counter');
-  if (counter) counter.textContent=`${_lbCurrent+1} / ${_lbImages.length}`;
-  const credit=document.getElementById('lightbox-credit');
-  const meta=isVideo ? item : IMAGE_META_BY_FILE[item.archivo];
+  const counter = document.getElementById('lightbox-counter');
+  if (counter) counter.textContent = `${_lbCurrent + 1} / ${_lbImages.length}`;
+  const credit = document.getElementById('lightbox-credit');
   if (credit) {
-    if (!meta || (!isVideo && !IMAGE_META_BY_FILE[item.archivo])) {
-      credit.innerHTML=''; credit.style.display='none';
-    } else {
-      const name=gallerySafe(meta.tecnica, 'Técnica textil');
-      credit.style.display='';
-      if (isVideo) {
-        const artisan=gallerySafe(meta.artesano,'No registrado');
-        const state=gallerySafe(meta.estado,'No registrado');
-        const town=gallerySafe(meta.municipio,'No registrado');
-        const locality=gallerySafe(meta.localidad,'No registrado');
-        credit.innerHTML=`<div class="lightbox-credit-kicker">Registro audiovisual</div><h3>${esc(name)}</h3>
-          <dl><div><dt>Artesana/o</dt><dd>${esc(artisan)}</dd></div>
-          <div><dt>Estado</dt><dd>${esc(state)}</dd></div>
-          <div><dt>Municipio</dt><dd>${esc(town)}</dd></div>
-          <div><dt>Localidad</dt><dd>${esc(locality)}</dd></div></dl>`;
-      } else {
-        const artisan=gallerySafe(meta.artesano,'Nombre no registrado');
-        const state=gallerySafe(meta.estado);
-        const town=gallerySafe(meta.municipio);
-        const locality=gallerySafe(meta.localidad);
-        credit.innerHTML=`${meta.categoria ? `<div class="lightbox-credit-kicker">${esc(meta.categoria)}</div>` : '<div class="lightbox-credit-kicker">Registro fotográfico</div>'}
-          <h3>${esc(name)}</h3><dl><div><dt>Artesana/o</dt><dd>${esc(artisan)}</dd></div>
-          <div><dt>Estado</dt><dd>${esc(state)}</dd></div><div><dt>Municipio</dt><dd>${esc(town)}</dd></div>
-          <div><dt>Localidad</dt><dd>${esc(locality)}</dd></div></dl>`;
-      }
-    }
+    // Resolver por archivo físico, nunca por posición del carrusel o nombre
+    // aproximado de técnica. No se atribuye una fotografía a otra persona.
+    const file = atlasMediaBasename(item.archivo);
+    const authoritative = isVideo
+      ? (window.ATLAS_VIDEO_ROWS || []).find(v => atlasMediaBasename(v.archivo) === file) || {}
+      : IMAGE_META_BY_FILE[file] || {};
+    const meta = {...item, ...authoritative};
+    const name = gallerySafe(meta.tecnica || meta.Tecnica, 'Registro textil');
+    const artisan = gallerySafe(meta.artesano, 'Nombre no registrado');
+    const state = gallerySafe(meta.estado);
+    const town = gallerySafe(meta.municipio);
+    const locality = gallerySafe(meta.localidad);
+    const kicker = isVideo ? 'Registro audiovisual'
+      : (meta.categoria ? meta.categoria : 'Registro fotográfico');
+    credit.style.display = '';
+    credit.innerHTML = `<div class="lightbox-credit-kicker">${esc(kicker)}</div>
+      <h3>${esc(name)}</h3>
+      <dl><div><dt>Artesana/o</dt><dd>${esc(artisan)}</dd></div>
+      <div><dt>Estado</dt><dd>${esc(state)}</dd></div>
+      <div><dt>Municipio</dt><dd>${esc(town)}</dd></div>
+      <div><dt>Localidad</dt><dd>${esc(locality)}</dd></div></dl>`;
   }
-  const prev=document.getElementById('lightbox-prev');
-  const next=document.getElementById('lightbox-next');
-  if (prev) prev.style.display=_lbImages.length>1?'':'none';
-  if (next) next.style.display=_lbImages.length>1?'':'none';
+  const prev = document.getElementById('lightbox-prev');
+  const next = document.getElementById('lightbox-next');
+  if (prev) prev.style.display = _lbImages.length > 1 ? '' : 'none';
+  if (next) next.style.display = _lbImages.length > 1 ? '' : 'none';
 }
 document.getElementById('lightbox-close').addEventListener('click',atlasCloseLightbox);
 document.getElementById('lightbox').addEventListener('click',e => {
@@ -3815,7 +3869,7 @@ function initArbol() {
               <span class="brace-level-label">Variante</span>
               <span class="brace-level-name">${esc(v.name)}</span>
             </span>
-            <span class="brace-subcat-count">${v.tecnicas.size}</span>
+            ${countBadgeHTML(v.tecnicas.size, 'brace-subcat-count')}
           </button>
         </div>`;
       }).join('')}
@@ -3840,7 +3894,7 @@ function initArbol() {
                 <span class="brace-level-label">Tipo</span>
                 <span class="brace-level-name">${esc(type.name)}</span>
               </span>
-              <span class="brace-subcat-count">${type.tecnicas.size}</span>
+              ${countBadgeHTML(type.tecnicas.size, 'brace-subcat-count')}
             </button>
           </div>
           ${renderVariantRows(type, typeKey)}
@@ -3858,7 +3912,7 @@ function initArbol() {
           <button type="button" class="brace-mini-toggle brace-cat-toggle" data-cat-toggle="${escAttr(cat.name)}" aria-expanded="${expanded}" title="${expanded ? 'Ocultar' : 'Mostrar'} subcategorías">${expanded ? '−' : '+'}</button>
           <button type="button" class="brace-cat-card${active ? ' is-active' : ''}${cat.tecnicas.size ? '' : ' is-empty'}" data-cat-select="${escAttr(cat.name)}">
             <span class="brace-cat-name">${esc(cat.name === 'Tejido' ? 'Tejido artesanal' : cat.name)}</span>
-            <span class="brace-cat-count">${cat.tecnicas.size}</span>
+            ${countBadgeHTML(cat.tecnicas.size, 'brace-cat-count')}
           </button>
         </div>
       </div>
@@ -3876,7 +3930,7 @@ function initArbol() {
                   <span class="brace-subcat-copy">
                     <span class="brace-subcat-name">${esc(sub.name)}</span>
                   </span>
-                  <span class="brace-subcat-count">${sub.tecnicas.size}</span>
+                  ${countBadgeHTML(sub.tecnicas.size, 'brace-subcat-count')}
                 </button>
               </div>
               ${renderTypeRows(sub, key)}
@@ -3893,6 +3947,13 @@ function initArbol() {
       <h3>Diagrama de llaves</h3>
       <p>Cada llave muestra la relación entre <strong>categorías</strong>, <strong>subcategorías</strong>, <strong>tipos</strong> y <strong>variantes</strong>. Selecciona cualquier nivel para consultar las técnicas registradas dentro de ese grupo.</p>
     </aside>`;
+  }
+
+  function countBadgeHTML(count, baseClass = 'brace-subcat-count') {
+    const total = Number(count) || 0;
+    return total > 0
+      ? `<span class="${baseClass}">${total}</span>`
+      : `<span class="${baseClass} is-empty-text">Sin registros documentados</span>`;
   }
 
   function renderTechList(names) {
@@ -3950,7 +4011,7 @@ function initArbol() {
         <div class="class-detail-kicker">Variante</div>
         <h3>${esc(node.name)}</h3>
         <div class="class-detail-path"><span>${esc(node.category)}</span><b>›</b><span>${esc(node.subcategory)}</span><b>›</b><span>${esc(node.parent)}</span><b>›</b><span>${esc(node.name)}</span></div>
-        <div class="class-detail-summary"><strong>${names.length}</strong><span>entrada${names.length !== 1 ? 's' : ''} del catálogo vinculadas con esta variante</span></div>
+        <div class="class-detail-summary"><strong>${names.length}</strong><span>${names.length ? `entrada${names.length !== 1 ? 's' : ''} del catálogo vinculadas con esta variante` : 'Sin registros documentados en esta variante'}</span></div>
         <p class="class-detail-note">Selecciona un registro para consultar su ficha.</p>
         ${renderTechList(names)}
       </aside>`;
@@ -3963,7 +4024,7 @@ function initArbol() {
         <div class="class-detail-kicker">Tipo</div>
         <h3>${esc(node.name)}</h3>
         <div class="class-detail-path"><span>${esc(node.category)}</span><b>›</b><span>${esc(node.parent)}</span><b>›</b><span>${esc(node.name)}</span></div>
-        <div class="class-detail-summary"><strong>${names.length}</strong><span>entrada${names.length !== 1 ? 's' : ''} del catálogo vinculadas con este tipo</span></div>
+        <div class="class-detail-summary"><strong>${names.length}</strong><span>${names.length ? `entrada${names.length !== 1 ? 's' : ''} del catálogo vinculadas con este tipo` : 'Sin registros documentados en este tipo'}</span></div>
         <p class="class-detail-note">Selecciona un registro para consultar su ficha.</p>
         ${renderTechList(names)}
       </aside>`;
@@ -3979,7 +4040,7 @@ function initArbol() {
         <h3>${esc(node.name)}</h3>
         <div class="class-detail-path"><span>${esc(node.parent)}</span><b>›</b><span>${esc(node.name)}</span></div>
         ${taxonomyBibliographyButton(biblioCard, 'Subcategoría', node.name)}
-        <div class="class-detail-summary"><strong>${names.length}</strong><span>entrada${names.length !== 1 ? 's' : ''} del catálogo vinculadas con esta subcategoría</span></div>
+        <div class="class-detail-summary"><strong>${names.length}</strong><span>${names.length ? `entrada${names.length !== 1 ? 's' : ''} del catálogo vinculadas con esta subcategoría` : 'Sin registros documentados en esta subcategoría'}</span></div>
         <p class="class-detail-note">Selecciona un registro para consultar su ficha.</p>
         ${renderTechList(names)}
       </aside>`;
@@ -3993,10 +4054,10 @@ function initArbol() {
         <div class="class-detail-kicker">Categoría</div>
         <h3>${esc(cat.name === 'Tejido' ? 'Tejido artesanal' : cat.name)}</h3>
         ${taxonomyBibliographyButton(biblioCard, 'Categoría', cat.name)}
-        <div class="class-detail-summary"><strong>${cat.tecnicas.size}</strong><span>entrada${cat.tecnicas.size !== 1 ? 's' : ''} del catálogo vinculadas con esta categoría</span></div>
+        <div class="class-detail-summary"><strong>${cat.tecnicas.size}</strong><span>${cat.tecnicas.size ? `entrada${cat.tecnicas.size !== 1 ? 's' : ''} del catálogo vinculadas con esta categoría` : 'Sin registros documentados en esta categoría'}</span></div>
         <p class="class-detail-note">Selecciona una subcategoría del diagrama para consultar los registros asociados.</p>
         <div class="class-detail-list compact">
-          ${cat.subcatsArr.map(sub => `<button type="button" class="class-detail-tech" data-subcat-detail="${escAttr(`${cat.name}|||${sub.name}`)}"><span>${esc(sub.name)}</span><b>${sub.tecnicas.size}</b></button>`).join('')}
+          ${cat.subcatsArr.map(sub => `<button type="button" class="class-detail-tech" data-subcat-detail="${escAttr(`${cat.name}|||${sub.name}`)}"><span>${esc(sub.name)}</span>${countBadgeHTML(sub.tecnicas.size, 'class-detail-tech-count')}</button>`).join('')}
         </div>
       </aside>`;
     }
